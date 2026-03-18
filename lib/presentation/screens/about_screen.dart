@@ -18,7 +18,7 @@ class _AboutScreenState extends State<AboutScreen> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text(
-          'مسیجیفای',
+          'هم نوا',
           style: TextStyle(fontFamily: 'CR', fontSize: 24),
         ),
         centerTitle: true,

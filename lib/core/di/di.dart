@@ -1,4 +1,3 @@
-import 'package:flutter_chat_room_app/core/pocketbase/pocket_base.dart';
 import 'package:flutter_chat_room_app/data/dataSource/authdatasource/auth_data_source.dart';
 import 'package:flutter_chat_room_app/data/dataSource/authdatasource/auth_data_source_remote.dart';
 import 'package:flutter_chat_room_app/data/dataSource/chatdatasource/chat_data_source.dart';
@@ -7,7 +6,6 @@ import 'package:flutter_chat_room_app/data/repository/authrepository/auth_reposi
 import 'package:flutter_chat_room_app/data/repository/chatrepository/chat_repository_impl.dart';
 import 'package:flutter_chat_room_app/domain/repository/authentication_repository.dart';
 import 'package:flutter_chat_room_app/domain/repository/chat_reposiroty.dart';
-import 'package:flutter_chat_room_app/domain/usecase/authentication/is_logedin_use_case.dart';
 import 'package:flutter_chat_room_app/domain/usecase/authentication/log_out_use_case.dart';
 import 'package:flutter_chat_room_app/domain/usecase/authentication/login_use_case.dart';
 import 'package:flutter_chat_room_app/domain/usecase/authentication/register_use_case.dart';
@@ -21,10 +19,11 @@ import 'package:pocketbase/pocketbase.dart';
 var locator = GetIt.instance;
 
 Future<void> getItInit() async {
-  locator.registerSingleton<PocketBase>(PocketBaseClient.pb);
+  locator.registerSingleton<PocketBase>(
+    PocketBase('https://messageflow-aelbqjwyta.liara.run'),
+  );
 
   // ۲. دیتاسورس‌ها (DataSources)
-  // نکته: اینجا مستقیم کلاس Impl را New می‌کنیم
   locator.registerLazySingleton<IAuthDataSource>(
     () => AuthDataSourceRemote(locator<PocketBase>()),
   );
@@ -34,7 +33,6 @@ Future<void> getItInit() async {
   );
 
   // ۳. ریپازیتوری‌ها (Repositories)
-  // حالا که دیتاسورس‌ها بالا ثبت شده‌اند، می‌توانیم از locator استفاده کنیم
   locator.registerLazySingleton<IAuthenticationRepository>(
     () => AuthRepositoryImpl(locator<IAuthDataSource>()),
   );
@@ -52,9 +50,6 @@ Future<void> getItInit() async {
   );
   locator.registerLazySingleton(
     () => LogOutUseCase(locator<IAuthenticationRepository>()),
-  );
-  locator.registerLazySingleton(
-    () => CheckLoginStatusUseCase(locator<IAuthenticationRepository>()),
   );
 
   // چت

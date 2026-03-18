@@ -31,7 +31,8 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => AuthBloc(locator.get(), locator.get()),
+      create: (context) =>
+          AuthBloc(locator.get(), locator.get(), locator.get()),
       child: Scaffold(
         backgroundColor: Colors.white,
         body: Center(
@@ -123,13 +124,18 @@ class _LoginScreenState extends State<LoginScreen> {
                   builder: (context, state) {
                     if (state is AuthLoading) {
                       return const CircularProgressIndicator(
-                        color: Colors.blueGrey,
+                        color: Color.fromARGB(255, 14, 208, 211),
                       );
                     }
                     return ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         foregroundColor: Colors.black,
-                        backgroundColor: Colors.blueGrey,
+                        backgroundColor: const Color.fromARGB(
+                          255,
+                          14,
+                          208,
+                          211,
+                        ),
                       ),
                       onPressed: () {
                         final username = _usernameController.text.trim();

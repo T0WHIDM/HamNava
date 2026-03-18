@@ -16,9 +16,6 @@ class AuthDataSourceRemote extends IAuthDataSource {
   }
 
   @override
-  bool isLogedIn() => pb.authStore.isValid;
-
-  @override
   Future<void> logOut() async => pb.authStore.clear();
 
   @override
@@ -39,8 +36,17 @@ class AuthDataSourceRemote extends IAuthDataSource {
       };
 
       await pb.collection('users').create(body: body);
-    } catch (e) {
-      throw ApiExeption('خطا در ایجاد حساب کاربری');
+    } on ClientException catch (e) {
+      final errorData = e.response['data'];
+
+      if (errorData != null && errorData['username'] != null) {
+        throw ApiExeption("این نام کاربری قبلاً توسط شخص دیگری رزرو شده است.");
+      } else if (errorData != null && errorData['email'] != null) {
+        throw ApiExeption("این ایمیل قبلاً در سیستم ثبت شده است.");
+      }
+
+      throw e.response['message'] ??
+          ApiExeption("این ایمیل قبلاً در سیستم ثبت شده است.");
     }
   }
 }

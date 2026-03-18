@@ -1,6 +1,12 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_chat_room_app/presentation/bloc/authentication/auth_bloc.dart';
+import 'package:flutter_chat_room_app/presentation/bloc/authentication/auth_event.dart';
+import 'package:flutter_chat_room_app/presentation/bloc/authentication/auth_state.dart';
 import 'package:flutter_chat_room_app/presentation/screens/about_screen.dart';
+import 'package:flutter_chat_room_app/presentation/screens/login_screen.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 
@@ -137,23 +143,62 @@ class _SettingScreenState extends State<SettingScreen> {
                         ),
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: InkWell(
-                        onTap: () {},
-                        child: const Row(
-                          children: [
-                            Icon(Icons.logout_outlined),
-                            SizedBox(width: 20),
-                            Text(
-                              'Log out',
-                              style: TextStyle(fontFamily: 'GB', fontSize: 16),
+                    BlocConsumer<AuthBloc, AuthState>(
+                      listener: (context, state) {
+                        if (state is AuthSuccess) {
+                          state.result.fold(
+                            (failure) {
+                              return ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  backgroundColor: Colors.red,
+                                  content: Text(
+                                    textDirection: TextDirection.rtl,
+                                    failure.message,
+                                    style: const TextStyle(
+                                      fontFamily: 'CR',
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                            (success) {
+                              context.goNamed(LoginScreen.namedRoute);
+                            },
+                          );
+                        }
+                      },
+                      builder: (context, state) {
+                        if (state is AuthLoading) {
+                          return const SpinKitFoldingCube(
+                            color: Color.fromARGB(255, 14, 208, 211),
+                            size: 32,
+                          );
+                        }
+                        return Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: InkWell(
+                            onTap: () {
+                              context.read<AuthBloc>().add(AuthLogOutEvent());
+                            },
+                            child: const Row(
+                              children: [
+                                Icon(Icons.logout_outlined),
+                                SizedBox(width: 20),
+                                Text(
+                                  'Log out',
+                                  style: TextStyle(
+                                    fontFamily: 'GB',
+                                    fontSize: 16,
+                                  ),
+                                ),
+                                Spacer(),
+                                Icon(Icons.arrow_right_sharp, size: 32),
+                              ],
                             ),
-                            Spacer(),
-                            Icon(Icons.arrow_right_sharp, size: 32),
-                          ],
-                        ),
-                      ),
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),

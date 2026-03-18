@@ -12,5 +12,5 @@ abstract class IAuthDataSource {
 
   Future<void> logOut();
 
-  bool isLogedIn();
+
 }

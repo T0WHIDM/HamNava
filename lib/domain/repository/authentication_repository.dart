@@ -14,5 +14,4 @@ abstract class IAuthenticationRepository {
 
   Future<Either<ApiExeption, void>> logOut();
 
-  bool isLogedIn();
 }

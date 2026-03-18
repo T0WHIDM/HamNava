@@ -8,9 +8,6 @@ class AuthRepositoryImpl implements IAuthenticationRepository {
   AuthRepositoryImpl(this.dataSource);
 
   @override
-  bool isLogedIn() => dataSource.isLogedIn();
-
-  @override
   Future<Either<ApiExeption, void>> logOut() async {
     try {
       await dataSource.logOut();
@@ -53,9 +50,11 @@ class AuthRepositoryImpl implements IAuthenticationRepository {
       );
       return await login(userName, password);
     } on ApiExeption catch (e) {
-      return Left(e);
+      return Left(ApiExeption(e.toString()));
     } catch (e) {
       return Left(ApiExeption('خطای غیرمنتظره در ثبت‌نام'));
     }
   }
+
+
 }

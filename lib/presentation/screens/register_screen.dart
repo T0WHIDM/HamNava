@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/authentication/auth_bloc.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/authentication/auth_event.dart';
@@ -126,6 +127,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
+                      prefixText: '@',
                     ),
                   ),
                 ),
@@ -239,20 +241,96 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 builder: (context, state) {
                   if (state is AuthLoading) {
                     return const CircularProgressIndicator(
-                      color: Colors.blueGrey,
+                      color: Color.fromARGB(255, 14, 208, 211),
                     );
                   }
                   return ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       foregroundColor: Colors.black,
-                      backgroundColor: Colors.blueGrey,
+                      backgroundColor: const Color.fromARGB(255, 14, 208, 211),
                     ),
                     onPressed: () {
                       final name = _nameController.text.trim();
-                      final userName = _nameController.text.trim();
-                      final email = _nameController.text.trim();
-                      final password = _nameController.text.trim();
-                      final passwordConfirm = _nameController.text.trim();
+                      final userName = _userNameController.text.trim();
+                      final email = _emailController.text.trim();
+                      final password = _passwordController.text.trim();
+                      final passwordConfirm = _passwordConfirmController.text
+                          .trim();
+
+                      final bool isEmailValid = RegExp(
+                        r"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$",
+                      ).hasMatch(email);
+
+                      final bool englishRegex = RegExp(
+                        r'^[a-zA-Z0-9_]+$',
+                      ).hasMatch(userName);
+
+                      if (!englishRegex && userName.isNotEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            backgroundColor: Colors.red,
+                            content: Text(
+                              textDirection: TextDirection.rtl,
+                              'نام کاربری فقط باید شامل حروف انگلیسی و عدد باشد',
+                              style: TextStyle(
+                                fontFamily: 'CR',
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        );
+                        return;
+                      }
+
+                      if (!isEmailValid && email.isNotEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            backgroundColor: Colors.red,
+                            content: Text(
+                              textDirection: TextDirection.rtl,
+                              'لطفاً یک ایمیل معتبر وارد کنید (مثل: example@gmail.com)',
+                              style: TextStyle(
+                                fontFamily: 'CR',
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        );
+                        return;
+                      }
+                      if (password.length < 8) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            backgroundColor: Colors.red,
+                            content: Text(
+                              textDirection: TextDirection.rtl,
+                              "رمز عبور باید حداقل ۸ کاراکتر باشد",
+                              style: TextStyle(
+                                fontFamily: 'CR',
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        );
+                        return;
+                      }
+
+                      if (password != passwordConfirm) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            backgroundColor: Colors.red,
+                            content: Text(
+                              textDirection: TextDirection.rtl,
+                              "رمز عبور و تکرار ان باید مطابق هم باشند",
+                              style: TextStyle(
+                                fontFamily: 'CR',
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        );
+                        return;
+                      }
 
                       if (name.isNotEmpty &&
                           userName.isNotEmpty &&

@@ -11,6 +11,8 @@ import 'package:flutter_chat_room_app/presentation/screens/setting_screen.dart';
 import 'package:flutter_chat_room_app/presentation/screens/register_screen.dart';
 import 'package:go_router/go_router.dart';
 
+
+
 final appGlobalRouter = GoRouter(
   initialLocation: '/',
   debugLogDiagnostics: true,
@@ -28,7 +30,8 @@ final appGlobalRouter = GoRouter(
       path: '/loginScreen',
       builder: (context, state) {
         return BlocProvider(
-          create: (context) => AuthBloc(locator.get(), locator.get()),
+          create: (context) =>
+              AuthBloc(locator.get(), locator.get(), locator.get()),
           child: const LoginScreen(),
         );
       },
@@ -38,7 +41,8 @@ final appGlobalRouter = GoRouter(
       path: '/RegisterScreen',
       builder: (context, state) {
         return BlocProvider(
-          create: (context) => AuthBloc(locator.get(), locator.get()),
+          create: (context) =>
+              AuthBloc(locator.get(), locator.get(), locator.get()),
           child: const RegisterScreen(),
         );
       },
@@ -81,7 +85,11 @@ final appGlobalRouter = GoRouter(
               name: SettingScreen.routeName,
               path: '/SettingScreen',
               builder: (context, state) {
-                return const SettingScreen();
+                return BlocProvider(
+                  create: (context) =>
+                      AuthBloc(locator.get(), locator.get(), locator.get()),
+                  child: const SettingScreen(),
+                );
               },
             ),
           ],
