@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/authentication/auth_bloc.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/authentication/auth_event.dart';
@@ -167,6 +166,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 child: Directionality(
                   textDirection: TextDirection.rtl,
                   child: TextField(
+                    obscureText: true,
                     controller: _passwordController,
                     decoration: InputDecoration(
                       enabledBorder: const OutlineInputBorder(
@@ -194,6 +194,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 child: Directionality(
                   textDirection: TextDirection.rtl,
                   child: TextField(
+                    obscureText: true,
                     controller: _passwordConfirmController,
                     decoration: InputDecoration(
                       enabledBorder: const OutlineInputBorder(

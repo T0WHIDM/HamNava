@@ -8,7 +8,7 @@ class ConversationMapper {
       id: dto.id,
       name: dto.name,
       isGroup: dto.isGroup,
-      admin: dto.admin,
+      admin: dto.admin.map((userDto) => UserMapper.toDomain(userDto)).toList(),
       participants: dto.participants
           .map((userDto) => UserMapper.toDomain(userDto))
           .toList(),

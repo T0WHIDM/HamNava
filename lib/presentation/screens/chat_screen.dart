@@ -36,6 +36,7 @@ class _ChatScreenState extends State<ChatScreen> {
               style: TextStyle(fontFamily: 'GB', fontSize: 20),
             ),
             const Spacer(),
+            IconButton(onPressed: () {}, icon: const Icon(Icons.search)),
           ],
         ),
       ),

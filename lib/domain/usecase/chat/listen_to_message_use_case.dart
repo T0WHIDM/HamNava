@@ -6,6 +6,6 @@ class ListenToMessageUseCase {
   ListenToMessageUseCase(this.repository);
 
   Stream<MessageEntity> call(String chatId) {
-    return repository.listenToMessage(chatId);
+    return repository.listenToMessages(chatId);
   }
 }

@@ -1,10 +1,10 @@
 import 'package:dartz/dartz.dart';
-import 'package:flutter_chat_room_app/core/exeption/api_exeption.dart';
+import 'package:flutter_chat_room_app/core/exception/api_exeption.dart';
 
 abstract class IAuthenticationRepository {
-  Future<Either<ApiExeption, void>> login(String userName, String password);
+  Future<Either<ApiException, void>> login(String userName, String password);
 
-  Future<Either<ApiExeption, void>> register(
+  Future<Either<ApiException, void>> register(
     String name,
     String userName,
     String email,
@@ -12,6 +12,6 @@ abstract class IAuthenticationRepository {
     String passwordConfirm,
   );
 
-  Future<Either<ApiExeption, void>> logOut();
+  Future<Either<ApiException, void>> logOut();
 
 }

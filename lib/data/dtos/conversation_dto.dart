@@ -5,25 +5,26 @@ class ConversationDto {
   final String id;
   final String name;
   final bool isGroup;
-  final String? admin;
+  final List<UserDto> admin;
   final List<UserDto> participants;
 
   ConversationDto({
     required this.id,
     required this.name,
     required this.isGroup,
-    this.admin,
+    required this.admin,
     required this.participants,
   });
 
   factory ConversationDto.fromRecord(RecordModel record) {
     final expandedUsers = record.get<List<RecordModel>>('expand.participants');
+    final expandedAdmin = record.get<List<RecordModel>>('expand.admin');
 
     return ConversationDto(
       id: record.id,
       name: record.getStringValue('name'),
       isGroup: record.getBoolValue('is_group'),
-      admin: record.getStringValue('admin'),
+      admin: expandedAdmin.map((e) => UserDto.fromRecord(e)).toList(),
       participants: expandedUsers
           .map((userRecord) => UserDto.fromRecord(userRecord))
           .toList(),

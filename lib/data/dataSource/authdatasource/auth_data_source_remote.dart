@@ -1,4 +1,4 @@
-import 'package:flutter_chat_room_app/core/exeption/api_exeption.dart';
+import 'package:flutter_chat_room_app/core/exception/api_exeption.dart';
 import 'package:flutter_chat_room_app/data/dataSource/authdatasource/auth_data_source.dart';
 import 'package:pocketbase/pocketbase.dart';
 
@@ -6,18 +6,21 @@ class AuthDataSourceRemote extends IAuthDataSource {
   final PocketBase pb;
   AuthDataSourceRemote(this.pb);
 
+  //login
   @override
   Future<void> login(String userName, String password) async {
     try {
       await pb.collection('users').authWithPassword(userName, password);
     } catch (e) {
-      throw ApiExeption('نام کاربری یا رمز عبور اشتباه است');
+      throw ApiException('نام کاربری یا رمز عبور اشتباه است');
     }
   }
 
+  //logOut
   @override
   Future<void> logOut() async => pb.authStore.clear();
 
+  //register
   @override
   Future<void> register(
     String name,
@@ -40,13 +43,12 @@ class AuthDataSourceRemote extends IAuthDataSource {
       final errorData = e.response['data'];
 
       if (errorData != null && errorData['username'] != null) {
-        throw ApiExeption("این نام کاربری قبلاً توسط شخص دیگری رزرو شده است.");
+        throw ApiException("این نام کاربری قبلاً توسط شخص دیگری رزرو شده است.");
       } else if (errorData != null && errorData['email'] != null) {
-        throw ApiExeption("این ایمیل قبلاً در سیستم ثبت شده است.");
+        throw ApiException("این ایمیل قبلاً در سیستم ثبت شده است.");
       }
 
-      throw e.response['message'] ??
-          ApiExeption("این ایمیل قبلاً در سیستم ثبت شده است.");
+      throw e.response['message'];
     }
   }
 }

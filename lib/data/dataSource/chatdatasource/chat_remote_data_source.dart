@@ -1,13 +1,12 @@
 import 'dart:async';
 import 'package:flutter_chat_room_app/data/dataSource/chatdatasource/chat_data_source.dart';
 import 'package:pocketbase/pocketbase.dart';
-import 'package:flutter_chat_room_app/core/exeption/api_exeption.dart';
+import 'package:flutter_chat_room_app/core/exception/api_exeption.dart';
 import 'package:flutter_chat_room_app/data/dtos/conversation_dto.dart';
 import 'package:flutter_chat_room_app/data/dtos/message_dto.dart';
 
 class ChatDataSourceImpl implements IChatDataSource {
   final PocketBase pb;
-
   ChatDataSourceImpl(this.pb);
 
   @override
@@ -24,7 +23,7 @@ class ChatDataSourceImpl implements IChatDataSource {
           .map((record) => ConversationDto.fromRecord(record))
           .toList();
     } catch (e) {
-      throw ApiExeption('خطا در دریافت لیست چت‌ها: $e');
+      throw ApiException('خطا در دریافت لیست چت‌ها: $e');
     }
   }
 
@@ -43,7 +42,7 @@ class ChatDataSourceImpl implements IChatDataSource {
 
       return records.map((record) => MessageDto.fromRecord(record)).toList();
     } catch (e) {
-      throw ApiExeption('خطا در دریافت پیام‌ها: $e');
+      throw ApiException('خطا در دریافت پیام‌ها: $e');
     }
   }
 
@@ -65,7 +64,7 @@ class ChatDataSourceImpl implements IChatDataSource {
 
       await pb.collection('messages').create(body: body);
     } catch (e) {
-      throw ApiExeption('خطا در ارسال پیام: $e');
+      throw ApiException('خطا در ارسال پیام: $e');
     }
   }
 
@@ -89,7 +88,7 @@ class ChatDataSourceImpl implements IChatDataSource {
             }
           }, expand: 'sender_id'); // بسیار مهم: اینجا هم باید expand را بنویسی!
         } catch (e) {
-          controller.addError(ApiExeption('خطا در اتصال زنده: $e'));
+          controller.addError(ApiException('خطا در اتصال زنده: $e'));
         }
       },
       onCancel: () {
