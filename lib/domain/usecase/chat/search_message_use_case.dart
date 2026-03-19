@@ -3,15 +3,15 @@ import 'package:flutter_chat_room_app/core/exception/api_exeption.dart';
 import 'package:flutter_chat_room_app/domain/entity/message_entity.dart';
 import 'package:flutter_chat_room_app/domain/repository/chat_repository.dart';
 
-class SendMessageUseCase {
+class SearchMessageUseCase {
   final IChatRepository repository;
 
-  SendMessageUseCase(this.repository);
+  SearchMessageUseCase(this.repository);
 
-  Future<Either<ApiException, MessageEntity>> call({
-    required String chatId,
-    String? text, 
-  }) {
-    return repository.sendMessage(text: text, chatId: chatId);
+  Future<Either<ApiException, List<MessageEntity>>> call(
+    String chatId,
+    String text,
+  ) {
+    return repository.searchMessage(chatId, text);
   }
 }

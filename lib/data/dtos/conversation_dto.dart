@@ -17,17 +17,23 @@ class ConversationDto {
   });
 
   factory ConversationDto.fromRecord(RecordModel record) {
-    final expandedUsers = record.get<List<RecordModel>>('expand.participants');
-    final expandedAdmin = record.get<List<RecordModel>>('expand.admin');
+    List<RecordModel> safeGetExpand(String key) {
+      try {
+        return record.get<List<RecordModel>>('expand.$key');
+      } catch (_) {
+        return [];
+      }
+    }
+
+    final participantsList = safeGetExpand('participants');
+    final adminList = safeGetExpand('admin');
 
     return ConversationDto(
       id: record.id,
       name: record.getStringValue('name'),
       isGroup: record.getBoolValue('is_group'),
-      admin: expandedAdmin.map((e) => UserDto.fromRecord(e)).toList(),
-      participants: expandedUsers
-          .map((userRecord) => UserDto.fromRecord(userRecord))
-          .toList(),
+      admin: adminList.map((e) => UserDto.fromRecord(e)).toList(),
+      participants: participantsList.map((e) => UserDto.fromRecord(e)).toList(),
     );
   }
 }

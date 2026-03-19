@@ -17,16 +17,9 @@ class UserDto {
 
   factory UserDto.fromRecord(RecordModel record) => UserDto(
     id: record.id,
-    userName: record.data['userName'] ?? '',
-    // avatar: record.data['avatar'],
-    email: record.data['email'] ?? '',
-    name: record.data['name'] ?? '',
+    userName: record.getStringValue('userName'),
+    // avatar: record.getStringValue('avatar'),
+    email: record.getStringValue('email'),
+    name: record.getStringValue('name'),
   );
 }
-
-
-
-
-
-
-

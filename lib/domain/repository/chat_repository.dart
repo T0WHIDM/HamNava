@@ -8,13 +8,17 @@ abstract class IChatRepository {
 
   Future<Either<ApiException, List<ConversationEntity>>> getAllChats();
 
-  Future<Either<ApiException, List<ConversationEntity>>> searchChat(
-    String chatId,
-  );
+  // داخل IChatRepository
+  Future<Either<ApiException, ConversationEntity>> getChatById(String chatId);
 
-  Future<Either<ApiException, ConversationEntity>> createGroupChat(
-    String chatName,
-    String chatId,
+
+  Future<Either<ApiException, ConversationEntity>> createGroupChat({
+    required String chatName,
+    required List<String> participantIds,
+  });
+
+  Future<Either<ApiException, ConversationEntity>> createOrGetPrivateChat(
+    String targetUserId,
   );
 
   Future<Either<ApiException, void>> deleteChat(String chatId);
@@ -32,9 +36,9 @@ abstract class IChatRepository {
   );
 
   Future<Either<ApiException, MessageEntity>> sendMessage({
-    required String text,
     required String chatId,
-    // String? attachmentUrl,
+    String? text,
+    // File? attachment, //
   });
 
   Stream<MessageEntity> listenToMessages(String chatId);

@@ -19,18 +19,24 @@ class MessageDto {
   });
 
   factory MessageDto.fromRecord(RecordModel record) {
-    final expandedList = record.get<List<RecordModel>>('expand.sender_id');
-    final expandedUser = expandedList.isNotEmpty ? expandedList.first : null;
+    RecordModel? senderRecord;
+
+    try {
+      final senders = record.get<List<RecordModel>>('expand.sender_id');
+      if (senders.isNotEmpty) {
+        senderRecord = senders.first;
+      }
+    } catch (_) {
+      senderRecord = null;
+    }
 
     return MessageDto(
       id: record.id,
       text: record.getStringValue('text'),
       chatId: record.getStringValue('chat_id'),
       attachment: record.getStringValue('attachment'),
-      created: record.get<DateTime>('created'),
-      sender: expandedUser != null
-          ? UserDto.fromRecord(expandedUser)
-          : null,
+      created: DateTime.parse(record.getStringValue('created')),
+      sender: senderRecord != null ? UserDto.fromRecord(senderRecord) : null,
     );
   }
 }

@@ -1,3 +1,4 @@
+// فایل: message_mapper.dart
 import 'package:flutter_chat_room_app/data/dtos/message_dto.dart';
 import 'package:flutter_chat_room_app/data/mapper/user_mapper.dart';
 import 'package:flutter_chat_room_app/domain/entity/message_entity.dart';
@@ -15,9 +16,9 @@ class MessageMapper {
           ? UserMapper.toDomain(messageDto.sender!)
           : UserEntity(
               id: '',
-              userName: 'unknown user',
+              userName: 'unknown_user',
               email: '',
-              name: 'deleted account',
+              name: 'Deleted Account',
             ),
     );
   }

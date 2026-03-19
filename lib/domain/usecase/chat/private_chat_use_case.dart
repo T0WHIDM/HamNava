@@ -3,11 +3,12 @@ import 'package:flutter_chat_room_app/core/exception/api_exeption.dart';
 import 'package:flutter_chat_room_app/domain/entity/conversation_entity.dart';
 import 'package:flutter_chat_room_app/domain/repository/chat_repository.dart';
 
-class GetAllChatUseCase {
+class PrivateChatUseCase {
   final IChatRepository repository;
-  GetAllChatUseCase(this.repository);
 
-  Future<Either<ApiException, List<ConversationEntity>>> call() {
-    return repository.getAllChats();
+  PrivateChatUseCase(this.repository);
+
+  Future<Either<ApiException, ConversationEntity>> call(String targetUserId) {
+    return repository.createOrGetPrivateChat(targetUserId);
   }
 }

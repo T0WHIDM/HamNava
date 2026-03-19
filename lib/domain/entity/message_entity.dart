@@ -2,7 +2,7 @@ import 'package:flutter_chat_room_app/domain/entity/user_entity.dart';
 
 class MessageEntity {
   final String id;
-  final String text;
+  final String? text;
   final UserEntity sender;
   final String chatId;
   final String? file;

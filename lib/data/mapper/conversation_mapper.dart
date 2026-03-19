@@ -6,7 +6,7 @@ class ConversationMapper {
   static ConversationEntity toDomain(ConversationDto dto) {
     return ConversationEntity(
       id: dto.id,
-      name: dto.name,
+      name: dto.name.isEmpty ? null : dto.name,
       isGroup: dto.isGroup,
       admin: dto.admin.map((userDto) => UserMapper.toDomain(userDto)).toList(),
       participants: dto.participants

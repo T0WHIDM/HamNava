@@ -5,7 +5,7 @@ import 'package:flutter_chat_room_app/data/dataSource/chatdatasource/chat_remote
 import 'package:flutter_chat_room_app/data/repository/authrepository/auth_repository.dart';
 import 'package:flutter_chat_room_app/data/repository/chatrepository/chat_repository_impl.dart';
 import 'package:flutter_chat_room_app/domain/repository/authentication_repository.dart';
-import 'package:flutter_chat_room_app/domain/repository/chat_reposiroty.dart';
+import 'package:flutter_chat_room_app/domain/repository/chat_repository.dart';
 import 'package:flutter_chat_room_app/domain/usecase/authentication/log_out_use_case.dart';
 import 'package:flutter_chat_room_app/domain/usecase/authentication/login_use_case.dart';
 import 'package:flutter_chat_room_app/domain/usecase/authentication/register_use_case.dart';
@@ -29,7 +29,7 @@ Future<void> getItInit() async {
   );
 
   locator.registerLazySingleton<IChatDataSource>(
-    () => ChatDataSourceImpl(locator<PocketBase>()),
+    () => ChatRemoteDataSource(locator<PocketBase>()),
   );
 
   // ۳. ریپازیتوری‌ها (Repositories)
@@ -37,9 +37,9 @@ Future<void> getItInit() async {
     () => AuthRepositoryImpl(locator<IAuthDataSource>()),
   );
 
-  locator.registerLazySingleton<IChatRepository>(
-    () => ChatRepositoryImpl(locator<IChatDataSource>()),
-  );
+  // locator.registerLazySingleton<IChatRepository>(
+  //   () => ChatRepositoryImpl(locator<IChatDataSource>()),
+  // );
 
   // ۴. یوزکیس‌ها (UseCases)
   locator.registerLazySingleton(
