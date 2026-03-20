@@ -36,17 +36,17 @@ class _AboutScreenState extends State<AboutScreen> {
 
           _buildLinkItem(
             icon: FontAwesomeIcons.telegram,
-            title: 'Telegram',
+            title: 'تلکرام',
             onTap: () => MyUrlLuncher.launchLink('https://t.me/T0WHID'),
           ),
           _buildLinkItem(
             icon: FontAwesomeIcons.github,
-            title: 'Source Code',
+            title: 'سورس کد',
             onTap: () => MyUrlLuncher.launchLink('https://github.com/T0WHIDM'),
           ),
           _buildLinkItem(
             icon: Icons.email,
-            title: 'Email',
+            title: 'ایمیل',
             onTap: () =>
                 MyUrlLuncher.launchLink('mailto:towhidmgholami@gmail.com'),
           ),
@@ -81,17 +81,24 @@ class _AboutScreenState extends State<AboutScreen> {
         onTap: onTap,
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-          child: Row(
-            children: [
-              Icon(icon, size: 24, color: Colors.black87),
-              const SizedBox(width: 20),
-              Text(
-                title,
-                style: const TextStyle(fontFamily: 'GB', fontSize: 16),
-              ),
-              const Spacer(),
-              const Icon(Icons.arrow_forward_ios, size: 18, color: Colors.grey),
-            ],
+          child: Directionality(
+            textDirection: TextDirection.rtl,
+            child: Row(
+              children: [
+                Icon(icon, size: 24, color: Colors.black87),
+                const SizedBox(width: 20),
+                Text(
+                  title,
+                  style: const TextStyle(fontFamily: 'cr', fontSize: 16),
+                ),
+                const Spacer(),
+                const Icon(
+                  Icons.arrow_forward_ios,
+                  size: 18,
+                  color: Colors.grey,
+                ),
+              ],
+            ),
           ),
         ),
       ),

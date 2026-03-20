@@ -37,7 +37,10 @@ class ChatListItem extends StatelessWidget {
                           'towhid',
                           style: TextStyle(fontFamily: 'GB', fontSize: 20),
                         ),
-                        Text("سلام خوبی؟"),
+                        Text(
+                          "سلام خوبی؟ چه خبر؟",
+                          style: TextStyle(fontFamily: 'cr', fontSize: 13),
+                        ),
                       ],
                     ),
                     Spacer(),

@@ -28,37 +28,15 @@ class _SettingScreenState extends State<SettingScreen> {
         child: Column(
           children: [
             const SizedBox(height: 100),
-            Center(
-              child: Stack(
-                children: [
-                  const CircleAvatar(
-                    backgroundColor: Colors.grey,
-                    radius: 78,
-                    child: Icon(
-                      FontAwesomeIcons.user,
-                      size: 48,
-                      color: Colors.black,
-                    ),
-                  ),
-                  Positioned(
-                    left: 105,
-                    top: 105,
-                    child: Container(
-                      width: 45,
-                      height: 45,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.blue,
-                      ),
-                      child: Center(
-                        child: IconButton(
-                          onPressed: () {},
-                          icon: const Icon(FontAwesomeIcons.pencil, size: 20),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+            const Center(
+              child: CircleAvatar(
+                backgroundColor: Colors.grey,
+                radius: 64,
+                child: Icon(
+                  FontAwesomeIcons.user,
+                  size: 48,
+                  color: Colors.black,
+                ),
               ),
             ),
             const SizedBox(height: 12),
@@ -67,12 +45,70 @@ class _SettingScreenState extends State<SettingScreen> {
               style: TextStyle(fontFamily: 'GB', fontSize: 24),
             ),
             const SizedBox(height: 8),
-            const Text(
-              'towhidmgholami@gmail.com',
-              style: TextStyle(
-                fontFamily: 'GR',
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
+            ClipRRect(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: InkWell(
+                        radius: 27,
+                        onTap: () {},
+                        child: Container(
+                          width: 165,
+                          height: 70,
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: .05),
+                            borderRadius: const BorderRadius.all(
+                              Radius.circular(16),
+                            ),
+                          ),
+                          child: const Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.edit),
+                              SizedBox(height: 5),
+                              Text(
+                                'ویرایش اطلاعات',
+                                style: TextStyle(fontFamily: 'CR'),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: InkWell(
+                        radius: 27,
+                        onTap: () {},
+                        child: Container(
+                          width: 165,
+                          height: 70,
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: .05),
+                            borderRadius: const BorderRadius.all(
+                              Radius.circular(16),
+                            ),
+                          ),
+                          child: const Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.photo_camera),
+                              SizedBox(height: 5),
+                              Text(
+                                'افزودن عکس',
+                                style: TextStyle(fontFamily: 'CR'),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 24),
@@ -84,26 +120,26 @@ class _SettingScreenState extends State<SettingScreen> {
                   filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withValues(alpha: .05),
                       borderRadius: const BorderRadius.all(Radius.circular(16)),
                     ),
                     child: Column(
                       children: [
                         _buildSettingItem(
                           icon: FontAwesomeIcons.moon,
-                          title: 'Dark Mode',
+                          title: 'دارک مود',
                           onTap: () {},
                         ),
                         _buildSettingItem(
                           icon: FontAwesomeIcons.shareNodes,
-                          title: 'Share',
+                          title: 'اشتراک گداری',
                           onTap: () {
                             // Share.share('Check out this app!');
                           },
                         ),
                         _buildSettingItem(
                           icon: FontAwesomeIcons.solidCircleQuestion,
-                          title: 'About',
+                          title: 'درباره ما',
                           onTap: () => context.pushNamed(AboutScreen.routeName),
                         ),
 
@@ -149,24 +185,28 @@ class _SettingScreenState extends State<SettingScreen> {
                                     AuthLogOutEvent(),
                                   );
                                 },
-                                child: const Row(
-                                  children: [
-                                    Icon(Icons.logout_outlined),
-                                    SizedBox(width: 20),
-                                    Text(
-                                      'Log out',
-                                      style: TextStyle(
-                                        fontFamily: 'GB',
-                                        fontSize: 16,
+                                child: const Directionality(
+                                  textDirection: TextDirection.rtl,
+
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.logout_outlined),
+                                      SizedBox(width: 20),
+                                      Text(
+                                        'خروج از حساب کاربری',
+                                        style: TextStyle(
+                                          fontFamily: 'CR',
+                                          fontSize: 16,
+                                        ),
                                       ),
-                                    ),
-                                    Spacer(),
-                                    Icon(
-                                      Icons.arrow_right_sharp,
-                                      size: 32,
-                                      color: Colors.grey,
-                                    ),
-                                  ],
+                                      Spacer(),
+                                      Icon(
+                                        Icons.arrow_right_sharp,
+                                        size: 32,
+                                        color: Colors.grey,
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             );
@@ -197,17 +237,24 @@ Widget _buildSettingItem({
       children: [
         Padding(
           padding: const EdgeInsets.all(16.0),
-          child: Row(
-            children: [
-              Icon(icon, size: 20),
-              const SizedBox(width: 20),
-              Text(
-                title,
-                style: const TextStyle(fontFamily: 'GB', fontSize: 16),
-              ),
-              const Spacer(),
-              const Icon(Icons.arrow_right_sharp, size: 32, color: Colors.grey),
-            ],
+          child: Directionality(
+            textDirection: TextDirection.rtl,
+            child: Row(
+              children: [
+                Icon(icon, size: 20),
+                const SizedBox(width: 20),
+                Text(
+                  title,
+                  style: const TextStyle(fontFamily: 'CR', fontSize: 16),
+                ),
+                const Spacer(),
+                const Icon(
+                  Icons.arrow_right_sharp,
+                  size: 32,
+                  color: Colors.grey,
+                ),
+              ],
+            ),
           ),
         ),
         if (!isLast) const Divider(height: 3, indent: 60),

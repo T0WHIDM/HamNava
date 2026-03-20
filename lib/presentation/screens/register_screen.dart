@@ -25,6 +25,32 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _passwordConfirmController =
       TextEditingController();
 
+  final FocusNode nameFocusNode = FocusNode();
+  final FocusNode userNameFocusNode = FocusNode();
+  final FocusNode emailFocusNode = FocusNode();
+  final FocusNode passwordFocusNode = FocusNode();
+  final FocusNode passwordConfirmFocusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    nameFocusNode.addListener(() {
+      setState(() {});
+    });
+    userNameFocusNode.addListener(() {
+      setState(() {});
+    });
+    emailFocusNode.addListener(() {
+      setState(() {});
+    });
+    passwordFocusNode.addListener(() {
+      setState(() {});
+    });
+    passwordConfirmFocusNode.addListener(() {
+      setState(() {});
+    });
+  }
+
   @override
   void dispose() {
     _nameController.dispose();
@@ -32,6 +58,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     _passwordConfirmController.dispose();
+    nameFocusNode.dispose();
+    userNameFocusNode.dispose();
+    emailFocusNode.dispose();
+    passwordFocusNode.dispose();
+    passwordConfirmFocusNode.dispose();
     super.dispose();
   }
 
@@ -84,6 +115,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 child: Directionality(
                   textDirection: TextDirection.rtl,
                   child: TextField(
+                    focusNode: nameFocusNode,
                     controller: _nameController,
                     decoration: InputDecoration(
                       enabledBorder: const OutlineInputBorder(
@@ -97,7 +129,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                       ),
                       label: const Text('نام'),
-                      labelStyle: const TextStyle(fontFamily: 'CR'),
+                      labelStyle: TextStyle(
+                        fontFamily: 'CR',
+                        color: nameFocusNode.hasFocus
+                            ? const Color.fromARGB(255, 14, 208, 211)
+                            : Colors.black,
+                      ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
@@ -113,6 +150,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 child: Directionality(
                   textDirection: TextDirection.rtl,
                   child: TextField(
+                    focusNode: userNameFocusNode,
                     controller: _userNameController,
                     decoration: InputDecoration(
                       enabledBorder: const OutlineInputBorder(
@@ -126,7 +164,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                       ),
                       label: const Text('نام کاربری'),
-                      labelStyle: const TextStyle(fontFamily: 'CR'),
+                      labelStyle: TextStyle(
+                        fontFamily: 'CR',
+                        color: userNameFocusNode.hasFocus
+                            ? const Color.fromARGB(255, 14, 208, 211)
+                            : Colors.black,
+                      ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
@@ -143,6 +186,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 child: Directionality(
                   textDirection: TextDirection.rtl,
                   child: TextField(
+                    focusNode: emailFocusNode,
                     controller: _emailController,
                     decoration: InputDecoration(
                       enabledBorder: const OutlineInputBorder(
@@ -156,7 +200,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                       ),
                       label: const Text('ایمیل'),
-                      labelStyle: const TextStyle(fontFamily: 'CR'),
+                      labelStyle: TextStyle(
+                        fontFamily: 'CR',
+                        color: emailFocusNode.hasFocus
+                            ? const Color.fromARGB(255, 14, 208, 211)
+                            : Colors.black,
+                      ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
@@ -172,6 +221,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 child: Directionality(
                   textDirection: TextDirection.rtl,
                   child: TextField(
+                    focusNode: passwordFocusNode,
                     obscureText: true,
                     controller: _passwordController,
                     decoration: InputDecoration(
@@ -186,7 +236,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                       ),
                       label: const Text('رمز عبور'),
-                      labelStyle: const TextStyle(fontFamily: 'CR'),
+                      labelStyle: TextStyle(
+                        fontFamily: 'CR',
+                        color: passwordFocusNode.hasFocus
+                            ? const Color.fromARGB(255, 14, 208, 211)
+                            : Colors.black,
+                      ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
@@ -202,6 +257,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 child: Directionality(
                   textDirection: TextDirection.rtl,
                   child: TextField(
+                    focusNode: passwordConfirmFocusNode,
                     obscureText: true,
                     controller: _passwordConfirmController,
                     decoration: InputDecoration(
@@ -216,7 +272,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                       ),
                       label: const Text('تکرار رمز عبور'),
-                      labelStyle: const TextStyle(fontFamily: 'CR'),
+                      labelStyle: TextStyle(
+                        fontFamily: 'CR',
+                        color: passwordConfirmFocusNode.hasFocus
+                            ? const Color.fromARGB(255, 14, 208, 211)
+                            : Colors.black,
+                      ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
@@ -309,7 +370,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         );
                         return;
                       }
-                      if (password.length < 8) {
+                      if (password.length < 8 && password.isNotEmpty) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             backgroundColor: Colors.red,

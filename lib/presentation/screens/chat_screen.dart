@@ -39,7 +39,7 @@ class _ChatScreenState extends State<ChatScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Touhid',
+                  'Towhid',
                   style: TextStyle(fontFamily: 'GB', fontSize: 16),
                 ),
                 Text(
@@ -132,15 +132,19 @@ class _ChatScreenState extends State<ChatScreen> {
                   icon: const Icon(Icons.attach_file, color: Colors.grey),
                 ),
                 Expanded(
-                  child: TextField(
-                    controller: _messageController,
-                    decoration: const InputDecoration(
-                      hintText: 'پیام خود را بنویسید...',
-                      hintStyle: TextStyle(fontFamily: 'CR', fontSize: 14),
-                      border: InputBorder.none,
+                  child: Directionality(
+                    textDirection: TextDirection.rtl,
+                    child: TextField(
+                      controller: _messageController,
+                      decoration: const InputDecoration(
+                        hintText: 'پیام خود را بنویسید...',
+                        hintStyle: TextStyle(fontFamily: 'CR', fontSize: 14),
+                        border: InputBorder.none,
+                      ),
                     ),
                   ),
                 ),
+                const SizedBox(width: 10,),
                 InkWell(
                   onTap: () {},
                   child: const CircleAvatar(
