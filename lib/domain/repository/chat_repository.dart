@@ -8,7 +8,6 @@ abstract class IChatRepository {
 
   Future<Either<ApiException, List<ConversationEntity>>> getAllChats();
 
-  // داخل IChatRepository
   Future<Either<ApiException, ConversationEntity>> getChatById(String chatId);
 
 
