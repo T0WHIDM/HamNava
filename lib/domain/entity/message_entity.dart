@@ -5,15 +5,23 @@ class MessageEntity {
   final String? text;
   final UserEntity sender;
   final String chatId;
-  final String? file;
+  final String? attachment;
   final DateTime created;
+  final List<UserEntity> readBy;
+  final String type;
+  final bool isDeleted;
+  final String replyToId;
 
   MessageEntity({
     required this.id,
     required this.text,
     required this.sender,
     required this.chatId,
-    this.file,
+    this.attachment,
     required this.created,
+    required this.readBy,
+    required this.type,
+    required this.isDeleted,
+    required this.replyToId,
   });
 }

@@ -8,10 +8,13 @@ class ConversationMapper {
       id: dto.id,
       name: dto.name.isEmpty ? null : dto.name,
       isGroup: dto.isGroup,
-      admin: dto.admin.map((userDto) => UserMapper.toDomain(userDto)).toList(),
-      participants: dto.participants
-          .map((userDto) => UserMapper.toDomain(userDto))
-          .toList(),
+      admin: UserMapper.toDomainList(dto.admin),
+      // dto.admin.map((userDto) => UserMapper.toDomain(userDto)).toList(),
+      participants: UserMapper.toDomainList(dto.participants),
+      // dto.participants
+      // .map((userDto) => UserMapper.toDomain(userDto))
+      // .toList(),
+      lastMessageId: dto.lastMessageId,
     );
   }
 

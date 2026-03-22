@@ -1,4 +1,12 @@
 import 'package:flutter_chat_room_app/data/dataSource/userdatasource/user_data_source_remote.dart';
+import 'package:flutter_chat_room_app/domain/usecase/chat/create_group_use_case.dart';
+import 'package:flutter_chat_room_app/domain/usecase/chat/delete_chat_use_case.dart';
+import 'package:flutter_chat_room_app/domain/usecase/chat/delete_message_use_case.dart';
+import 'package:flutter_chat_room_app/domain/usecase/chat/edit_message_use_case.dart';
+import 'package:flutter_chat_room_app/domain/usecase/chat/search_chat_use_case.dart';
+import 'package:flutter_chat_room_app/domain/usecase/chat/search_message_use_case.dart';
+import 'package:flutter_chat_room_app/domain/usecase/user/update_profile_use_case.dart';
+import 'package:flutter_chat_room_app/domain/usecase/user/view_profile_use_case.dart';
 import 'package:get_it/get_it.dart';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:flutter_chat_room_app/data/dataSource/authdatasource/auth_data_source.dart';
@@ -20,16 +28,26 @@ import 'package:flutter_chat_room_app/domain/usecase/chat/get_message_use_case.d
 import 'package:flutter_chat_room_app/domain/usecase/chat/listen_to_message_use_case.dart';
 import 'package:flutter_chat_room_app/domain/usecase/chat/send_message_use_case.dart';
 import 'package:flutter_chat_room_app/domain/usecase/chat/private_chat_use_case.dart'; // جدید
-import 'package:flutter_chat_room_app/domain/usecase/user/search_user_use_case.dart'; // جدید
+import 'package:flutter_chat_room_app/domain/usecase/user/search_user_use_case.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // جدید
 
 final locator = GetIt.instance;
 
 Future<void> getItInit() async {
-  locator.registerSingleton<PocketBase>(
-    PocketBase('https://messageflow-aelbqjwyta.liara.run'),
+  final prefs = await SharedPreferences.getInstance();
+
+  //pocketBase
+  final store = AsyncAuthStore(
+    initial: prefs.getString('pb_auth'),
+    save: (String data) async => await prefs.setString('pb_auth', data),
+    clear: () async => await prefs.remove('pb_auth'),
   );
 
-  // ۲. دیتاسورس‌ها (DataSources)
+  locator.registerSingleton<PocketBase>(
+    PocketBase('https://messageflow-aelbqjwyta.liara.run', authStore: store),
+  );
+
+  //--- DataSources ---
   locator.registerLazySingleton<IAuthDataSource>(
     () => AuthDataSourceRemote(locator<PocketBase>()),
   );
@@ -42,7 +60,7 @@ Future<void> getItInit() async {
     () => UserDataSourceRemote(locator<PocketBase>()),
   );
 
-  // ۳. ریپازیتوری‌ها (Repositories)
+  // --- Repositories ---
   locator.registerLazySingleton<IAuthenticationRepository>(
     () => AuthRepositoryImpl(locator<IAuthDataSource>()),
   );
@@ -55,19 +73,67 @@ Future<void> getItInit() async {
     () => UserRepositoryImpl(locator<IUserDataSource>()),
   );
 
-  // ۴. یوزکیس‌ها (UseCases)
+  // --- UseCases ---
   // --- Auth ---
-  locator.registerLazySingleton(() => LoginUseCase(locator<IAuthenticationRepository>()));
-  locator.registerLazySingleton(() => RegisterUseCase(locator<IAuthenticationRepository>()));
-  locator.registerLazySingleton(() => LogOutUseCase(locator<IAuthenticationRepository>()));
+  locator.registerLazySingleton(
+    () => LoginUseCase(locator<IAuthenticationRepository>()),
+  );
+  locator.registerLazySingleton(
+    () => RegisterUseCase(locator<IAuthenticationRepository>()),
+  );
+  locator.registerLazySingleton(
+    () => LogOutUseCase(locator<IAuthenticationRepository>()),
+  );
 
   // --- Chat ---
-  locator.registerLazySingleton(() => GetAllChatUseCase(locator<IChatRepository>()));
-  locator.registerLazySingleton(() => GetMessageUseCase(locator<IChatRepository>()));
-  locator.registerLazySingleton(() => ListenToMessageUseCase(locator<IChatRepository>()));
-  locator.registerLazySingleton(() => SendMessageUseCase(locator<IChatRepository>()));
-  locator.registerLazySingleton(() => PrivateChatUseCase(locator<IChatRepository>()));
+  locator.registerLazySingleton(
+    () => CreateGroupUseCase(locator<IChatRepository>()),
+  );
+
+  locator.registerLazySingleton(
+    () => DeleteChatUseCase(locator<IChatRepository>()),
+  );
+
+  locator.registerLazySingleton(
+    () => DeleteMessageUseCase(locator<IChatRepository>()),
+  );
+
+  locator.registerLazySingleton(
+    () => EditMessageUseCase(locator<IChatRepository>()),
+  );
+
+  locator.registerLazySingleton(
+    () => GetAllChatUseCase(locator<IChatRepository>()),
+  );
+  locator.registerLazySingleton(
+    () => GetMessageUseCase(locator<IChatRepository>()),
+  );
+  locator.registerLazySingleton(
+    () => ListenToMessageUseCase(locator<IChatRepository>()),
+  );
+  locator.registerLazySingleton(
+    () => SendMessageUseCase(locator<IChatRepository>()),
+  );
+  locator.registerLazySingleton(
+    () => PrivateChatUseCase(locator<IChatRepository>()),
+  );
+
+  locator.registerLazySingleton(
+    () => SearchMessageUseCase(locator<IChatRepository>()),
+  );
+
+  locator.registerLazySingleton(
+    () => SearchChatUseCase(locator<IChatRepository>()),
+  );
 
   // --- User ---
-  locator.registerLazySingleton(() => SearchUserUseCase(locator<IUserRepository>()));
+  locator.registerLazySingleton(
+    () => SearchUserUseCase(locator<IUserRepository>()),
+  );
+  locator.registerLazySingleton(
+    () => UpdateProfileUseCase(locator<IUserRepository>()),
+  );
+  locator.registerLazySingleton(
+    () => ViewProfileUseCase(locator<IUserRepository>()),
+  );
 }

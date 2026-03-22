@@ -6,6 +6,7 @@ class ConversationEntity {
   final bool isGroup;
   final List<UserEntity> admin;
   final List<UserEntity> participants;
+  final String lastMessageId;
 
   ConversationEntity({
     required this.id,
@@ -13,5 +14,6 @@ class ConversationEntity {
     required this.isGroup,
     required this.admin,
     required this.participants,
+    required this.lastMessageId,
   });
 }

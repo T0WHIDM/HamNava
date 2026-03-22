@@ -7,6 +7,7 @@ class ConversationDto {
   final bool isGroup;
   final List<UserDto> admin;
   final List<UserDto> participants;
+  final String lastMessageId;
 
   ConversationDto({
     required this.id,
@@ -14,6 +15,7 @@ class ConversationDto {
     required this.isGroup,
     required this.admin,
     required this.participants,
+    required this.lastMessageId,
   });
 
   factory ConversationDto.fromRecord(RecordModel record) {
@@ -34,6 +36,7 @@ class ConversationDto {
       isGroup: record.getBoolValue('is_group'),
       admin: adminList.map((e) => UserDto.fromRecord(e)).toList(),
       participants: participantsList.map((e) => UserDto.fromRecord(e)).toList(),
+      lastMessageId: record.getStringValue('last_message'),
     );
   }
 }

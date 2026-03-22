@@ -9,6 +9,8 @@ class UserMapper {
       email: userDto.email,
       name: userDto.name,
       // avatar: userDto.avatar,
+      friends: UserMapper.toDomainList(userDto.friends),
+      
     );
   }
 

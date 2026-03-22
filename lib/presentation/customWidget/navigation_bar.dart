@@ -10,14 +10,14 @@ class MyBootomNavigationBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBody: true,
+      extendBody: true, 
       body: navigationShell,
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.only(left: 32, right: 32, bottom: 32),
         child: ClipRRect(
           borderRadius: const BorderRadius.all(Radius.circular(32)),
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
             child: BottomNavigationBar(
               currentIndex: navigationShell.currentIndex,
               onTap: (int index) {

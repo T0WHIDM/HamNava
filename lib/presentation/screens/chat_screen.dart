@@ -1,6 +1,9 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter_chat_room_app/presentation/screens/home_screen.dart';
+import 'package:flutter_chat_room_app/presentation/screens/user_profile_screen.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:go_router/go_router.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -25,28 +28,39 @@ class _ChatScreenState extends State<ChatScreen> {
     return Scaffold(
       backgroundColor: const Color(0xffF5F5F5),
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios),
+          onPressed: () {
+            context.goNamed(HomeScreen.namedRoute);
+          },
+        ),
         elevation: 0,
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
-        title: const Row(
+        title: Row(
           children: [
-            CircleAvatar(
+            const CircleAvatar(
               backgroundColor: Colors.grey,
               child: Icon(FontAwesomeIcons.user, size: 20, color: Colors.white),
             ),
-            SizedBox(width: 12),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Towhid',
-                  style: TextStyle(fontFamily: 'GB', fontSize: 16),
-                ),
-                Text(
-                  'online',
-                  style: TextStyle(fontSize: 12, color: Colors.green),
-                ),
-              ],
+            const SizedBox(width: 12),
+            InkWell(
+              onTap: () {
+                context.pushNamed(UserProfileScreen.routeName);
+              },
+              child: const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Towhid',
+                    style: TextStyle(fontFamily: 'GB', fontSize: 16),
+                  ),
+                  Text(
+                    'online',
+                    style: TextStyle(fontSize: 12, color: Color.fromARGB(255, 6, 166, 11)),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -63,7 +77,7 @@ class _ChatScreenState extends State<ChatScreen> {
               padding: const EdgeInsets.all(16),
               itemCount: 10,
               itemBuilder: (context, index) {
-                bool isMe = index % 2 != 0;
+                bool isMe = index % 2 == 1;
                 return _buildChatBubble(isMe, index);
               },
             ),
@@ -91,7 +105,7 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 5,
               spreadRadius: 1,
             ),
@@ -121,7 +135,7 @@ class _ChatScreenState extends State<ChatScreen> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.8),
+              color: Colors.white.withValues(alpha: 0.8),
               borderRadius: BorderRadius.circular(32),
               border: Border.all(color: Colors.grey.shade300),
             ),
@@ -144,7 +158,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(width: 10,),
+                const SizedBox(width: 10),
                 InkWell(
                   onTap: () {},
                   child: const CircleAvatar(
