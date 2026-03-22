@@ -57,7 +57,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   ),
                   Text(
                     'online',
-                    style: TextStyle(fontSize: 12, color: Colors.green),
+                    style: TextStyle(fontSize: 12, color: Color.fromARGB(255, 6, 166, 11)),
                   ),
                 ],
               ),
@@ -77,7 +77,7 @@ class _ChatScreenState extends State<ChatScreen> {
               padding: const EdgeInsets.all(16),
               itemCount: 10,
               itemBuilder: (context, index) {
-                bool isMe = index % 2 != 0;
+                bool isMe = index % 2 == 1;
                 return _buildChatBubble(isMe, index);
               },
             ),

@@ -10,7 +10,7 @@ class UserProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      extendBodyBehindAppBar: true, // برای اینکه عکس پروفایل زیر AppBar برود
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -19,10 +19,10 @@ class UserProfileScreen extends StatelessWidget {
           child: IconButton(
             onPressed: () => context.pop(),
             icon: const CircleAvatar(
-              backgroundColor: Colors.white24,
+              backgroundColor: Colors.white,
               child: Icon(
                 Icons.arrow_back_ios_new,
-                color: Colors.white,
+                color: Colors.black,
                 size: 20,
               ),
             ),
@@ -48,7 +48,6 @@ class UserProfileScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                // افکت گرادینت پایین عکس برای خوانایی متن
                 Container(
                   height: 150,
                   decoration: BoxDecoration(
@@ -62,7 +61,6 @@ class UserProfileScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                // نام و آیدی کاربر روی عکس
                 Positioned(
                   bottom: 20,
                   left: 20,
@@ -78,7 +76,7 @@ class UserProfileScreen extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        'username',
+                        '@towhid',
                         style: TextStyle(
                           color: Colors.white.withValues(alpha: 0.8),
                           fontSize: 16,
@@ -93,7 +91,6 @@ class UserProfileScreen extends StatelessWidget {
 
             const SizedBox(height: 20),
 
-            // بخش اطلاعات و تنظیمات (Glassmorphism)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Column(
@@ -105,7 +102,6 @@ class UserProfileScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 30),
 
-                  // دکمه‌های عملیاتی
                   Row(
                     children: [
                       Expanded(
@@ -133,10 +129,19 @@ class UserProfileScreen extends StatelessWidget {
                       ),
 
                       const SizedBox(width: 10),
-                      _buildActionCircle(
-                        Icons.block_flipped,
-                        Colors.red,
-                        () {},
+                      InkWell(
+                        onTap: () {},
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.red.withValues(alpha: 0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.block_flipped,
+                            color: Colors.red,
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -182,21 +187,6 @@ class UserProfileScreen extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  // دکمه‌های دایره‌ای کوچک
-  Widget _buildActionCircle(IconData icon, Color color, VoidCallback onTap) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.1),
-          shape: BoxShape.circle,
-        ),
-        child: Icon(icon, color: color),
       ),
     );
   }

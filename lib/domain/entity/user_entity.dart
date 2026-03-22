@@ -4,6 +4,7 @@ class UserEntity {
   // final String? avatar;
   final String email;
   final String name;
+  final List<UserEntity> friends;
 
   UserEntity({
     required this.userName,
@@ -11,5 +12,6 @@ class UserEntity {
     // this.avatar,
     required this.email,
     required this.name,
+    required this.friends,
   });
 }

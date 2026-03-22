@@ -16,7 +16,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(seconds: 4), () {
+    Future.delayed(const Duration(seconds: 3), () {
       if (mounted) {
         context.goNamed(LoginScreen.namedRoute);
       }
@@ -31,8 +31,8 @@ class _LoadingScreenState extends State<LoadingScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Center(child: Image.asset('assets/images/hamnava.jpg')),
-          const SizedBox(height: 15),
-          const SpinKitFoldingCube(
+          const SizedBox(height: 25),
+          const SpinKitSquareCircle(
             color: Color.fromARGB(255, 14, 208, 211),
             size: 32,
           ),

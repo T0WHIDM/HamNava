@@ -1,4 +1,3 @@
-// فایل: message_mapper.dart
 import 'package:flutter_chat_room_app/data/dtos/message_dto.dart';
 import 'package:flutter_chat_room_app/data/mapper/user_mapper.dart';
 import 'package:flutter_chat_room_app/domain/entity/message_entity.dart';
@@ -10,7 +9,7 @@ class MessageMapper {
       id: messageDto.id,
       text: messageDto.text,
       chatId: messageDto.chatId,
-      file: messageDto.attachment,
+      attachment: messageDto.attachment,
       created: messageDto.created,
       sender: messageDto.sender != null
           ? UserMapper.toDomain(messageDto.sender!)
@@ -19,7 +18,12 @@ class MessageMapper {
               userName: 'unknown_user',
               email: '',
               name: 'Deleted Account',
+              friends: [],
             ),
+      isDeleted: messageDto.isDeleted,
+      type: messageDto.type,
+      replyToId: messageDto.replyToId,
+      readBy: UserMapper.toDomainList(messageDto.readBy),
     );
   }
 

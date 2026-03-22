@@ -1,7 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_room_app/presentation/screens/home_screen.dart';
-import 'package:flutter_chat_room_app/presentation/screens/user_profile_screen.dart';
 import 'package:go_router/go_router.dart';
 
 class UserSearchScreen extends StatefulWidget {
@@ -73,9 +72,7 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
                         border: InputBorder.none,
                         suffixIcon: IconButton(
                           icon: const Icon(Icons.search),
-                          onPressed: () {
-                            context.pushNamed(UserProfileScreen.routeName);
-                          },
+                          onPressed: () {},
                         ),
                       ),
                     ),
@@ -90,7 +87,6 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
     );
   }
 
-  // نمایش لیست کاربران پیدا شده
   Widget buildUserList(List<dynamic> users) {
     if (users.isEmpty) {
       return const Center(
@@ -135,7 +131,6 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
     );
   }
 
-  // نمایش ویجت خطا
   Widget buildErrorWidget(String message) {
     return Center(
       child: Column(
@@ -152,7 +147,6 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
     );
   }
 
-  // وضعیت اولیه صفحه (قبل از جستجو)
   Widget buildEmptyState() {
     return Center(
       child: Column(

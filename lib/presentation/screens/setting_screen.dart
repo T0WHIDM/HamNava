@@ -48,7 +48,7 @@ class _SettingScreenState extends State<SettingScreen> {
             const SizedBox(height: 8),
             ClipRRect(
               child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [

@@ -8,6 +8,10 @@ class MessageDto {
   final String chatId;
   final String? attachment;
   final DateTime created;
+  final List<UserDto> readBy;
+  final String type;
+  final bool isDeleted;
+  final String replyToId;
 
   MessageDto({
     required this.id,
@@ -16,6 +20,10 @@ class MessageDto {
     required this.chatId,
     this.attachment,
     required this.created,
+    required this.readBy,
+    required this.type,
+    required this.isDeleted,
+    required this.replyToId,
   });
 
   factory MessageDto.fromRecord(RecordModel record) {
@@ -30,6 +38,8 @@ class MessageDto {
       senderRecord = null;
     }
 
+    final readByList = record.get<List<RecordModel>>('expand.read_by');
+
     return MessageDto(
       id: record.id,
       text: record.getStringValue('text'),
@@ -37,6 +47,10 @@ class MessageDto {
       attachment: record.getStringValue('attachment'),
       created: DateTime.parse(record.getStringValue('created')),
       sender: senderRecord != null ? UserDto.fromRecord(senderRecord) : null,
+      readBy: readByList.map((e) => UserDto.fromRecord(e)).toList(),
+      type: record.getStringValue('type'),
+      isDeleted: record.getBoolValue('is_deleted'),
+      replyToId: record.getStringValue('reply_to'),
     );
   }
 }

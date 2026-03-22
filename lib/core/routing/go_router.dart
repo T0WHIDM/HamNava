@@ -18,34 +18,32 @@ import 'package:pocketbase/pocketbase.dart';
 
 final appGlobalRouter = GoRouter(
   initialLocation: '/',
+  debugLogDiagnostics: true,
+
   refreshListenable: GoRouterRefreshStream(
     locator<PocketBase>().authStore.onChange,
   ),
-  debugLogDiagnostics: true,
+
   redirect: (context, state) {
     final bool isAuthenticated = locator<PocketBase>().authStore.isValid;
     final String currentPath = state.matchedLocation;
 
-    // بررسی می‌کنیم آیا کاربر در صفحات مربوط به احراز هویت است یا خیر
     final bool isAuthRoute =
         currentPath == '/loginScreen' || currentPath == '/RegisterScreen';
 
-    // ۱. اگر لاگین نیست و تو صفحات لاگین/رجیستر هم نیست -> بفرستش به لاگین
     if (!isAuthenticated && !isAuthRoute) {
       return '/';
     }
 
-    // ۲. اگر لاگین هست و داره میره تو صفحات لاگین/رجیستر -> بفرستش به خانه
     if (isAuthenticated && isAuthRoute) {
       return '/HomeScreen';
     }
 
-    // ۳. اگر لاگین هست و در مسیر '/' (لودینگ اولیه) گیر کرده -> بفرستش تو خانه
     if (isAuthenticated && currentPath == '/') {
       return '/';
     }
 
-    return null; // اجازه بده به مسیر خودش بره
+    return null;
   },
   routes: [
     GoRoute(

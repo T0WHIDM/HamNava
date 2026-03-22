@@ -36,6 +36,7 @@ final locator = GetIt.instance;
 Future<void> getItInit() async {
   final prefs = await SharedPreferences.getInstance();
 
+  //pocketBase
   final store = AsyncAuthStore(
     initial: prefs.getString('pb_auth'),
     save: (String data) async => await prefs.setString('pb_auth', data),
