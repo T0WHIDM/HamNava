@@ -5,8 +5,6 @@ import 'package:flutter_chat_room_app/domain/entity/user_entity.dart';
 abstract class IUserRepository {
   // ==================== User ====================
 
-  Future<Either<ApiException, UserEntity>> viewProfile(String userIdOrUsername);
-
   Future<Either<ApiException, List<UserEntity>>> searchUser(String query);
 
   Future<Either<ApiException, void>> updateProfile({
@@ -18,4 +16,6 @@ abstract class IUserRepository {
   });
 
   Future<Either<ApiException, void>> addFriend(String userId);
+
+  Future<Either<ApiException, List<UserEntity>>> friendsList(String userId);
 }

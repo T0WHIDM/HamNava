@@ -25,3 +25,12 @@ class AddFriendComplatedState extends UserState {
 
   AddFriendComplatedState(this.result);
 }
+
+// ---------------- friend list ----------------
+class FriendsListLoadingState extends UserState {}
+
+class FriendListSuccessState extends UserState {
+  final Either<ApiException, List<UserEntity>> result;
+
+  FriendListSuccessState(this.result);
+}

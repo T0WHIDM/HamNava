@@ -3,6 +3,7 @@ import 'package:flutter_chat_room_app/core/di/di.dart';
 import 'package:flutter_chat_room_app/core/utility/go_router_refresh_stream.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/authentication/auth_bloc.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/user/user_bloc.dart';
+import 'package:flutter_chat_room_app/presentation/bloc/user/user_event.dart';
 import 'package:flutter_chat_room_app/presentation/customWidget/navigation_bar.dart';
 import 'package:flutter_chat_room_app/presentation/screens/about_screen.dart';
 import 'package:flutter_chat_room_app/presentation/screens/chat_screen.dart';
@@ -98,7 +99,8 @@ final appGlobalRouter = GoRouter(
       path: '/UserSearchScreen',
       builder: (context, state) {
         return BlocProvider(
-          create: (context) => UserBloc(locator.get(), locator.get()),
+          create: (context) =>
+              UserBloc(locator.get(), locator.get(), locator.get()),
           child: const UserSearchScreen(),
         );
       },
@@ -142,7 +144,23 @@ final appGlobalRouter = GoRouter(
               path: '/FriendListScreen',
               name: FriendsListScreen.routeName,
               builder: (context, state) {
-                return const FriendsListScreen();
+                final userId = locator<PocketBase>().authStore.record!.id;
+
+                return BlocProvider(
+                  create: (context) {
+                    final bloc = UserBloc(
+                      locator.get(),
+                      locator.get(),
+                      locator.get(),
+                    );
+                    if (userId.isNotEmpty) {
+                      bloc.add(FriendListEvent(userId));
+                    }
+                    return bloc;
+                  },
+
+                  child: const FriendsListScreen(),
+                );
               },
             ),
           ],

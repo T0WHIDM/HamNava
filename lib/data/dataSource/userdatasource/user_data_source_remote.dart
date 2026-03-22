@@ -7,20 +7,6 @@ class UserDataSourceRemote extends IUserDataSource {
   final PocketBase pb;
   UserDataSourceRemote(this.pb);
 
-  @override
-  Future<UserDto> viewProfile(String userIdOrUsername) async {
-    try {
-      final record = await pb
-          .collection('users')
-          .getFirstListItem(
-            'id = "$userIdOrUsername" || userName = "$userIdOrUsername"',
-          );
-
-      return UserDto.fromRecord(record);
-    } catch (e) {
-      throw Exception('خطا در دریافت اطلاعات کاربر');
-    }
-  }
 
   @override
   Future<List<UserDto>> searchUser(String query) async {
@@ -75,6 +61,25 @@ class UserDataSourceRemote extends IUserDataSource {
       }
     } catch (e) {
       throw ApiException('خطا در اضافه کردن دوست');
+    }
+  }
+
+  @override
+  Future<List<UserDto>> friendsList(String userId) async {
+    try {
+      final record = await pb
+          .collection('users')
+          .getOne(userId, expand: 'friend');
+
+      final List<RecordModel> friendsRecord = record.get<List<RecordModel>>(
+        'expand.friend',
+      );
+
+      return friendsRecord.map((friendRecord) {
+        return UserDto.fromRecord(friendRecord);
+      }).toList();
+    } catch (e) {
+      throw ApiException('خطایی در نمایش لیست دوستان شما به وجود امده است');
     }
   }
 }

@@ -1,7 +1,6 @@
 import 'package:flutter_chat_room_app/data/dtos/user_dto.dart';
 
 abstract class IUserDataSource {
-  Future<UserDto> viewProfile(String userIdOrUsername);
 
   Future<List<UserDto>> searchUser(String query);
 
@@ -14,4 +13,6 @@ abstract class IUserDataSource {
   });
 
   Future<void> addFriend(String userId);
+
+  Future<List<UserDto>> friendsList(String userId);
 }

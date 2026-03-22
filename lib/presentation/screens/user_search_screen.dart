@@ -58,7 +58,7 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
                   SnackBar(
                     backgroundColor: Colors.red,
                     content: Text(
-                      failure.message, 
+                      failure.message,
                       textDirection: TextDirection.rtl,
                       style: const TextStyle(
                         fontFamily: 'CR',
@@ -124,15 +124,13 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
                           suffixIcon: BlocBuilder<UserBloc, UserState>(
                             buildWhen: (previous, current) =>
                                 current is UserSearchLoadingState ||
-                                current
-                                    is AddFriendLoadingState ||
+                                current is AddFriendLoadingState ||
                                 current is UserSearchComplatedsState ||
                                 current is AddFriendComplatedState,
 
                             builder: (context, state) {
                               if (state is UserSearchLoadingState ||
                                   state is AddFriendLoadingState) {
-                             
                                 return const Text('');
                               }
                               if (state is UserSearchLoadingState) {
@@ -171,7 +169,6 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
             Expanded(
               child: BlocBuilder<UserBloc, UserState>(
                 buildWhen: (previous, current) {
-                  // این بیلدر به استیت‌های افزودن دوست واکنشی نشان نخواهد داد
                   return current is! AddFriendLoadingState &&
                       current is! AddFriendComplatedState;
                 },

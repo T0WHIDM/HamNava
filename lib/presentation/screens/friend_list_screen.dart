@@ -1,60 +1,81 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_chat_room_app/core/di/di.dart';
+import 'package:flutter_chat_room_app/presentation/bloc/user/user_bloc.dart';
+import 'package:flutter_chat_room_app/presentation/bloc/user/user_event.dart';
+import 'package:flutter_chat_room_app/presentation/bloc/user/user_state.dart';
+import 'package:flutter_chat_room_app/presentation/screens/user_profile_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_chat_room_app/domain/entity/user_entity.dart';
+import 'package:pocketbase/pocketbase.dart';
 
-class FriendsListScreen extends StatelessWidget {
+class FriendsListScreen extends StatefulWidget {
   const FriendsListScreen({super.key});
 
   static String get routeName => 'FriendsListScreen';
 
   @override
-  Widget build(BuildContext context) {
-    final List<UserEntity> dummyFriends = [
-      UserEntity(
-        id: '1',
-        userName: 'ali_reza',
-        email: 'ali@test.com',
-        name: 'علی رضا',
-        friends: [],
-      ),UserEntity(
-        id: '1',
-        userName: 'sina',
-        email: 'ali@test.com',
-        name: 'سینا',
-        friends: [],
-      ),
-    ];
+  State<FriendsListScreen> createState() => _FriendsListScreenState();
+}
 
+class _FriendsListScreenState extends State<FriendsListScreen> {
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 15.0),
-          child: IconButton(
-            onPressed: () {
-              context.pop();
-            },
-            icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-          ),
-        ),
+
         title: const Text(
           'دوستان من',
           style: TextStyle(fontFamily: 'CR', color: Colors.black, fontSize: 20),
         ),
         centerTitle: true,
       ),
-      body: dummyFriends.isEmpty
-          ? _buildEmptyState()
-          : ListView.builder(
-              itemCount: dummyFriends.length,
-              padding: const EdgeInsets.all(16),
-              itemBuilder: (context, index) {
-                final friend = dummyFriends[index];
-                return _buildFriendCard(context, friend);
+      body: BlocBuilder<UserBloc, UserState>(
+        builder: (context, state) {
+          if (state is FriendsListLoadingState) {
+            return const Center(
+              child: CircularProgressIndicator(
+                color: Color.fromARGB(255, 14, 208, 211),
+              ),
+            );
+          }
+
+          if (state is FriendListSuccessState) {
+            return state.result.fold(
+              (failure) {
+                return Center(child: Text(failure.message));
               },
-            ),
+              (success) {
+                if (success.isEmpty) {
+                  return _buildEmptyState(context);
+                }
+
+                return RefreshIndicator(
+                  color: const Color.fromARGB(255, 14, 208, 211),
+                  onRefresh: () async {
+                    final userId = locator<PocketBase>().authStore.record!.id;
+                    context.read<UserBloc>().add(FriendListEvent(userId));
+                  },
+                  child: ListView.builder(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    itemCount: success.length,
+                    padding: const EdgeInsets.all(16),
+                    itemBuilder: (context, index) {
+                      final friend = success[index];
+                      return _buildFriendCard(context, friend);
+                    },
+                  ),
+                );
+              },
+            );
+          }
+
+          return _buildEmptyState(context);
+        },
+      ),
     );
   }
 
@@ -70,18 +91,33 @@ class FriendsListScreen extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 4.0),
         child: ListTile(
-          leading: CircleAvatar(
-            radius: 24,
-            backgroundColor: Colors.cyan.withValues(alpha: 0.2),
+          leading: InkWell(
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) {
+                    return UserProfileScreen(
+                      name: friend.name,
+                      email: friend.email,
+                      userName: friend.userName,
+                    );
+                  },
+                ),
+              );
+            },
+            child: CircleAvatar(
+              radius: 24,
+              backgroundColor: Colors.cyan.withValues(alpha: 0.2),
 
-            child: const Icon(Icons.person, color: Colors.cyan),
+              child: const Icon(Icons.person, color: Colors.cyan),
+            ),
           ),
           title: Text(
-            friend.userName,
-            style: const TextStyle(fontFamily: 'GB', fontSize: 16),
+            friend.name,
+            style: const TextStyle(fontFamily: 'cr', fontSize: 16),
           ),
           subtitle: Text(
-            friend.name.isNotEmpty ? friend.name : 'بدون نام',
+            '@${friend.userName}',
             style: const TextStyle(
               fontFamily: 'CR',
               fontSize: 13,
@@ -99,8 +135,7 @@ class FriendsListScreen extends StatelessWidget {
                 color: Colors.green,
                 size: 20,
               ),
-              onPressed: () {
-              },
+              onPressed: () {},
             ),
           ),
         ),
@@ -108,22 +143,34 @@ class FriendsListScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.people_outline, size: 80, color: Colors.grey[300]),
-          const SizedBox(height: 16),
-          Text(
-            'شما هنوز دوستی اضافه نکرده‌اید.',
-            style: TextStyle(
-              fontFamily: 'CR',
-              color: Colors.grey[500],
-              fontSize: 16,
-            ),
+  Widget _buildEmptyState(BuildContext context) {
+    return RefreshIndicator(
+      color: const Color.fromARGB(255, 14, 208, 211),
+      onRefresh: () async {
+        final userId = locator<PocketBase>().authStore.record!.id;
+        context.read<UserBloc>().add(FriendListEvent(userId));
+      },
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: Container(
+          height: MediaQuery.of(context).size.height * 0.7,
+          alignment: Alignment.center,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.people_outline, size: 80, color: Colors.grey[300]),
+              const SizedBox(height: 16),
+              Text(
+                'شما هنوز دوستی اضافه نکرده‌اید.',
+                style: TextStyle(
+                  fontFamily: 'CR',
+                  color: Colors.grey[500],
+                  fontSize: 16,
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

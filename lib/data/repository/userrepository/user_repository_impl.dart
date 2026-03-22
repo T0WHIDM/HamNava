@@ -7,23 +7,8 @@ import 'package:flutter_chat_room_app/domain/repository/user_repository.dart';
 
 class UserRepositoryImpl extends IUserRepository {
   final IUserDataSource dataSource;
-
   UserRepositoryImpl(this.dataSource);
 
-  @override
-  Future<Either<ApiException, UserEntity>> viewProfile(
-    String userIdOrUsername,
-  ) async {
-    try {
-      final userDto = await dataSource.viewProfile(userIdOrUsername);
-
-      final userEntity = UserMapper.toDomain(userDto);
-
-      return Right(userEntity);
-    } catch (e) {
-      return Left(ApiException('خطا در دریافت اطلاعات کاربر: '));
-    }
-  }
 
   @override
   Future<Either<ApiException, List<UserEntity>>> searchUser(
@@ -67,6 +52,20 @@ class UserRepositoryImpl extends IUserRepository {
       return right(null);
     } catch (e) {
       return left(ApiException('خطایی در افزودن دوست به وجود امده است'));
+    }
+  }
+
+  @override
+  Future<Either<ApiException, List<UserEntity>>> friendsList(
+    String userId,
+  ) async {
+    try {
+      final friendsListDto = await dataSource.friendsList(userId);
+
+      final userEntities = UserMapper.toDomainList(friendsListDto);
+      return right(userEntities);
+    } catch (e) {
+      throw ApiException('خطا در نمایش لیست دوستان شما');
     }
   }
 }
