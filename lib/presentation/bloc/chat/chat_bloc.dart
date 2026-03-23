@@ -22,7 +22,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     });
 
     on<LoadMessagesEvent>((event, emit) async {
-      emit(ChatLoadingState());
+      // emit(ChatLoadingState());
       final result = await _getMessageUseCase.call(event.chatId);
       emit(ChatMessagesResultState(result));
     });
@@ -33,6 +33,9 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         text: event.text,
       );
       emit(ChatMessageSentResultState(result));
+      if (result.isRight()) {
+        add(LoadMessagesEvent(event.chatId));
+      }
     });
   }
 }

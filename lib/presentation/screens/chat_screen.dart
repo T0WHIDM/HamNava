@@ -1,8 +1,15 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_chat_room_app/core/di/di.dart';
+import 'package:flutter_chat_room_app/domain/entity/message_entity.dart';
+import 'package:flutter_chat_room_app/presentation/bloc/chat/chat_bloc.dart';
+import 'package:flutter_chat_room_app/presentation/bloc/chat/chat_event.dart';
+import 'package:flutter_chat_room_app/presentation/bloc/chat/chat_state.dart';
 import 'package:flutter_chat_room_app/presentation/screens/user_profile_screen.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
+import 'package:pocketbase/pocketbase.dart';
 
 class ChatScreen extends StatefulWidget {
   final String friendId;
@@ -16,6 +23,17 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _messageController = TextEditingController();
+  String? _currentChatId;
+  late String myUserId;
+  List<MessageEntity> _messages = [];
+
+  @override
+  void initState() {
+    super.initState();
+
+    final record = locator<PocketBase>().authStore.record;
+    myUserId = record?.id ?? '';
+  }
 
   @override
   void dispose() {
@@ -27,76 +45,127 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xffF5F5F5),
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios),
-          onPressed: () {
-            context.pop();
-          },
-        ),
-        elevation: 0,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        title: Row(
-          children: [
-            InkWell(
-              onTap: () {
-                context.pushNamed(UserProfileScreen.routeName);
-              },
-              child: const CircleAvatar(
-                backgroundColor: Colors.grey,
-                child: Icon(
-                  FontAwesomeIcons.user,
-                  size: 20,
-                  color: Colors.white,
-                ),
+      appBar: _buildAppBar(context),
+      body: BlocConsumer<ChatBloc, ChatState>(
+        listener: (context, state) {
+          if (state is ChatInitializedResultState) {
+            state.result.fold(
+              (failure) => ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text("خطا در لود چت: ${failure.message}")),
               ),
-            ),
-            const SizedBox(width: 12),
-            const Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Towhid',
-                  style: TextStyle(fontFamily: 'GB', fontSize: 16),
-                ),
-                Text(
-                  'online',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Color.fromARGB(255, 6, 166, 11),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(onPressed: () {}, icon: const Icon(Icons.search)),
-          IconButton(onPressed: () {}, icon: const Icon(Icons.more_vert)),
-        ],
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView.builder(
-              reverse: true,
-              padding: const EdgeInsets.all(16),
-              itemCount: 10,
-              itemBuilder: (context, index) {
-                bool isMe = index % 2 == 1;
-                return _buildChatBubble(isMe, index);
+              (conversation) {
+                setState(() {
+                  _currentChatId =
+                      conversation.id; // آیدی چت اینجا ذخیره می‌شود
+                });
+                // بعد از گرفتن آیدی، پیام‌ها را لود کن
+                context.read<ChatBloc>().add(
+                  LoadMessagesEvent(conversation.id),
+                );
               },
-            ),
-          ),
+            );
+          }
+          if (state is ChatMessageSentResultState) {
+            state.result.fold(
+              (failure) {
+                // فقط اگر واقعاً شکست خورد خطا نشان بده
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text("خطا در ارسال پیام: ${failure.message}"),
+                  ),
+                );
+              },
+              (success) {
+                // اگر موفق بود، فیلد متن را خالی کن (نیازی به نشان دادن مسیج موفقیت نیست)
+                _messageController.clear();
+              },
+            );
+          }
+        },
+        builder: (context, state) {
+          // آپدیت کردن لیست محلی در صورت موفقیت
+          if (state is ChatMessagesResultState) {
+            state.result.fold((failure) => null, (messagesFromServer) {
+              _messages = messagesFromServer; // لیست را بروزرسانی کن
+            });
+          }
 
-          _buildMessageInput(),
-        ],
+          return Column(
+            children: [
+              Expanded(
+                child: _buildMessagesList(
+                  state,
+                ), // پاس دادن استیت برای مدیریت لودینگ/خالی بودن
+              ),
+              _buildMessageInput(),
+            ],
+          );
+        },
       ),
     );
   }
 
-  Widget _buildChatBubble(bool isMe, int index) {
+  // بخش لیست پیام‌ها با مدیریت Either
+  Widget _buildMessagesList(ChatState state) {
+    // اگر در حال لود اولیه هستیم و لیستی نداریم
+    if (state is ChatLoadingState && _messages.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    // اگر لیست خالی است
+    if (_messages.isEmpty) {
+      return buildEmptyState();
+    }
+
+    return ListView.builder(
+      reverse: true,
+      padding: const EdgeInsets.all(16),
+      itemCount: _messages.length,
+      itemBuilder: (context, index) {
+        final message = _messages[index];
+        bool isMe = message.sender.id == myUserId;
+        return _buildChatBubble(isMe, message.text ?? "");
+      },
+    );
+  }
+
+  AppBar _buildAppBar(BuildContext context) {
+    return AppBar(
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back_ios),
+        onPressed: () {
+          context.pop();
+        },
+      ),
+      elevation: 0,
+      backgroundColor: Colors.white,
+      foregroundColor: Colors.black,
+      title: Row(
+        children: [
+          InkWell(
+            onTap: () {
+              context.pushNamed(UserProfileScreen.routeName);
+            },
+            child: const CircleAvatar(
+              backgroundColor: Colors.grey,
+              child: Icon(FontAwesomeIcons.user, size: 20, color: Colors.white),
+            ),
+          ),
+          const SizedBox(width: 12),
+          const Text(
+            'Towhid', // بعدا می‌توانید نام کاربر را از دیتابیس بگیرید
+            style: TextStyle(fontFamily: 'GB', fontSize: 16),
+          ),
+        ],
+      ),
+      actions: [
+        IconButton(onPressed: () {}, icon: const Icon(Icons.search)),
+        IconButton(onPressed: () {}, icon: const Icon(Icons.more_vert)),
+      ],
+    );
+  }
+
+  Widget _buildChatBubble(bool isMe, String text) {
     return Align(
       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
@@ -122,7 +191,7 @@ class _ChatScreenState extends State<ChatScreen> {
           maxWidth: MediaQuery.of(context).size.width * 0.75,
         ),
         child: Text(
-          isMe ? "سلام، چطوری؟" : "ممنون، تو چطوری؟ برنامه چت چطور پیش میره؟",
+          text, // نمایش متن واقعی پیام
           style: TextStyle(
             fontFamily: 'CR',
             color: isMe ? Colors.black : Colors.black87,
@@ -167,7 +236,18 @@ class _ChatScreenState extends State<ChatScreen> {
                 ),
                 const SizedBox(width: 10),
                 InkWell(
-                  onTap: () {},
+                  onTap: () {
+                    // اتصال دکمه ارسال به بلاک
+                    if (_messageController.text.trim().isNotEmpty &&
+                        _currentChatId != null) {
+                      context.read<ChatBloc>().add(
+                        SendMessageEvent(
+                          chatId: _currentChatId!,
+                          text: _messageController.text.trim(),
+                        ),
+                      );
+                    }
+                  },
                   child: const CircleAvatar(
                     backgroundColor: Color.fromARGB(255, 14, 208, 211),
                     radius: 18,

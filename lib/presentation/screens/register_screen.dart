@@ -79,7 +79,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 children: [
                   const CircleAvatar(
                     backgroundColor: Colors.grey,
-                    radius: 78,
+                    radius: 54,
                     child: Icon(
                       FontAwesomeIcons.user,
                       size: 48,
@@ -87,11 +87,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                   ),
                   Positioned(
-                    left: 105,
-                    top: 105,
+                    left: 75,
+                    top: 75,
                     child: Container(
-                      width: 45,
-                      height: 45,
+                      width: 30,
+                      height: 30,
                       decoration: const BoxDecoration(
                         shape: BoxShape.circle,
                         color: Colors.blue,
@@ -99,7 +99,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       child: Center(
                         child: IconButton(
                           onPressed: () {},
-                          icon: const Icon(FontAwesomeIcons.pencil, size: 20),
+                          icon: const Icon(FontAwesomeIcons.pencil,size: 14,),
                         ),
                       ),
                     ),

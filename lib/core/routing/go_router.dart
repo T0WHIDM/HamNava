@@ -89,8 +89,8 @@ final appGlobalRouter = GoRouter(
       },
     ),
     GoRoute(
+      path: '/chatScreen/:friendId',
       name: ChatScreen.routeName,
-      path: '/chat/:friendId',
       builder: (context, state) {
         final friendId = state.pathParameters['friendId']!;
 
@@ -98,10 +98,11 @@ final appGlobalRouter = GoRouter(
           create: (context) {
             final bloc = ChatBloc(locator.get(), locator.get(), locator.get());
             if (friendId.isNotEmpty) {
-              context.read<ChatBloc>().add(ChatInitializeEvent(friendId));
+              bloc.add(ChatInitializeEvent(friendId));
             }
             return bloc;
           },
+
           child: ChatScreen(friendId),
         );
       },

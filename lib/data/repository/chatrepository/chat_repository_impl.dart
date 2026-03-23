@@ -36,7 +36,7 @@ class ChatRepositoryImpl extends IChatRepository {
       final dto = await dataSource.createOrGetPrivateChat(targetUserId);
       return Right(ConversationMapper.toDomain(dto));
     } catch (e) {
-      return Left(ApiException('خطا در شروع گفتگو: ${e.toString()}'));
+      return Left(ApiException('خطا در شروع گفتگو'));
     }
   }
 
@@ -99,7 +99,7 @@ class ChatRepositoryImpl extends IChatRepository {
       final entities = MessageMapper.toDomainList(dtos);
       return Right(entities);
     } catch (e) {
-      return Left(ApiException('خطا در دریافت پیام‌ها: ${e.toString()}'));
+      return Left(ApiException('خطا در دریافت پیام‌ها'));
     }
   }
 
@@ -133,7 +133,7 @@ class ChatRepositoryImpl extends IChatRepository {
       final dto = await dataSource.sendMessage(chatId: chatId, text: text);
       return Right(MessageMapper.toDomain(dto));
     } catch (e) {
-      return Left(ApiException('خطا در ارسال پیام: ${e.toString()}'));
+      return Left(ApiException('خطا در ارسال پیام'));
     }
   }
 

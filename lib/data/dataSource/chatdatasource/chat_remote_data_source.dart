@@ -154,14 +154,12 @@ class ChatRemoteDataSourceImpl implements IChatDatasource {
 
     pb.collection('messages').subscribe('*', (e) {
       if (e.action == 'create' && e.record != null) {
-        // فقط اگر پیام مربوط به همین چت بود آن را اضافه کن
         if (e.record!.getStringValue('chat_id') == chatId) {
           controller.add(MessageDto.fromRecord(e.record!));
         }
       }
     });
 
-    // بستن سابسکریپشن در صورت کنسل شدن استریم
     controller.onCancel = () {
       pb.collection('messages').unsubscribe('*');
       controller.close();

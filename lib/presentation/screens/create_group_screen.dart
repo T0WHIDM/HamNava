@@ -77,7 +77,6 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
               children: [
                 GestureDetector(
                   onTap: () {
-                    // TODO: باز کردن گالری
                   },
                   child: CircleAvatar(
                     radius: 35,
