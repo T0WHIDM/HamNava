@@ -1,12 +1,12 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:flutter_chat_room_app/presentation/screens/home_screen.dart';
 import 'package:flutter_chat_room_app/presentation/screens/user_profile_screen.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 
 class ChatScreen extends StatefulWidget {
-  const ChatScreen({super.key});
+  final String friendId;
+  const ChatScreen(this.friendId, {super.key});
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -31,7 +31,7 @@ class _ChatScreenState extends State<ChatScreen> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios),
           onPressed: () {
-            context.goNamed(HomeScreen.namedRoute);
+            context.pop();
           },
         ),
         elevation: 0,
@@ -39,28 +39,35 @@ class _ChatScreenState extends State<ChatScreen> {
         foregroundColor: Colors.black,
         title: Row(
           children: [
-            const CircleAvatar(
-              backgroundColor: Colors.grey,
-              child: Icon(FontAwesomeIcons.user, size: 20, color: Colors.white),
-            ),
-            const SizedBox(width: 12),
             InkWell(
               onTap: () {
                 context.pushNamed(UserProfileScreen.routeName);
               },
-              child: const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Towhid',
-                    style: TextStyle(fontFamily: 'GB', fontSize: 16),
-                  ),
-                  Text(
-                    'online',
-                    style: TextStyle(fontSize: 12, color: Color.fromARGB(255, 6, 166, 11)),
-                  ),
-                ],
+              child: const CircleAvatar(
+                backgroundColor: Colors.grey,
+                child: Icon(
+                  FontAwesomeIcons.user,
+                  size: 20,
+                  color: Colors.white,
+                ),
               ),
+            ),
+            const SizedBox(width: 12),
+            const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Towhid',
+                  style: TextStyle(fontFamily: 'GB', fontSize: 16),
+                ),
+                Text(
+                  'online',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Color.fromARGB(255, 6, 166, 11),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -172,6 +179,22 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.message, size: 80, color: Colors.grey[400]),
+          const SizedBox(height: 16),
+          Text(
+            'پیامی ندارید, برای شروع مکالمه پیام دهید',
+            style: TextStyle(fontFamily: 'CR', color: Colors.grey[400]),
+          ),
+        ],
       ),
     );
   }

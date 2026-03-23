@@ -2,6 +2,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_chat_room_app/core/di/di.dart';
 import 'package:flutter_chat_room_app/core/utility/go_router_refresh_stream.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/authentication/auth_bloc.dart';
+import 'package:flutter_chat_room_app/presentation/bloc/chat/chat_bloc.dart';
+import 'package:flutter_chat_room_app/presentation/bloc/chat/chat_event.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/user/user_bloc.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/user/user_event.dart';
 import 'package:flutter_chat_room_app/presentation/customWidget/navigation_bar.dart';
@@ -88,9 +90,20 @@ final appGlobalRouter = GoRouter(
     ),
     GoRoute(
       name: ChatScreen.routeName,
-      path: '/ChatScreen',
+      path: '/chat/:friendId',
       builder: (context, state) {
-        return const ChatScreen();
+        final friendId = state.pathParameters['friendId']!;
+
+        return BlocProvider(
+          create: (context) {
+            final bloc = ChatBloc(locator.get(), locator.get(), locator.get());
+            if (friendId.isNotEmpty) {
+              context.read<ChatBloc>().add(ChatInitializeEvent(friendId));
+            }
+            return bloc;
+          },
+          child: ChatScreen(friendId),
+        );
       },
     ),
 

@@ -4,6 +4,7 @@ import 'package:flutter_chat_room_app/core/di/di.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/user/user_bloc.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/user/user_event.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/user/user_state.dart';
+import 'package:flutter_chat_room_app/presentation/screens/chat_screen.dart';
 import 'package:flutter_chat_room_app/presentation/screens/user_profile_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_chat_room_app/domain/entity/user_entity.dart';
@@ -135,7 +136,12 @@ class _FriendsListScreenState extends State<FriendsListScreen> {
                 color: Colors.green,
                 size: 20,
               ),
-              onPressed: () {},
+              onPressed: () {
+                context.pushNamed(
+                  ChatScreen.routeName,
+                  pathParameters: {'friendId': friend.id},
+                );
+              },
             ),
           ),
         ),

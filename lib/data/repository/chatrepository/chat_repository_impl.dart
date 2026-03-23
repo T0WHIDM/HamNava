@@ -96,7 +96,7 @@ class ChatRepositoryImpl extends IChatRepository {
   }) async {
     try {
       final dtos = await dataSource.getMessages(chatId, page: page);
-      final entities = dtos.map((dto) => MessageMapper.toDomain(dto)).toList();
+      final entities = MessageMapper.toDomainList(dtos);
       return Right(entities);
     } catch (e) {
       return Left(ApiException('خطا در دریافت پیام‌ها: ${e.toString()}'));
