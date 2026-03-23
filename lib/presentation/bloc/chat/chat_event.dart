@@ -1,3 +1,5 @@
+import 'package:flutter_chat_room_app/domain/entity/message_entity.dart';
+
 abstract class ChatEvent {}
 
 class LoadMessagesEvent extends ChatEvent {
@@ -16,4 +18,14 @@ class SendMessageEvent extends ChatEvent {
 class ChatInitializeEvent extends ChatEvent {
   final String targetUserId;
   ChatInitializeEvent(this.targetUserId);
+}
+
+class ChatStartListeningEvent extends ChatEvent {
+  final String chatId;
+  ChatStartListeningEvent(this.chatId);
+}
+
+class ChatMessageReceivedFromStreamEvent extends ChatEvent {
+  final MessageEntity message;
+  ChatMessageReceivedFromStreamEvent(this.message);
 }

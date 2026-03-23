@@ -4,6 +4,7 @@ import 'package:pocketbase/pocketbase.dart';
 class MessageDto {
   final String id;
   final String text;
+  final String senderId;
   final UserDto? sender;
   final String chatId;
   final String? attachment;
@@ -16,6 +17,7 @@ class MessageDto {
   MessageDto({
     required this.id,
     required this.text,
+    required this.senderId,
     required this.sender,
     required this.chatId,
     this.attachment,
@@ -38,7 +40,12 @@ class MessageDto {
       senderRecord = null;
     }
 
-    final readByList = record.get<List<RecordModel>>('expand.read_by');
+    List<RecordModel> readByList = [];
+    try {
+      readByList = record.get<List<RecordModel>>('expand.read_by');
+    } catch (_) {
+      readByList = [];
+    }
 
     return MessageDto(
       id: record.id,
@@ -47,6 +54,7 @@ class MessageDto {
       attachment: record.getStringValue('attachment'),
       created: DateTime.parse(record.getStringValue('created')),
       sender: senderRecord != null ? UserDto.fromRecord(senderRecord) : null,
+      senderId: record.getStringValue('sender_id'),
       readBy: readByList.map((e) => UserDto.fromRecord(e)).toList(),
       type: record.getStringValue('type'),
       isDeleted: record.getBoolValue('is_deleted'),

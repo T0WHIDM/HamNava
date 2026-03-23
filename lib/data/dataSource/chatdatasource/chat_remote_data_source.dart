@@ -187,6 +187,9 @@ class ChatRemoteDataSourceImpl implements IChatDatasource {
 
       return MessageDto.fromRecord(record);
     } catch (e) {
+      print(
+        "Error in sendMessage: $e",
+      ); // این را اضافه کنید تا ارور واقعی را در کنسول ببینید
       throw ApiException('پیام ارسال نشد');
     }
   }

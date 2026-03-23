@@ -48,6 +48,7 @@ class _ChatScreenState extends State<ChatScreen> {
       appBar: _buildAppBar(context),
       body: BlocConsumer<ChatBloc, ChatState>(
         listener: (context, state) {
+          // ۱. لود اولیه چت روم
           if (state is ChatInitializedResultState) {
             state.result.fold(
               (failure) => ScaffoldMessenger.of(context).showSnackBar(
@@ -55,20 +56,41 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
               (conversation) {
                 setState(() {
-                  _currentChatId =
-                      conversation.id; // آیدی چت اینجا ذخیره می‌شود
+                  _currentChatId = conversation.id;
                 });
-                // بعد از گرفتن آیدی، پیام‌ها را لود کن
                 context.read<ChatBloc>().add(
                   LoadMessagesEvent(conversation.id),
                 );
               },
             );
           }
+
+          // ۲. دریافت لیست اولیه پیام‌ها (منتقل شده از builder به اینجا)
+          if (state is ChatMessagesResultState) {
+            state.result.fold(
+              (failure) => null,
+              (messagesFromServer) {
+                setState(() {
+                  // لیست اولیه را ست می‌کنیم
+                  _messages = List.from(messagesFromServer);
+                });
+              },
+            );
+          }
+
+          // ۳. دریافت پیام جدید به صورت Real-time از استریم
+          if (state is ChatNewMessageResultState) {
+            setState(() {
+              // چون ListView شما reverse: true است، پیام جدید باید به ایندکس صفر (ابتدای لیست) اضافه شود
+              // تا در پایین‌ترین قسمت صفحه نمایش داده شود.
+              _messages.insert(0, state.result);
+            });
+          }
+
+          // ۴. نتیجه ارسال پیام
           if (state is ChatMessageSentResultState) {
             state.result.fold(
               (failure) {
-                // فقط اگر واقعاً شکست خورد خطا نشان بده
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text("خطا در ارسال پیام: ${failure.message}"),
@@ -76,26 +98,17 @@ class _ChatScreenState extends State<ChatScreen> {
                 );
               },
               (success) {
-                // اگر موفق بود، فیلد متن را خالی کن (نیازی به نشان دادن مسیج موفقیت نیست)
+                // پاک کردن فیلد تکست پس از ارسال موفق
                 _messageController.clear();
               },
             );
           }
         },
         builder: (context, state) {
-          // آپدیت کردن لیست محلی در صورت موفقیت
-          if (state is ChatMessagesResultState) {
-            state.result.fold((failure) => null, (messagesFromServer) {
-              _messages = messagesFromServer; // لیست را بروزرسانی کن
-            });
-          }
-
           return Column(
             children: [
               Expanded(
-                child: _buildMessagesList(
-                  state,
-                ), // پاس دادن استیت برای مدیریت لودینگ/خالی بودن
+                child: _buildMessagesList(state),
               ),
               _buildMessageInput(),
             ],
@@ -105,7 +118,6 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  // بخش لیست پیام‌ها با مدیریت Either
   Widget _buildMessagesList(ChatState state) {
     // اگر در حال لود اولیه هستیم و لیستی نداریم
     if (state is ChatLoadingState && _messages.isEmpty) {
@@ -118,7 +130,7 @@ class _ChatScreenState extends State<ChatScreen> {
     }
 
     return ListView.builder(
-      reverse: true,
+      reverse: true, // نمایش از پایین به بالا
       padding: const EdgeInsets.all(16),
       itemCount: _messages.length,
       itemBuilder: (context, index) {
@@ -191,7 +203,7 @@ class _ChatScreenState extends State<ChatScreen> {
           maxWidth: MediaQuery.of(context).size.width * 0.75,
         ),
         child: Text(
-          text, // نمایش متن واقعی پیام
+          text,
           style: TextStyle(
             fontFamily: 'CR',
             color: isMe ? Colors.black : Colors.black87,
@@ -237,7 +249,6 @@ class _ChatScreenState extends State<ChatScreen> {
                 const SizedBox(width: 10),
                 InkWell(
                   onTap: () {
-                    // اتصال دکمه ارسال به بلاک
                     if (_messageController.text.trim().isNotEmpty &&
                         _currentChatId != null) {
                       context.read<ChatBloc>().add(

@@ -23,3 +23,9 @@ class ChatMessageSentResultState extends ChatState {
   final Either<ApiException, MessageEntity> result;
   ChatMessageSentResultState(this.result);
 }
+
+class ChatNewMessageResultState extends ChatState {
+  final MessageEntity result;
+
+  ChatNewMessageResultState(this.result);
+}

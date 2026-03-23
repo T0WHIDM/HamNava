@@ -14,10 +14,10 @@ class MessageMapper {
       sender: messageDto.sender != null
           ? UserMapper.toDomain(messageDto.sender!)
           : UserEntity(
-              id: '',
+              id: messageDto.senderId,
               userName: 'unknown_user',
               email: '',
-              name: 'Deleted Account',
+              name: 'شما',
               friends: [],
             ),
       isDeleted: messageDto.isDeleted,

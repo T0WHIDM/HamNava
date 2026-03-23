@@ -131,6 +131,8 @@ class ChatRepositoryImpl extends IChatRepository {
   }) async {
     try {
       final dto = await dataSource.sendMessage(chatId: chatId, text: text);
+      print(MessageMapper.toDomain(dto));
+
       return Right(MessageMapper.toDomain(dto));
     } catch (e) {
       return Left(ApiException('خطا در ارسال پیام'));
