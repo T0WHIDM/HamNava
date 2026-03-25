@@ -29,10 +29,10 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
         elevation: 0,
         leading: Padding(
           padding: const EdgeInsets.only(left: 20.0),
@@ -40,12 +40,12 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
             onPressed: () {
               context.goNamed(HomeScreen.namedRoute);
             },
-            icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+            icon: const Icon(Icons.arrow_back_ios),
           ),
         ),
         title: const Text(
           'جستجوی دوستان',
-          style: TextStyle(fontFamily: 'CR', color: Colors.black, fontSize: 20),
+          style: TextStyle(fontFamily: 'CR', fontSize: 20),
         ),
         centerTitle: true,
       ),
@@ -98,10 +98,14 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.05),
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.1)
+                          : Colors.black.withValues(alpha: 0.05),
                       borderRadius: BorderRadius.circular(15),
                       border: Border.all(
-                        color: Colors.black.withValues(alpha: 0.1),
+                        color: isDark
+                            ? Colors.white.withValues(alpha: 0.1)
+                            : Colors.black.withValues(alpha: 0.1),
                       ),
                     ),
                     child: Directionality(
@@ -185,7 +189,7 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
                   } else if (state is UserSearchComplatedsState) {
                     return state.result.fold(
                       (exception) => buildErrorWidget(exception.message),
-                      (users) => buildUserList(users),
+                      (users) => buildUserList(users, context),
                     );
                   }
                   return const SizedBox.shrink();
@@ -198,7 +202,7 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
     );
   }
 
-  Widget buildUserList(List<UserEntity> users) {
+  Widget buildUserList(List<UserEntity> users, BuildContext context) {
     if (users.isEmpty) {
       return const Center(
         child: Column(
@@ -227,7 +231,7 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
         return Card(
           margin: const EdgeInsets.only(bottom: 20),
           elevation: 3,
-          color: Colors.grey[50],
+          color: Theme.of(context).cardColor,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),

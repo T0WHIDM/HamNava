@@ -63,6 +63,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Directionality(
                   textDirection: TextDirection.rtl,
                   child: TextField(
+                    style: const TextStyle(color: Colors.black),
                     focusNode: _emailFocusNode,
                     controller: _usernameController,
                     decoration: InputDecoration(
@@ -73,6 +74,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
                         borderSide: const BorderSide(
+                          width: 2,
                           color: Color.fromARGB(255, 14, 208, 211),
                         ),
                       ),
@@ -99,6 +101,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Directionality(
                   textDirection: TextDirection.rtl,
                   child: TextField(
+                    style: const TextStyle(color: Colors.black),
                     focusNode: _passwordFocusNode,
                     obscureText: true,
                     controller: _passwordController,
@@ -110,6 +113,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
                         borderSide: const BorderSide(
+                          width: 2,
+
                           color: Color.fromARGB(255, 14, 208, 211),
                         ),
                       ),

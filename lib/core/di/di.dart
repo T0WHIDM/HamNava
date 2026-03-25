@@ -34,8 +34,12 @@ import 'package:shared_preferences/shared_preferences.dart'; // جدید
 final locator = GetIt.instance;
 
 Future<void> getItInit() async {
+  // sharedprefrences
   final prefs = await SharedPreferences.getInstance();
 
+  locator.registerSingleton<SharedPreferences>(prefs);
+
+  
   //pocketBase
   final store = AsyncAuthStore(
     initial: prefs.getString('pb_auth'),

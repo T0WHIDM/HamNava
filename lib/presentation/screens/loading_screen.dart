@@ -30,9 +30,12 @@ class _LoadingScreenState extends State<LoadingScreen> {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Center(child: SizedBox(
-            height: 300,
-            child: Image.asset('assets/images/hamnava.png'))),
+          Center(
+            child: SizedBox(
+              height: 300,
+              child: Image.asset('assets/images/hamnava.png'),
+            ),
+          ),
           const SpinKitPulsingGrid(
             color: Color.fromARGB(255, 14, 208, 211),
             size: 32,

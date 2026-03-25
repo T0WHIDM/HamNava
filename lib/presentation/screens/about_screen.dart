@@ -15,11 +15,11 @@ class _AboutScreenState extends State<AboutScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      // backgroundColor: Colors.white, -> حذف شد تا از تم بگیرد
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        // backgroundColor: Colors.white, -> حذف شد
+        // foregroundColor: Colors.black, -> حذف شد
         elevation: 0,
-        foregroundColor: Colors.black,
         title: const Text(
           'هم‌نوا',
           style: TextStyle(
@@ -35,16 +35,19 @@ class _AboutScreenState extends State<AboutScreen> {
           const SizedBox(height: 40),
 
           _buildLinkItem(
+            context: context, // کانتکست اضافه شد برای گرفتن رنگ
             icon: FontAwesomeIcons.telegram,
             title: 'تلکرام',
             onTap: () => MyUrlLuncher.launchLink('https://t.me/T0WHID'),
           ),
           _buildLinkItem(
+            context: context,
             icon: FontAwesomeIcons.github,
             title: 'سورس کد',
             onTap: () => MyUrlLuncher.launchLink('https://github.com/T0WHIDM'),
           ),
           _buildLinkItem(
+            context: context,
             icon: Icons.email,
             title: 'ایمیل',
             onTap: () =>
@@ -60,7 +63,7 @@ class _AboutScreenState extends State<AboutScreen> {
               style: TextStyle(
                 fontFamily: 'GB',
                 fontSize: 14,
-                color: Colors.grey,
+                color: Colors.grey, // خاکستری در هر دو تم خواناست
               ),
             ),
           ),
@@ -70,10 +73,14 @@ class _AboutScreenState extends State<AboutScreen> {
   }
 
   Widget _buildLinkItem({
+    required BuildContext context,
     required IconData icon,
     required String title,
     required VoidCallback onTap,
   }) {
+    // گرفتن رنگ آیکون و متن بر اساس تم فعلی
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 40.0, vertical: 12.0),
       child: InkWell(
@@ -85,7 +92,7 @@ class _AboutScreenState extends State<AboutScreen> {
             textDirection: TextDirection.rtl,
             child: Row(
               children: [
-                Icon(icon, size: 24, color: Colors.black87),
+                Icon(icon, size: 24, color: isDark ? Colors.white70 : Colors.black87),
                 const SizedBox(width: 20),
                 Text(
                   title,

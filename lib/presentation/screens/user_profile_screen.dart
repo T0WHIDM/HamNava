@@ -11,8 +11,9 @@ class UserProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.white,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -21,11 +22,11 @@ class UserProfileScreen extends StatelessWidget {
           padding: const EdgeInsets.only(left: 8.0),
           child: IconButton(
             onPressed: () => context.pop(),
-            icon: const CircleAvatar(
-              backgroundColor: Colors.white,
+            icon: CircleAvatar(
+              backgroundColor: isDark ? Colors.black54 : Colors.white70,
               child: Icon(
                 Icons.arrow_back_ios_new,
-                color: Colors.black,
+                color: isDark ? Colors.white : Colors.black,
                 size: 20,
               ),
             ),
@@ -90,7 +91,12 @@ class UserProfileScreen extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Column(
                 children: [
-                  _buildInfoTile(Icons.alternate_email, 'ایمیل', user.email),
+                  _buildInfoTile(
+                    Icons.alternate_email,
+                    'ایمیل',
+                    user.email,
+                    context,
+                  ),
                   const SizedBox(height: 30),
 
                   Row(
@@ -155,13 +161,20 @@ class UserProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoTile(IconData icon, String label, String value) {
+  Widget _buildInfoTile(
+    IconData icon,
+    String label,
+    String value,
+    BuildContext context,
+  ) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Icon(icon, color: Colors.black, size: 22),
+          Icon(icon, color: isDark ? Colors.white70 : Colors.black, size: 22),
           const SizedBox(width: 15),
           Expanded(
             child: Column(
@@ -169,19 +182,21 @@ class UserProfileScreen extends StatelessWidget {
               children: [
                 Text(
                   label,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'cr',
                     fontSize: 13,
-                    color: Color.fromARGB(255, 54, 53, 53),
+                    color: isDark
+                        ? Colors.grey[400]
+                        : const Color.fromARGB(255, 54, 53, 53),
                   ),
                 ),
                 const SizedBox(height: 5),
                 Text(
                   value,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'gb',
                     fontSize: 16,
-                    color: Colors.black87,
+                    color: isDark ? Colors.white : Colors.black87,
                   ),
                 ),
               ],

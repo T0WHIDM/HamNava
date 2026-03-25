@@ -23,14 +23,11 @@ class _FriendsListScreenState extends State<FriendsListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
         elevation: 0,
-
         title: const Text(
           'دوستان من',
-          style: TextStyle(fontFamily: 'CR', color: Colors.black, fontSize: 20),
+          style: TextStyle(fontFamily: 'CR', fontSize: 20),
         ),
         centerTitle: true,
       ),
@@ -84,11 +81,12 @@ class _FriendsListScreenState extends State<FriendsListScreen> {
     return Card(
       elevation: 3,
       margin: const EdgeInsets.only(bottom: 12),
-      color: Colors.grey[50],
+      color: Theme.of(context).cardColor,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(15),
         side: BorderSide(color: Colors.grey.withValues(alpha: 0.2), width: 1),
       ),
+
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 4.0),
         child: ListTile(

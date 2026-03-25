@@ -9,6 +9,8 @@ class MyBootomNavigationBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       extendBody: true,
       body: navigationShell,
@@ -26,9 +28,14 @@ class MyBootomNavigationBar extends StatelessWidget {
                   initialLocation: index == navigationShell.currentIndex,
                 );
               },
-              fixedColor: Colors.black,
+              fixedColor: isDark
+                  ? const Color.fromARGB(255, 14, 208, 211)
+                  : Colors.black,
+              unselectedItemColor: isDark ? Colors.white54 : Colors.black54,
               elevation: 0,
-              backgroundColor: const Color.fromARGB(30, 0, 0, 0),
+              backgroundColor: isDark
+                  ? Colors.white.withValues(alpha: 0.1)
+                  : Colors.black.withValues(alpha: 0.05),
               selectedFontSize: 14,
               iconSize: 24,
               unselectedFontSize: 10,

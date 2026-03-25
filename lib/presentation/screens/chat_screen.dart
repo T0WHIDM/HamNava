@@ -49,7 +49,6 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBody: true,
-      backgroundColor: const Color(0xffF5F5F5),
       appBar: _buildAppBar(context, widget.friend),
       body: BlocConsumer<ChatBloc, ChatState>(
         listener: (context, state) {
@@ -259,8 +258,6 @@ class _ChatScreenState extends State<ChatScreen> {
         },
       ),
       elevation: 0,
-      backgroundColor: Colors.white,
-      foregroundColor: Colors.black,
       title: Row(
         children: [
           InkWell(
@@ -283,13 +280,17 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Widget _buildChatBubble(bool isMe, String text) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Align(
       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 5),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
-          color: isMe ? const Color.fromARGB(255, 14, 208, 211) : Colors.white,
+          color: isMe
+              ? const Color.fromARGB(255, 14, 208, 211)
+              : (isDark ? Colors.grey[800] : Colors.white),
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(16),
             topRight: const Radius.circular(16),
@@ -311,7 +312,9 @@ class _ChatScreenState extends State<ChatScreen> {
           text,
           style: TextStyle(
             fontFamily: 'CR',
-            color: isMe ? Colors.black : Colors.black87,
+            color: isMe
+                ? Colors.black
+                : (isDark ? Colors.white : Colors.black87),
           ),
         ),
       ),
@@ -319,6 +322,8 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Widget _buildMessageInput() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(15, 10, 15, 25),
       child: ClipRRect(
@@ -328,9 +333,13 @@ class _ChatScreenState extends State<ChatScreen> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8),
             decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.1),
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.1)
+                  : Colors.black.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(32),
-              border: Border.all(color: Colors.grey.shade300),
+              border: Border.all(
+                color: isDark ? Colors.grey.shade700 : Colors.grey.shade300,
+              ),
             ),
             child: Row(
               children: [

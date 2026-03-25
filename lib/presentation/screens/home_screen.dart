@@ -1,5 +1,4 @@
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_chat_room_app/core/di/di.dart';
@@ -41,6 +40,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 6.0),
@@ -49,7 +50,6 @@ class _HomeScreenState extends State<HomeScreen> {
           onRefresh: () async {
             final userId = locator<PocketBase>().authStore.record!.id;
             context.read<ChatBloc>().add(GetChatListEvent(userId));
-
             await Future.delayed(const Duration(seconds: 1));
           },
           child: CustomScrollView(
@@ -88,18 +88,20 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12),
                         decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.05),
+                          color: isDark
+                              ? Colors.white.withValues(alpha: 0.1)
+                              : Colors.black.withValues(alpha: 0.05),
                           borderRadius: BorderRadius.circular(15),
                           border: Border.all(
-                            color: Colors.black.withValues(alpha: 0.1),
+                            color: isDark
+                                ? Colors.white.withValues(alpha: 0.1)
+                                : Colors.black.withValues(alpha: 0.1),
                           ),
                         ),
                         child: Directionality(
                           textDirection: TextDirection.rtl,
                           child: TextField(
-                            onChanged: (value) {
-                              if (value.isNotEmpty) {}
-                            },
+                            onChanged: (value) {},
                             decoration: InputDecoration(
                               hintText: 'جستجو در گفتگو ها ...',
                               hintStyle: const TextStyle(

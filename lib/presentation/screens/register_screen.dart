@@ -99,7 +99,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       child: Center(
                         child: IconButton(
                           onPressed: () {},
-                          icon: const Icon(FontAwesomeIcons.pencil,size: 14,),
+                          icon: const Icon(FontAwesomeIcons.pencil, size: 14),
                         ),
                       ),
                     ),
@@ -115,6 +115,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 child: Directionality(
                   textDirection: TextDirection.rtl,
                   child: TextField(
+                    style: const TextStyle(color: Colors.black),
+
                     focusNode: nameFocusNode,
                     controller: _nameController,
                     decoration: InputDecoration(
@@ -125,6 +127,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
                         borderSide: const BorderSide(
+                          width: 2,
                           color: Color.fromARGB(255, 14, 208, 211),
                         ),
                       ),
@@ -150,6 +153,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 child: Directionality(
                   textDirection: TextDirection.rtl,
                   child: TextField(
+                    style: const TextStyle(color: Colors.black),
+
                     focusNode: userNameFocusNode,
                     controller: _userNameController,
                     decoration: InputDecoration(
@@ -160,6 +165,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
                         borderSide: const BorderSide(
+                          width: 2,
                           color: Color.fromARGB(255, 14, 208, 211),
                         ),
                       ),
@@ -186,6 +192,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 child: Directionality(
                   textDirection: TextDirection.rtl,
                   child: TextField(
+                    style: const TextStyle(color: Colors.black),
+
                     focusNode: emailFocusNode,
                     controller: _emailController,
                     decoration: InputDecoration(
@@ -196,6 +204,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
                         borderSide: const BorderSide(
+                          width: 2,
                           color: Color.fromARGB(255, 14, 208, 211),
                         ),
                       ),
@@ -221,6 +230,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 child: Directionality(
                   textDirection: TextDirection.rtl,
                   child: TextField(
+                    style: const TextStyle(color: Colors.black),
+
                     focusNode: passwordFocusNode,
                     obscureText: true,
                     controller: _passwordController,
@@ -232,6 +243,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
                         borderSide: const BorderSide(
+                          width: 2,
                           color: Color.fromARGB(255, 14, 208, 211),
                         ),
                       ),
@@ -257,6 +269,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 child: Directionality(
                   textDirection: TextDirection.rtl,
                   child: TextField(
+                    style: const TextStyle(color: Colors.black),
+
                     focusNode: passwordConfirmFocusNode,
                     obscureText: true,
                     controller: _passwordConfirmController,
@@ -268,6 +282,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
                         borderSide: const BorderSide(
+                          width: 2,
                           color: Color.fromARGB(255, 14, 208, 211),
                         ),
                       ),

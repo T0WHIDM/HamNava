@@ -88,9 +88,9 @@ class ChatListItem extends StatelessWidget {
                   children: [
                     const CircleAvatar(
                       radius: 25,
-                      backgroundColor: Colors.cyan,
+                      backgroundColor: Color.fromARGB(255, 14, 208, 211),
                       child: Center(
-                        child: Icon(FontAwesomeIcons.user, color: Colors.white),
+                        child: Icon(FontAwesomeIcons.user, color: Colors.black),
                       ),
                     ),
                     const SizedBox(width: 15),

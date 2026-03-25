@@ -4,6 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/authentication/auth_bloc.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/authentication/auth_event.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/authentication/auth_state.dart';
+import 'package:flutter_chat_room_app/presentation/bloc/theme/theme_bloc.dart';
+import 'package:flutter_chat_room_app/presentation/bloc/theme/theme_event.dart';
 import 'package:flutter_chat_room_app/presentation/screens/about_screen.dart';
 import 'package:flutter_chat_room_app/presentation/screens/login_screen.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -23,20 +25,24 @@ class SettingScreen extends StatefulWidget {
 class _SettingScreenState extends State<SettingScreen> {
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final containerColor = isDark
+        ? Colors.white.withValues(alpha: 0.1)
+        : Colors.black.withValues(alpha: 0.05);
+
     return Scaffold(
-      backgroundColor: Colors.white,
       body: SingleChildScrollView(
         child: Column(
           children: [
             const SizedBox(height: 100),
-            const Center(
+            Center(
               child: CircleAvatar(
-                backgroundColor: Colors.grey,
+                backgroundColor: isDark ? Colors.grey[800] : Colors.grey[300],
                 radius: 64,
                 child: Icon(
                   FontAwesomeIcons.user,
                   size: 48,
-                  color: Colors.black,
+                  color: isDark ? Colors.white70 : Colors.black87,
                 ),
               ),
             ),
@@ -61,7 +67,7 @@ class _SettingScreenState extends State<SettingScreen> {
                           width: 155,
                           height: 70,
                           decoration: BoxDecoration(
-                            color: Colors.black.withValues(alpha: .05),
+                            color: containerColor,
                             borderRadius: const BorderRadius.all(
                               Radius.circular(16),
                             ),
@@ -89,7 +95,7 @@ class _SettingScreenState extends State<SettingScreen> {
                           width: 155,
                           height: 70,
                           decoration: BoxDecoration(
-                            color: Colors.black.withValues(alpha: .05),
+                            color: containerColor,
                             borderRadius: const BorderRadius.all(
                               Radius.circular(16),
                             ),
@@ -121,15 +127,61 @@ class _SettingScreenState extends State<SettingScreen> {
                   filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: .05),
+                      color: containerColor,
                       borderRadius: const BorderRadius.all(Radius.circular(16)),
                     ),
                     child: Column(
                       children: [
-                        _buildSettingItem(
-                          icon: FontAwesomeIcons.moon,
-                          title: 'دارک مود',
-                          onTap: () {},
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            right: 16.0,
+                            top: 16,
+                            bottom: 16,
+                          ),
+                          child: Directionality(
+                            textDirection: TextDirection.rtl,
+                            child: Row(
+                              children: [
+                                Icon(
+                                  isDark
+                                      ? Icons.light_mode_outlined
+                                      : Icons.dark_mode_outlined,
+                                  size: 24,
+                                  color: isDark
+                                      ? const Color.fromARGB(255, 235, 177, 2)
+                                      : Colors.black,
+                                ),
+                                const SizedBox(width: 20),
+                                Text(
+                                  isDark ? 'لایت مود' : 'دارک مود',
+                                  style: const TextStyle(
+                                    fontFamily: 'CR',
+                                    fontSize: 16,
+                                  ),
+                                ),
+                                const Spacer(),
+                                Transform.scale(
+                                  scale: 0.6,
+                                  child: SizedBox(
+                                    child: Switch(
+                                      activeThumbColor: const Color.fromARGB(
+                                        255,
+                                        14,
+                                        208,
+                                        211,
+                                      ),
+                                      value: isDark,
+                                      onChanged: (value) {
+                                        context.read<ThemeBloc>().add(
+                                          ToggleThemeEvent(),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                         _buildSettingItem(
                           icon: FontAwesomeIcons.shareNodes,
