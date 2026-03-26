@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dartz/dartz.dart';
 import 'package:flutter_chat_room_app/core/exception/api_exeption.dart';
 import 'package:flutter_chat_room_app/data/dataSource/authdatasource/auth_data_source.dart';
@@ -39,6 +41,7 @@ class AuthRepositoryImpl implements IAuthenticationRepository {
     String email,
     String password,
     String passwordConfirm,
+    File? avatarFile,
   ) async {
     try {
       await dataSource.register(
@@ -47,14 +50,11 @@ class AuthRepositoryImpl implements IAuthenticationRepository {
         email,
         password,
         passwordConfirm,
+        avatarFile,
       );
-      return await login(userName, password);
+      return const Right(null); 
     } on ApiException catch (e) {
-      return Left(ApiException(e.toString()));
-    } catch (e) {
-      return Left(ApiException('خطای غیرمنتظره در ثبت‌نام'));
+      return Left(e);
     }
   }
-
-
 }

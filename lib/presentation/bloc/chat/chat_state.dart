@@ -24,10 +24,10 @@ class ChatMessageSentResultState extends ChatState {
   ChatMessageSentResultState(this.result);
 }
 
-class ChatNewMessageResultState extends ChatState {
+class ChatNewMessageRealTimeState extends ChatState {
   final MessageEntity result;
 
-  ChatNewMessageResultState(this.result);
+  ChatNewMessageRealTimeState(this.result);
 }
 
 class ChatMessageUpdatedRealtimeState extends ChatState {

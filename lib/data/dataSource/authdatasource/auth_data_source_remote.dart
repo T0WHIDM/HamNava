@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter_chat_room_app/core/exception/api_exeption.dart';
 import 'package:flutter_chat_room_app/data/dataSource/authdatasource/auth_data_source.dart';
+import 'package:http/http.dart' as http;
 import 'package:pocketbase/pocketbase.dart';
 
 class AuthDataSourceRemote extends IAuthDataSource {
@@ -28,28 +31,27 @@ class AuthDataSourceRemote extends IAuthDataSource {
     String email,
     String password,
     String passwordConfirm,
+    File? avatarFile,
   ) async {
     try {
       final body = <String, dynamic>{
-        "email": email,
-        "userName": userName,
-        "name": name,
-        "password": password,
-        "passwordConfirm": passwordConfirm,
-        "emailVisibility": true, 
+        'username': userName,
+        'email': email,
+        'password': password,
+        'passwordConfirm': passwordConfirm,
+        'name': name,
       };
 
-      await pb.collection('users').create(body: body);
-    } on ClientException catch (e) {
-      final errorData = e.response['data'];
-
-      if (errorData != null && errorData['username'] != null) {
-        throw ApiException("این نام کاربری قبلاً توسط شخص دیگری رزرو شده است.");
-      } else if (errorData != null && errorData['email'] != null) {
-        throw ApiException("این ایمیل قبلاً در سیستم ثبت شده است.");
+      List<http.MultipartFile> files = [];
+      if (avatarFile != null) {
+        files.add(await http.MultipartFile.fromPath('avatar', avatarFile.path));
       }
 
-      throw e.response['message'];
+      await pb.collection('users').create(body: body, files: files);
+    } on ClientException catch (e) {
+      throw ApiException(e.response['message'] ?? 'خطا در ارتباط با سرور');
+    } catch (e) {
+      throw ApiException('خطای نامشخص در ثبت نام');
     }
   }
 }

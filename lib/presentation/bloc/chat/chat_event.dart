@@ -20,11 +20,6 @@ class ChatInitializeEvent extends ChatEvent {
   ChatInitializeEvent(this.targetUserId);
 }
 
-class ChatStartListeningEvent extends ChatEvent {
-  final String chatId;
-  ChatStartListeningEvent(this.chatId);
-}
-
 class ChatMessageReceivedFromStreamEvent extends ChatEvent {
   final String action;
   final MessageEntity message;

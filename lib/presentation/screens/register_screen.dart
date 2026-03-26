@@ -1,3 +1,4 @@
+import 'dart:io'; 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/authentication/auth_bloc.dart';
@@ -7,6 +8,7 @@ import 'package:flutter_chat_room_app/presentation/screens/home_screen.dart';
 import 'package:flutter_chat_room_app/presentation/screens/login_screen.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart'; // برای انتخاب عکس
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -30,6 +32,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final FocusNode emailFocusNode = FocusNode();
   final FocusNode passwordFocusNode = FocusNode();
   final FocusNode passwordConfirmFocusNode = FocusNode();
+
+  // متغیر برای نگه‌داری فایل عکس انتخاب شده
+  File? _selectedAvatar;
 
   @override
   void initState() {
@@ -66,6 +71,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
     super.dispose();
   }
 
+  // تابع انتخاب عکس از گالری
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      setState(() {
+        _selectedAvatar = File(pickedFile.path);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -77,14 +94,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
             children: [
               Stack(
                 children: [
-                  const CircleAvatar(
+                  CircleAvatar(
                     backgroundColor: Colors.grey,
                     radius: 54,
-                    child: Icon(
-                      FontAwesomeIcons.user,
-                      size: 48,
-                      color: Colors.black,
-                    ),
+                    // اگر عکس انتخاب شده بود آن را نشان بده
+                    backgroundImage: _selectedAvatar != null
+                        ? FileImage(_selectedAvatar!)
+                        : null,
+                    // در غیر این صورت آیکون پیش‌فرض را نشان بده
+                    child: _selectedAvatar == null
+                        ? const Icon(
+                            FontAwesomeIcons.user,
+                            size: 48,
+                            color: Colors.black,
+                          )
+                        : null,
                   ),
                   Positioned(
                     left: 75,
@@ -98,7 +122,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       child: Center(
                         child: IconButton(
-                          onPressed: () {},
+                          onPressed: _pickImage, 
                           icon: const Icon(FontAwesomeIcons.pencil, size: 14),
                         ),
                       ),
@@ -116,7 +140,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   textDirection: TextDirection.rtl,
                   child: TextField(
                     style: const TextStyle(color: Colors.black),
-
                     focusNode: nameFocusNode,
                     controller: _nameController,
                     decoration: InputDecoration(
@@ -154,7 +177,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   textDirection: TextDirection.rtl,
                   child: TextField(
                     style: const TextStyle(color: Colors.black),
-
                     focusNode: userNameFocusNode,
                     controller: _userNameController,
                     decoration: InputDecoration(
@@ -193,7 +215,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   textDirection: TextDirection.rtl,
                   child: TextField(
                     style: const TextStyle(color: Colors.black),
-
                     focusNode: emailFocusNode,
                     controller: _emailController,
                     decoration: InputDecoration(
@@ -231,7 +252,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   textDirection: TextDirection.rtl,
                   child: TextField(
                     style: const TextStyle(color: Colors.black),
-
                     focusNode: passwordFocusNode,
                     obscureText: true,
                     controller: _passwordController,
@@ -270,7 +290,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   textDirection: TextDirection.rtl,
                   child: TextField(
                     style: const TextStyle(color: Colors.black),
-
                     focusNode: passwordConfirmFocusNode,
                     obscureText: true,
                     controller: _passwordConfirmController,
@@ -431,6 +450,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             email,
                             password,
                             passwordConfirm,
+                            _selectedAvatar, 
                           ),
                         );
                       } else {

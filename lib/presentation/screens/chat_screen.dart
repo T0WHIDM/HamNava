@@ -112,7 +112,8 @@ class _ChatScreenState extends State<ChatScreen> {
             );
           }
 
-          if (state is ChatNewMessageResultState) {
+          //دریافت پیام ریل تایم
+          if (state is ChatNewMessageRealTimeState) {
             setState(() {
               if (!_messages.any((m) => m.id == state.result.id)) {
                 _messages.insert(0, state.result);
@@ -120,6 +121,7 @@ class _ChatScreenState extends State<ChatScreen> {
             });
           }
 
+          //ادیت پیام ریل تایم
           if (state is ChatMessageUpdatedRealtimeState) {
             setState(() {
               final index = _messages.indexWhere(
@@ -131,12 +133,14 @@ class _ChatScreenState extends State<ChatScreen> {
             });
           }
 
+          //دلیت پیام ریل تایم
           if (state is ChatMessageDeletedRealtimeState) {
             setState(() {
               _messages.removeWhere((m) => m.id == state.messageId);
             });
           }
 
+          //دلیت پیام
           if (state is DeleteMessageSuccessState) {
             state.result.fold((failure) {
               context.read<ChatBloc>().add(LoadMessagesEvent(_currentChatId!));
@@ -152,6 +156,7 @@ class _ChatScreenState extends State<ChatScreen> {
             }, (success) {});
           }
 
+          //ادیت پیام
           if (state is EditMessageSuccessState) {
             state.result.fold((failure) {
               ScaffoldMessenger.of(context).showSnackBar(
