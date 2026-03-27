@@ -23,6 +23,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   FocusNode searchFocusNode = FocusNode();
+  String searchQuery = '';
 
   @override
   void initState() {
@@ -101,7 +102,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: Directionality(
                           textDirection: TextDirection.rtl,
                           child: TextField(
-                            onChanged: (value) {},
+                            onChanged: (value) {
+                              setState(() {
+                                searchQuery = value;
+                              });
+                            },
                             decoration: InputDecoration(
                               hintText: 'جستجو در گفتگو ها ...',
                               hintStyle: const TextStyle(
@@ -146,13 +151,28 @@ class _HomeScreenState extends State<HomeScreen> {
                         );
                       },
                       (success) {
-                        if (success.isEmpty) {
+                        final filteredList = success.where((chat) {
+                          if (searchQuery.isEmpty) {
+                            return true;
+                          }
+
+                          final chatName = (chat.participants.last.name)
+                              .toLowerCase();
+                          final searchLower = searchQuery.toLowerCase();
+
+                          return chatName.contains(searchLower);
+                        }).toList();
+
+                        if (filteredList.isEmpty) {
                           return SliverFillRemaining(
-                            child: _buildEmptyState(context),
+                            child: _buildEmptyState(
+                              context,
+                              isSearchEmpty: searchQuery.isNotEmpty,
+                            ),
                           );
                         }
 
-                        return ChatListItem(success);
+                        return ChatListItem(filteredList);
                       },
                     );
                   }
@@ -160,6 +180,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   return const SliverToBoxAdapter(child: SizedBox.shrink());
                 },
               ),
+
               const SliverPadding(padding: EdgeInsets.only(top: 120)),
             ],
           ),
@@ -168,7 +189,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildEmptyState(BuildContext context) {
+  Widget _buildEmptyState(BuildContext context, {bool isSearchEmpty = false}) {
     return SingleChildScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
       child: Container(
@@ -177,13 +198,19 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.people_outline, size: 80, color: Colors.grey[300]),
+            Icon(
+              isSearchEmpty ? Icons.search_off : Icons.chat_bubble_outline,
+              size: 80,
+              color: isSearchEmpty ? Colors.redAccent : Colors.grey,
+            ),
             const SizedBox(height: 16),
             Text(
-              'شما هنوز گفتگویی ندارید',
+              isSearchEmpty
+                  ? 'گفتگویی با این نام پیدا نشد'
+                  : 'شما هنوز گفتگویی ندارید',
               style: TextStyle(
                 fontFamily: 'CR',
-                color: Colors.grey[500],
+                color: isSearchEmpty ? Colors.redAccent : Colors.grey,
                 fontSize: 16,
               ),
             ),

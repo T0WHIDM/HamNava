@@ -75,19 +75,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           newName,
         ),
       );
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          duration: Duration(seconds: 1),
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.green,
-          content: Text(
-            textDirection: TextDirection.rtl,
-            'در حال ذخیره اطلاعات ...',
-            style: TextStyle(fontFamily: 'cr'),
-          ),
-        ),
-      );
     }
   }
 
@@ -97,7 +84,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        // ... (کدهای AppBar شما بدون تغییر)
         title: const Text(
           'ویرایش پروفایل',
           style: TextStyle(fontFamily: 'cr', fontSize: 20),
@@ -108,40 +94,35 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           onPressed: () => context.pop(),
         ),
       ),
-      // 1. کل بدنه را در BlocListener قرار می‌دهیم
       body: BlocListener<UserBloc, UserState>(
         listener: (context, state) {
           if (state is UpdateProfileInfoSuccessState) {
-            // بررسی می‌کنیم که آیا عملیات موفق بود یا نه
             state.update.fold(
-              // اگر خطا بود (Left)
               (failure) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     behavior: SnackBarBehavior.floating,
                     backgroundColor: Colors.red,
                     content: Text(
-                      failure.message, // نمایش پیام خطا از سرور
+                      failure.message,
                       textDirection: TextDirection.rtl,
                       style: const TextStyle(fontFamily: 'cr'),
                     ),
                   ),
                 );
               },
-              // اگر موفقیت‌آمیز بود (Right)
               (updatedUser) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     behavior: SnackBarBehavior.floating,
                     backgroundColor: Colors.green,
                     content: Text(
-                      'پروفایل با موفقیت به‌روزرسانی شد.',
+                      'پروفایل با موفقیت به‌روزرسانی شد',
                       textDirection: TextDirection.rtl,
                       style: TextStyle(fontFamily: 'cr'),
                     ),
                   ),
                 );
-                // بعد از موفقیت، به صفحه قبل برمی‌گردیم
                 context.pop();
               },
             );
@@ -154,7 +135,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // ... تمام TextFormField های شما بدون تغییر اینجا قرار می‌گیرند ...
                 Directionality(
                   textDirection: TextDirection.rtl,
                   child: TextFormField(
@@ -276,10 +256,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 ),
                 const SizedBox(height: 32),
 
-                // 2. BlocBuilder حالا فقط مسئول نمایش دکمه یا لودینگ است
                 BlocBuilder<UserBloc, UserState>(
                   builder: (context, state) {
-                    // اگر در حال آپدیت بودیم، لودینگ نشان بده
                     if (state is UpdateProfileInfoLoadingState) {
                       return const Center(
                         child: CircularProgressIndicator(
@@ -288,7 +266,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       );
                     }
 
-                    // در غیر این صورت، دکمه را نشان بده
                     return ElevatedButton(
                       onPressed: _saveProfile,
                       style: ElevatedButton.styleFrom(

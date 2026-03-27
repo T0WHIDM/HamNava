@@ -156,10 +156,8 @@ final appGlobalRouter = GoRouter(
     ),
     GoRoute(
       name: EditProfileScreen.routeNmae,
-      path: '/editProfile',
-      // 👈 بخش redirect را کاملا پاک کنید
+      path: '/EditProfileScreen',
       builder: (context, state) {
-        // ۱. اگر اطلاعات وجود داشت، صفحه به درستی ساخته می‌شود
         if (state.extra is UserEntity) {
           final user = state.extra as UserEntity;
 
@@ -175,23 +173,16 @@ final appGlobalRouter = GoRouter(
           );
         }
 
-        // ۲. اگر به خاطر رفرش شدن دیتابیس extra خالی شد:
-        // این دستور بلافاصله کاربر را به صورت امن به صفحه قبل برمی‌گرداند
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (context.mounted) {
             if (context.canPop()) {
               context.pop();
             } else {
-              // اگر به هر دلیلی pop کار نکرد، مستقیما بفرست به مسیر اصلی تنظیمات
-              context.goNamed(
-                'setting',
-              ); // 👈 نام روت تنظیمات خود را اینجا بنویسید (اگر متفاوت است)
+              context.goNamed(SettingScreen.routeName);
             }
           }
         });
 
-        // ۳. در آن کسری از ثانیه، به جای یک صفحه کاملا خالی سفید یا سیاه،
-        // یک لودینگ زیبا نشان می‌دهیم تا تجربه کاربری بهتری داشته باشد
         return const Scaffold(body: Center(child: CircularProgressIndicator()));
       },
     ),
