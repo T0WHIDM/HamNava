@@ -26,10 +26,20 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _messageController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+  bool _showScrollToBottom = false;
   String? _currentChatId;
   late String myUserId;
   List<MessageEntity> _messages = [];
   bool _isLoading = true;
+
+  void _scrollToButton() {
+    _scrollController.animateTo(
+      _scrollController.position.minScrollExtent,
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeOut,
+    );
+  }
 
   @override
   void initState() {
@@ -37,17 +47,45 @@ class _ChatScreenState extends State<ChatScreen> {
 
     final record = locator<PocketBase>().authStore.record;
     myUserId = record?.id ?? '';
+
+    _scrollController.addListener(() {
+      if (_scrollController.offset > 200) {
+        if (!_showScrollToBottom) {
+          setState(() {
+            _showScrollToBottom = true;
+          });
+        }
+      } else {
+        if (_showScrollToBottom) {
+          setState(() {
+            _showScrollToBottom = false;
+          });
+        }
+      }
+    });
   }
 
   @override
   void dispose() {
     _messageController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: _showScrollToBottom
+          ? Padding(
+              padding: const EdgeInsets.only(bottom: 80),
+              child: FloatingActionButton.small(
+                backgroundColor: Colors.white,
+                foregroundColor: Colors.black87,
+                onPressed: _scrollToButton,
+                child: const Icon(Icons.keyboard_arrow_down),
+              ),
+            )
+          : null,
       extendBody: true,
       appBar: _buildAppBar(context, widget.friend),
       body: BlocConsumer<ChatBloc, ChatState>(
@@ -195,6 +233,7 @@ class _ChatScreenState extends State<ChatScreen> {
       return buildEmptyState();
     }
     return ListView.builder(
+      controller: _scrollController,
       physics: const BouncingScrollPhysics(),
       reverse: true,
       padding: const EdgeInsets.all(16),
