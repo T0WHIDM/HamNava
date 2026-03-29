@@ -23,13 +23,11 @@ class _ChatListItemState extends State<ChatListItem> {
   @override
   void initState() {
     super.initState();
-    // کپی کردن مقادیر لیست اصلی درون لیست محلی
     _localChatList = List.from(widget.chatList);
   }
 
-  // اگر لیست از بیرون آپدیت شد، لیست محلی را هم آپدیت می‌کنیم
   @override
-  void didUpdateWidget(covariant ChatListItem oldWidget) {
+  void didUpdateWidget(ChatListItem oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.chatList != oldWidget.chatList) {
       _localChatList = List.from(widget.chatList);
@@ -39,7 +37,6 @@ class _ChatListItemState extends State<ChatListItem> {
   @override
   Widget build(BuildContext context) {
     if (_localChatList.isEmpty) {
-      // از لیست محلی استفاده می‌کنیم
       return SliverFillRemaining(
         hasScrollBody: false,
         child: Center(
@@ -71,7 +68,7 @@ class _ChatListItemState extends State<ChatListItem> {
         context,
         index,
       ) {
-        final chat = _localChatList[index]; // از لیست محلی استفاده می‌کنیم
+        final chat = _localChatList[index];
         final myUserId = locator<PocketBase>().authStore.record?.id ?? '';
 
         final friendUserEntity = chat.participants
@@ -108,7 +105,6 @@ class _ChatListItemState extends State<ChatListItem> {
                 duration: Duration(seconds: 1),
               ),
             );
-            
           },
 
           child: Padding(
