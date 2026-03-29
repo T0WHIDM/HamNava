@@ -16,6 +16,7 @@ import 'package:flutter_chat_room_app/presentation/screens/create_group_screen.d
 import 'package:flutter_chat_room_app/presentation/screens/edit_profile_screen.dart';
 import 'package:flutter_chat_room_app/presentation/screens/friend_list_screen.dart';
 import 'package:flutter_chat_room_app/presentation/screens/group_chat_screen.dart';
+import 'package:flutter_chat_room_app/presentation/screens/group_info.dart';
 import 'package:flutter_chat_room_app/presentation/screens/home_screen.dart';
 import 'package:flutter_chat_room_app/presentation/screens/loading_screen.dart';
 import 'package:flutter_chat_room_app/presentation/screens/login_screen.dart';
@@ -56,6 +57,7 @@ final appGlobalRouter = GoRouter(
     return null;
   },
   routes: [
+    //loading
     GoRoute(
       name: LoadingScreen.routeName,
       path: '/',
@@ -63,6 +65,8 @@ final appGlobalRouter = GoRouter(
         return const LoadingScreen();
       },
     ),
+
+    //login
     GoRoute(
       name: LoginScreen.namedRoute,
       path: '/loginScreen',
@@ -74,6 +78,8 @@ final appGlobalRouter = GoRouter(
         );
       },
     ),
+
+    //register
     GoRoute(
       name: RegisterScreen.namedRoute,
       path: '/RegisterScreen',
@@ -85,6 +91,8 @@ final appGlobalRouter = GoRouter(
         );
       },
     ),
+
+    //about
     GoRoute(
       name: AboutScreen.routeName,
       path: '/AboutScreen',
@@ -92,6 +100,8 @@ final appGlobalRouter = GoRouter(
         return const AboutScreen();
       },
     ),
+
+    //chat
     GoRoute(
       path: '/chatScreen/:friendId',
       name: ChatScreen.routeName,
@@ -122,6 +132,8 @@ final appGlobalRouter = GoRouter(
         );
       },
     ),
+
+    //userSearch
     GoRoute(
       name: UserSearchScreen.routeName,
       path: '/UserSearchScreen',
@@ -138,6 +150,8 @@ final appGlobalRouter = GoRouter(
         );
       },
     ),
+
+    //userProfile
     GoRoute(
       name: UserProfileScreen.routeName,
       path: '/UserProfileScreen',
@@ -147,6 +161,8 @@ final appGlobalRouter = GoRouter(
         return UserProfileScreen(user);
       },
     ),
+
+    //createGroup
     GoRoute(
       path: '/CreateGroup',
       name: CreateGroupScreen.routeName,
@@ -189,6 +205,8 @@ final appGlobalRouter = GoRouter(
         );
       },
     ),
+
+    //editProfile
     GoRoute(
       name: EditProfileScreen.routeNmae,
       path: '/EditProfileScreen',
@@ -221,6 +239,8 @@ final appGlobalRouter = GoRouter(
         return const Scaffold(body: Center(child: CircularProgressIndicator()));
       },
     ),
+
+    //groupChatScreen
     GoRoute(
       path: '/GroupChatScreen',
       name: GroupChatScreen.routeName,
@@ -242,11 +262,22 @@ final appGlobalRouter = GoRouter(
         );
       },
     ),
+
+    //groupInfoScreen
+    GoRoute(
+      path: '/GroupInfoScreen',
+      name: GroupInfoScreen.routeName,
+      builder: (context, state) {
+        final conversation = state.extra as ConversationEntity;
+        return GroupInfoScreen(conversation: conversation);
+      },
+    ),
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) {
         return MyBootomNavigationBar(navigationShell: navigationShell);
       },
       branches: [
+        //home
         StatefulShellBranch(
           routes: [
             GoRoute(
@@ -279,6 +310,8 @@ final appGlobalRouter = GoRouter(
             ),
           ],
         ),
+
+        //friendList
         StatefulShellBranch(
           routes: [
             GoRoute(
@@ -308,6 +341,8 @@ final appGlobalRouter = GoRouter(
             ),
           ],
         ),
+
+        //setting
         StatefulShellBranch(
           routes: [
             GoRoute(

@@ -7,6 +7,7 @@ import 'package:flutter_chat_room_app/domain/entity/message_entity.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/chat/chat_bloc.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/chat/chat_event.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/chat/chat_state.dart';
+import 'package:flutter_chat_room_app/presentation/screens/group_info.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pocketbase/pocketbase.dart';
@@ -220,43 +221,51 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
         icon: const Icon(Icons.arrow_back_ios),
         onPressed: () => context.pop(),
       ),
-      title: Row(
-        children: [
-          CircleAvatar(
-            backgroundColor: const Color.fromARGB(
-              255,
-              14,
-              208,
-              211,
-            ).withValues(alpha: 0.2),
-            child: const Icon(
-              Icons.group,
-              color: Color.fromARGB(255, 14, 208, 211),
+      title: InkWell(
+        onTap: () {
+          context.pushNamed(
+            GroupInfoScreen.routeName,
+            extra: widget.conversation, 
+          );
+        },
+        child: Row(
+          children: [
+            CircleAvatar(
+              backgroundColor: const Color.fromARGB(
+                255,
+                14,
+                208,
+                211,
+              ).withValues(alpha: 0.2),
+              child: const Icon(
+                Icons.group,
+                color: Color.fromARGB(255, 14, 208, 211),
+              ),
             ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  widget.conversation.name ?? 'گروه',
-                  style: const TextStyle(fontFamily: 'GB', fontSize: 16),
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Text(
-                  '${widget.conversation.participants.length} نفر',
-                  style: const TextStyle(
-                    fontFamily: 'CR',
-                    fontSize: 12,
-                    color: Colors.grey,
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    widget.conversation.name ?? 'گروه',
+                    style: const TextStyle(fontFamily: 'GB', fontSize: 16),
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-              ],
+                  Text(
+                    '${widget.conversation.participants.length} نفر',
+                    style: const TextStyle(
+                      fontFamily: 'CR',
+                      fontSize: 12,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -276,7 +285,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     return ListView.builder(
       controller: _scrollController,
       physics: const BouncingScrollPhysics(),
-      reverse: true, 
+      reverse: true,
       padding: const EdgeInsets.all(16),
       itemCount: _messages.length,
       itemBuilder: (context, index) {

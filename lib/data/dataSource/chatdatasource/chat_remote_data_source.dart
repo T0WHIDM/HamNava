@@ -27,7 +27,7 @@ class ChatRemoteDataSourceImpl implements IChatDatasource {
         "name": chatName,
         "is_group": true,
         "participants": finalParticipants,
-        "admin": myUserId,
+        "admin": [myUserId],
       };
 
       final record = await pb
@@ -135,7 +135,7 @@ class ChatRemoteDataSourceImpl implements IChatDatasource {
             page: 1,
             perPage: 50,
             sort: '-updated',
-            expand: 'participants,last_message',
+            expand: 'participants,last_message,admin',
             filter: 'participants ~ "$myUserId"',
           );
 

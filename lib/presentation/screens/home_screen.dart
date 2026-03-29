@@ -2,11 +2,13 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_chat_room_app/core/di/di.dart';
+import 'package:flutter_chat_room_app/domain/entity/conversation_entity.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/chat/chat_bloc.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/chat/chat_event.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/chat/chat_state.dart';
 import 'package:flutter_chat_room_app/presentation/customWidget/chat_list_item.dart';
 import 'package:flutter_chat_room_app/presentation/screens/create_group_screen.dart';
+import 'package:flutter_chat_room_app/presentation/screens/group_chat_screen.dart';
 import 'package:flutter_chat_room_app/presentation/screens/user_search_screen.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
@@ -71,18 +73,26 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 actions: [
                   IconButton(
-                    onPressed: () {
-                      context.pushNamed(CreateGroupScreen.routeName).then((
-                        value,
-                      ) {
-                        final userId =
-                            locator<PocketBase>().authStore.record!.id;
+                    onPressed: () async {
+                      final result = await context.pushNamed(
+                        CreateGroupScreen.routeName,
+                      );
+
+                      if (result != null && result is ConversationEntity) {
                         if (context.mounted) {
+                          final userId =
+                              locator<PocketBase>().authStore.record!.id;
+
                           context.read<ChatBloc>().add(
                             GetChatListEvent(userId),
                           );
+
+                          context.pushNamed(
+                            GroupChatScreen.routeName,
+                            extra: result,
+                          );
                         }
-                      });
+                      }
                     },
                     icon: const Icon(FontAwesomeIcons.userGroup, size: 20),
                   ),
@@ -193,6 +203,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   return const SliverToBoxAdapter(child: SizedBox.shrink());
                 },
               ),
+              const SliverPadding(padding: EdgeInsetsGeometry.only(top: 120)),
             ],
           ),
         ),

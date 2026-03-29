@@ -132,22 +132,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                 );
               },
               (conversation) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text(
-                      'گروه با موفقیت ساخته شد!',
-                      style: TextStyle(fontFamily: 'cr'),
-                    ),
-                    backgroundColor: Colors.green,
-                  ),
-                );
-
-                context.read<ChatBloc>().add(GetChatListEvent(myUsrId));
-
-                context.pushReplacementNamed(
-                  'GroupChatScreen',
-                  extra: conversation,
-                );
+                context.pop(conversation);
               },
             );
           }
