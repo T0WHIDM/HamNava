@@ -25,6 +25,30 @@ packages:
       url: "https://pub.tarazerp.ir"
     source: hosted
     version: "2.1.2"
+  cached_network_image:
+    dependency: "direct main"
+    description:
+      name: cached_network_image
+      sha256: ec6d0cefc417945bf6586bfc89216d13f17e0e0c6f9c3068ba8720102b40bdd8
+      url: "https://pub.tarazerp.ir"
+    source: hosted
+    version: "3.4.1"
+  cached_network_image_platform_interface:
+    dependency: transitive
+    description:
+      name: cached_network_image_platform_interface
+      sha256: "44f1d7afdd26406eaaf55762be844faa648b369529a3469b94864a3334167964"
+      url: "https://pub.tarazerp.ir"
+    source: hosted
+    version: "4.1.1"
+  cached_network_image_web:
+    dependency: transitive
+    description:
+      name: cached_network_image_web
+      sha256: "1efdecdd91c9e49924506f019bb81ba70acaf4b5d13b31f7985e58bd3cf34a64"
+      url: "https://pub.tarazerp.ir"
+    source: hosted
+    version: "1.3.1"
   characters:
     dependency: transitive
     description:
@@ -129,6 +153,38 @@ packages:
       url: "https://pub.tarazerp.ir"
     source: hosted
     version: "7.0.1"
+  file_selector_linux:
+    dependency: transitive
+    description:
+      name: file_selector_linux
+      sha256: d06c531133e34f1e742fe602fafedbd9d455adc6047d943df7f640b963c4014d
+      url: "https://pub.tarazerp.ir"
+    source: hosted
+    version: "0.9.4"
+  file_selector_macos:
+    dependency: transitive
+    description:
+      name: file_selector_macos
+      sha256: "96923f6f693fabab6d951d98f371865593d65594e4236e0bfe377980ecdee29d"
+      url: "https://pub.tarazerp.ir"
+    source: hosted
+    version: "0.9.5"
+  file_selector_platform_interface:
+    dependency: transitive
+    description:
+      name: file_selector_platform_interface
+      sha256: c22a421d423bcb73bc179c4f283564a493899035203e87829f95e2a3abf1cc27
+      url: "https://pub.tarazerp.ir"
+    source: hosted
+    version: "2.7.0"
+  file_selector_windows:
+    dependency: transitive
+    description:
+      name: file_selector_windows
+      sha256: b369a51d97858cf6eadcd746b17f9b9dc74d2199af5780770d7291dd3fa9f533
+      url: "https://pub.tarazerp.ir"
+    source: hosted
+    version: "0.9.3+5"
   fixnum:
     dependency: transitive
     description:
@@ -150,6 +206,14 @@ packages:
       url: "https://pub.tarazerp.ir"
     source: hosted
     version: "7.3.3"
+  flutter_cache_manager:
+    dependency: transitive
+    description:
+      name: flutter_cache_manager
+      sha256: c11c78ea1b542c50808e7b150e5f6bf4df74f714ca8b1a9cbc86855259340e59
+      url: "https://pub.tarazerp.ir"
+    source: hosted
+    version: "3.4.1"
   flutter_lints:
     dependency: "direct dev"
     description:
@@ -158,6 +222,14 @@ packages:
       url: "https://pub.tarazerp.ir"
     source: hosted
     version: "6.0.0"
+  flutter_plugin_android_lifecycle:
+    dependency: transitive
+    description:
+      name: flutter_plugin_android_lifecycle
+      sha256: "38d1c268de9097ff59cf0e844ac38759fc78f76836d37edad06fa21e182055a0"
+      url: "https://pub.tarazerp.ir"
+    source: hosted
+    version: "2.0.34"
   flutter_spinkit:
     dependency: "direct main"
     description:
@@ -232,6 +304,70 @@ packages:
       url: "https://pub.tarazerp.ir"
     source: hosted
     version: "4.1.2"
+  image_picker:
+    dependency: "direct main"
+    description:
+      name: image_picker
+      sha256: c625a93735e214dbde67bb20279b0d3e81bda639a582e1f6a7f683d048c73568
+      url: "https://pub.tarazerp.ir"
+    source: hosted
+    version: "1.2.1"
+  image_picker_android:
+    dependency: transitive
+    description:
+      name: image_picker_android
+      sha256: "9eae0cbd672549dacc18df855c2a23782afe4854ada5190b7d63b30ee0b0d3fd"
+      url: "https://pub.tarazerp.ir"
+    source: hosted
+    version: "0.8.13+15"
+  image_picker_for_web:
+    dependency: transitive
+    description:
+      name: image_picker_for_web
+      sha256: f7bfc56dc64d2458407d1707f98621d57a1982b1a198b01780fdf93bc556d897
+      url: "https://pub.tarazerp.ir"
+    source: hosted
+    version: "3.1.1"
+  image_picker_ios:
+    dependency: transitive
+    description:
+      name: image_picker_ios
+      sha256: b9c4a438a9ff4f60808c9cf0039b93a42bb6c2211ef6ebb647394b2b3fa84588
+      url: "https://pub.tarazerp.ir"
+    source: hosted
+    version: "0.8.13+6"
+  image_picker_linux:
+    dependency: transitive
+    description:
+      name: image_picker_linux
+      sha256: "6373fc2fea231c1e18d17e3d1812d4e07a799cf5f5e4a55b5242569073186596"
+      url: "https://pub.tarazerp.ir"
+    source: hosted
+    version: "0.2.2"
+  image_picker_macos:
+    dependency: transitive
+    description:
+      name: image_picker_macos
+      sha256: aa9f73393fe3489ff5480ddd2d30eebaebf846a6e761f3078a1d8c00d311b360
+      url: "https://pub.tarazerp.ir"
+    source: hosted
+    version: "0.2.2+1"
+  image_picker_platform_interface:
+    dependency: transitive
+    description:
+      name: image_picker_platform_interface
+      sha256: df99cae750269af572c36488e118c4c0c21722645599fe6d70c810467e25d168
+      url: "https://pub.tarazerp.ir"
+    source: hosted
+    version: "2.11.1"
+  image_picker_windows:
+    dependency: transitive
+    description:
+      name: image_picker_windows
+      sha256: b5fa4441d37dc9ceb197da8f21c0573c2ab04917732d0f848da960f9693cf7dd
+      url: "https://pub.tarazerp.ir"
+    source: hosted
+    version: "0.2.2"
   json_annotation:
     dependency: transitive
     description:
@@ -320,6 +456,14 @@ packages:
       url: "https://pub.tarazerp.ir"
     source: hosted
     version: "1.0.0"
+  octo_image:
+    dependency: transitive
+    description:
+      name: octo_image
+      sha256: ca17a717b88a18212559d324e9ac97cad0ac4a1d33df703f7387c83161e0ff14
+      url: "https://pub.tarazerp.ir"
+    source: hosted
+    version: "2.1.0"
   path:
     dependency: transitive
     description:
@@ -408,6 +552,14 @@ packages:
       url: "https://pub.tarazerp.ir"
     source: hosted
     version: "6.1.5+1"
+  rxdart:
+    dependency: transitive
+    description:
+      name: rxdart
+      sha256: "826d1a876ef3c6f4e72150a7082deab84104ef26a74921d0d735259b381ded3a"
+      url: "https://pub.tarazerp.ir"
+    source: hosted
+    version: "0.28.0"
   share_plus:
     dependency: "direct main"
     description:
@@ -493,6 +645,46 @@ packages:
       url: "https://pub.tarazerp.ir"
     source: hosted
     version: "1.10.2"
+  sqflite:
+    dependency: transitive
+    description:
+      name: sqflite
+      sha256: "5401f4dccc3a570e3ef91ab1ff4aab8b823b03188995b305abbc7190e5a8569a"
+      url: "https://pub.tarazerp.ir"
+    source: hosted
+    version: "2.4.2"
+  sqflite_android:
+    dependency: transitive
+    description:
+      name: sqflite_android
+      sha256: "881e28efdcc9950fd8e9bb42713dcf1103e62a2e7168f23c9338d82db13dec40"
+      url: "https://pub.tarazerp.ir"
+    source: hosted
+    version: "2.4.2+3"
+  sqflite_common:
+    dependency: transitive
+    description:
+      name: sqflite_common
+      sha256: "6ba36b4bd65f739747c9e1c8ab56ee7fa134e173b6c276c96b5f15de85aad194"
+      url: "https://pub.tarazerp.ir"
+    source: hosted
+    version: "2.5.6"
+  sqflite_darwin:
+    dependency: transitive
+    description:
+      name: sqflite_darwin
+      sha256: "4012e14adb62857e2b22740ef1fdbc7b73752c68faf410dd0489046a58da4f6c"
+      url: "https://pub.tarazerp.ir"
+    source: hosted
+    version: "2.4.2"
+  sqflite_platform_interface:
+    dependency: transitive
+    description:
+      name: sqflite_platform_interface
+      sha256: d03fbb6f47930a6397eba1304ef61190a2919b6f8f43f94a6f1ffe13a8697dfa
+      url: "https://pub.tarazerp.ir"
+    source: hosted
+    version: "2.4.0"
   stack_trace:
     dependency: transitive
     description:
@@ -517,6 +709,14 @@ packages:
       url: "https://pub.tarazerp.ir"
     source: hosted
     version: "1.4.1"
+  synchronized:
+    dependency: transitive
+    description:
+      name: synchronized
+      sha256: "6ae936b1b38013ed81b7cff046e95b79baccd6f20f6ea76a9c431c98b018ce62"
+      url: "https://pub.tarazerp.ir"
+    source: hosted
+    version: "3.4.0"
   term_glyph:
     dependency: transitive
     description:
