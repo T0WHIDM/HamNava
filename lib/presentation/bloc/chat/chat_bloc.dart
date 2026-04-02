@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_chat_room_app/core/di/di.dart';
+import 'package:flutter_chat_room_app/domain/usecase/chat/add_friend_to_group_use_case.dart';
 import 'package:flutter_chat_room_app/domain/usecase/chat/create_group_use_case.dart';
 import 'package:flutter_chat_room_app/domain/usecase/chat/delete_chat_use_case.dart';
 import 'package:flutter_chat_room_app/domain/usecase/chat/delete_message_use_case.dart';
@@ -24,6 +25,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   final EditMessageUseCase _editMessageUseCase;
   final DeleteChatUseCase _deleteChatUseCase;
   final CreateGroupUseCase _createGroupUseCase;
+  final AddFriendToGroupUseCase _addFriendToGroupUseCase;
 
   StreamSubscription? _messageSubscription;
 
@@ -37,6 +39,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     this._editMessageUseCase,
     this._deleteChatUseCase,
     this._createGroupUseCase,
+    this._addFriendToGroupUseCase,
   ) : super(ChatInitialState()) {
     on<ChatInitializeEvent>((event, emit) async {
       emit(ChatLoadingState());
@@ -126,6 +129,17 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
       final myUserId = locator<PocketBase>().authStore.record?.id ?? '';
       add(GetChatListEvent(myUserId));
+    });
+
+    on<AddFriendToGroupEvent>((event, emit) async {
+      emit(ChatLoadingState());
+
+      var result = await _addFriendToGroupUseCase.call(
+        event.userId,
+        event.chatId,
+      );
+
+      emit(AddFriendToGroupSuccessState(result));
     });
   }
 

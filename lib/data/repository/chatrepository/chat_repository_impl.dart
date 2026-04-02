@@ -136,4 +136,17 @@ class ChatRepositoryImpl extends IChatRepository {
       return Left(ApiException('خطا در ارسال پیام'));
     }
   }
+
+  @override
+  Future<Either<ApiException, ConversationEntity>> addFriendToGroup(
+    String userId,
+    String chatId,
+  ) async {
+    try {
+      final dto = await dataSource.addFriendToGroup(userId, chatId);
+      return right(ConversationMapper.toDomain(dto));
+    } catch (e) {
+      return left(ApiException('خطا در اضافه کردن عضو به گروه'));
+    }
+  }
 }

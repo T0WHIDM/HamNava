@@ -122,6 +122,7 @@ final appGlobalRouter = GoRouter(
               locator.get(),
               locator.get(),
               locator.get(),
+              locator.get(),
             );
             if (friendId.isNotEmpty) {
               bloc.add(ChatInitializeEvent(friendId));
@@ -173,6 +174,7 @@ final appGlobalRouter = GoRouter(
           providers: [
             BlocProvider(
               create: (context) => ChatBloc(
+                locator.get(),
                 locator.get(),
                 locator.get(),
                 locator.get(),
@@ -257,6 +259,7 @@ final appGlobalRouter = GoRouter(
             locator.get(),
             locator.get(),
             locator.get(),
+            locator.get(),
           ),
           child: GroupChatScreen(conversation: conversation),
         );
@@ -269,7 +272,43 @@ final appGlobalRouter = GoRouter(
       name: GroupInfoScreen.routeName,
       builder: (context, state) {
         final conversation = state.extra as ConversationEntity;
-        return GroupInfoScreen(conversation: conversation);
+
+        final userId = locator<PocketBase>().authStore.record!.id;
+
+        return MultiBlocProvider(
+          providers: [
+            BlocProvider(
+              create: (context) {
+                final bloc = UserBloc(
+                  locator.get(),
+                  locator.get(),
+                  locator.get(),
+                  locator.get(),
+                  updateProfileUseCase: locator.get(),
+                );
+                if (userId.isNotEmpty) {
+                  bloc.add(FriendListEvent(userId));
+                }
+                return bloc;
+              },
+            ),
+            BlocProvider(
+              create: (context) => ChatBloc(
+                locator.get(),
+                locator.get(),
+                locator.get(),
+                locator.get(),
+                locator.get(),
+                locator.get(),
+                locator.get(),
+                locator.get(),
+                locator.get(),
+                locator.get(),
+              ),
+            ),
+          ],
+          child: GroupInfoScreen(conversation: conversation),
+        );
       },
     ),
     StatefulShellRoute.indexedStack(
@@ -289,6 +328,7 @@ final appGlobalRouter = GoRouter(
                 return BlocProvider(
                   create: (context) {
                     final bloc = ChatBloc(
+                      locator.get(),
                       locator.get(),
                       locator.get(),
                       locator.get(),

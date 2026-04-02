@@ -63,3 +63,10 @@ class CreateGroupChatEvent extends ChatEvent {
 
   CreateGroupChatEvent({required this.chatName, required this.participants});
 }
+
+class AddFriendToGroupEvent extends ChatEvent {
+  final String chatId;
+  final String userId;
+
+  AddFriendToGroupEvent(this.chatId, this.userId);
+}

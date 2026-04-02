@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/authentication/auth_bloc.dart';
@@ -22,6 +23,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
+  // متغیر برای مدیریت نمایش/مخفی کردن رمز عبور
+  bool _isPasswordObscured = true;
+
   @override
   void dispose() {
     _usernameController.dispose();
@@ -31,254 +35,326 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // تشخیص حالت دارک مود
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    // پالت رنگی پریمیوم
+    final bgColor = isDark ? const Color(0xFF000000) : const Color(0xFFF2F2F7);
+    final cardColor = isDark ? const Color(0xFF1C1C1E) : Colors.white;
+    final primaryColor = const Color(0xFF0ED0D3);
+    final textColor = isDark ? Colors.white : Colors.black87;
+    final hintColor = isDark ? Colors.grey[500] : Colors.grey[400];
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: bgColor,
       body: Center(
         child: SingleChildScrollView(
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SizedBox(
-                  height: 300,
-                  child: Image.asset('assets/images/hamnava.png'),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 44.0,
-                    vertical: 22.0,
-                  ),
-                  child: Directionality(
-                    textDirection: TextDirection.rtl,
-                    child: TextFormField(
-                      style: const TextStyle(color: Colors.black),
-                      controller: _usernameController,
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'لطفاً ایمیل خود را وارد کنید';
-                        }
-                        final bool isEmailValid = RegExp(
-                          r"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$",
-                        ).hasMatch(value);
-                        if (!isEmailValid) {
-                          return 'لطفاً یک ایمیل معتبر وارد کنید';
-                        }
-                        return null;
-                      },
-                      decoration: InputDecoration(
-                        enabledBorder: const OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(16)),
-                          borderSide: BorderSide(color: Colors.black, width: 2),
+          physics: const BouncingScrollPhysics(),
+          child: SafeArea(
+            child: Form(
+              key: _formKey,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        color: primaryColor.withOpacity(0.15),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Center(
+                        child: Icon(
+                          CupertinoIcons.chat_bubble_2_fill,
+                          size: 40,
+                          color: primaryColor,
                         ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: const BorderSide(
-                            width: 2,
-                            color: Color.fromARGB(255, 14, 208, 211),
-                          ),
-                        ),
-                        errorBorder: const OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(16)),
-                          borderSide: BorderSide(color: Colors.red, width: 2),
-                        ),
-                        focusedErrorBorder: const OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(16)),
-                          borderSide: BorderSide(color: Colors.red, width: 2),
-                        ),
-                        label: const Text('ایمیل'),
-                        labelStyle: WidgetStateTextStyle.resolveWith((
-                          Set<WidgetState> states,
-                        ) {
-                          Color labelColor = Colors.black;
-                          if (states.contains(WidgetState.error)) {
-                            labelColor = Colors.red;
-                          } else if (states.contains(WidgetState.focused)) {
-                            labelColor = const Color.fromARGB(
-                              255,
-                              14,
-                              208,
-                              211,
-                            );
-                          }
-                          return TextStyle(fontFamily: 'CR', color: labelColor);
-                        }),
-                        floatingLabelStyle: WidgetStateTextStyle.resolveWith((
-                          Set<WidgetState> states,
-                        ) {
-                          Color labelColor = Colors.black;
-                          if (states.contains(WidgetState.error)) {
-                            labelColor = Colors.red;
-                          } else if (states.contains(WidgetState.focused)) {
-                            labelColor = const Color.fromARGB(
-                              255,
-                              14,
-                              208,
-                              211,
-                            );
-                          }
-                          return TextStyle(fontFamily: 'CR', color: labelColor);
-                        }),
                       ),
                     ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 44.0,
-                    vertical: 22.0,
-                  ),
-                  child: Directionality(
-                    textDirection: TextDirection.rtl,
-                    child: TextFormField(
-                      style: const TextStyle(color: Colors.black),
-                      obscureText: true,
-                      controller: _passwordController,
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'لطفاً رمز عبور خود را وارد کنید';
-                        }
-                        return null;
-                      },
-                      decoration: InputDecoration(
-                        enabledBorder: const OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(16)),
-                          borderSide: BorderSide(color: Colors.black, width: 2),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: const BorderSide(
-                            width: 2,
-                            color: Color.fromARGB(255, 14, 208, 211),
-                          ),
-                        ),
-                        errorBorder: const OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(16)),
-                          borderSide: BorderSide(color: Colors.red, width: 2),
-                        ),
-                        focusedErrorBorder: const OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(16)),
-                          borderSide: BorderSide(color: Colors.red, width: 2),
-                        ),
-                        label: const Text('رمز عبور'),
-                        labelStyle: WidgetStateTextStyle.resolveWith((
-                          Set<WidgetState> states,
-                        ) {
-                          Color labelColor = Colors.black;
-                          if (states.contains(WidgetState.error)) {
-                            labelColor = Colors.red;
-                          } else if (states.contains(WidgetState.focused)) {
-                            labelColor = const Color.fromARGB(
-                              255,
-                              14,
-                              208,
-                              211,
-                            );
-                          }
-                          return TextStyle(fontFamily: 'CR', color: labelColor);
-                        }),
-                        floatingLabelStyle: WidgetStateTextStyle.resolveWith((
-                          Set<WidgetState> states,
-                        ) {
-                          Color labelColor = Colors.black;
-                          if (states.contains(WidgetState.error)) {
-                            labelColor = Colors.red;
-                          } else if (states.contains(WidgetState.focused)) {
-                            labelColor = const Color.fromARGB(
-                              255,
-                              14,
-                              208,
-                              211,
-                            );
-                          }
-                          return TextStyle(fontFamily: 'CR', color: labelColor);
-                        }),
+                    const SizedBox(height: 24),
+
+                    // تیتر خوش‌آمدگویی (اختیاری برای زیبایی بیشتر)
+                    Text(
+                      'خوش آمدید',
+                      style: TextStyle(
+                        fontFamily: 'CR',
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: textColor,
                       ),
                     ),
-                  ),
-                ),
-                BlocConsumer<AuthBloc, AuthState>(
-                  listener: (context, state) {
-                    if (state is AuthSuccess) {
-                      state.result.fold(
-                        (failure) {
-                          return ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              backgroundColor: Colors.red,
-                              content: Text(
-                                textDirection: TextDirection.rtl,
-                                failure.message,
-                                style: const TextStyle(
-                                  fontFamily: 'CR',
-                                  color: Colors.white,
+                    const SizedBox(height: 8),
+                    Text(
+                      'برای ادامه وارد حساب کاربری خود شوید',
+                      style: TextStyle(
+                        fontFamily: 'CR',
+                        fontSize: 14,
+                        color: hintColor,
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+
+                    // فیلد ایمیل
+                    Directionality(
+                      textDirection: TextDirection.rtl,
+                      child: TextFormField(
+                        controller: _usernameController,
+                        style: TextStyle(
+                          fontFamily: 'CR',
+                          color: textColor,
+                          fontSize: 16,
+                        ),
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                        keyboardType: TextInputType.emailAddress,
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'لطفاً ایمیل خود را وارد کنید';
+                          }
+                          final bool isEmailValid = RegExp(
+                            r"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$",
+                          ).hasMatch(value);
+                          if (!isEmailValid) {
+                            return 'لطفاً یک ایمیل معتبر وارد کنید';
+                          }
+                          return null;
+                        },
+                        decoration: _buildInputDecoration(
+                          isDark: isDark,
+                          hint: 'ایمیل',
+                          icon: CupertinoIcons.mail,
+                          cardColor: cardColor,
+                          primaryColor: primaryColor,
+                          hintColor: hintColor!,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // فیلد رمز عبور
+                    Directionality(
+                      textDirection: TextDirection.rtl,
+                      child: TextFormField(
+                        controller: _passwordController,
+                        obscureText: _isPasswordObscured,
+                        style: TextStyle(
+                          fontFamily: 'CR',
+                          color: textColor,
+                          fontSize: 16,
+                        ),
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'لطفاً رمز عبور خود را وارد کنید';
+                          }
+                          return null;
+                        },
+                        decoration:
+                            _buildInputDecoration(
+                              isDark: isDark,
+                              hint: 'رمز عبور',
+                              icon: CupertinoIcons.lock,
+                              cardColor: cardColor,
+                              primaryColor: primaryColor,
+                              hintColor: hintColor,
+                            ).copyWith(
+                              // اضافه کردن دکمه نمایش رمز
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  _isPasswordObscured
+                                      ? CupertinoIcons.eye
+                                      : CupertinoIcons.eye_slash,
+                                  color: hintColor,
                                 ),
+                                onPressed: () {
+                                  setState(() {
+                                    _isPasswordObscured = !_isPasswordObscured;
+                                  });
+                                },
+                              ),
+                            ),
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+
+                    // دکمه لاگین / لودینگ
+                    BlocConsumer<AuthBloc, AuthState>(
+                      listener: (context, state) {
+                        if (state is AuthSuccess) {
+                          state.result.fold(
+                            (failure) {
+                              // نمایش ارور با استایل اسنک‌بار شناور و مدرن
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  behavior: SnackBarBehavior.floating,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  backgroundColor: const Color(
+                                    0xFFFF3B30,
+                                  ), // قرمز iOS
+                                  content: Directionality(
+                                    textDirection: TextDirection.rtl,
+                                    child: Text(
+                                      failure.message,
+                                      style: const TextStyle(
+                                        fontFamily: 'CR',
+                                        color: Colors.white,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                            (success) {
+                              context.goNamed(HomeScreen.namedRoute);
+                            },
+                          );
+                        }
+                      },
+                      builder: (context, state) {
+                        if (state is AuthLoading) {
+                          return Container(
+                            height: 55,
+                            decoration: BoxDecoration(
+                              color: cardColor,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Center(
+                              child: CupertinoActivityIndicator(
+                                radius: 14,
+                                color: primaryColor,
                               ),
                             ),
                           );
-                        },
-                        (success) {
-                          context.goNamed(HomeScreen.namedRoute);
-                        },
-                      );
-                    }
-                  },
-                  builder: (context, state) {
-                    if (state is AuthLoading) {
-                      return const CircularProgressIndicator(
-                        color: Color.fromARGB(255, 14, 208, 211),
-                      );
-                    }
-                    return ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        foregroundColor: Colors.black,
-                        backgroundColor: const Color.fromARGB(
-                          255,
-                          14,
-                          208,
-                          211,
-                        ),
-                      ),
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          final username = _usernameController.text.trim();
-                          final password = _passwordController.text.trim();
-
-                          context.read<AuthBloc>().add(
-                            AuthLoginEvent(username, password),
-                          );
                         }
+                        return SizedBox(
+                          width: double.infinity,
+                          height: 55,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: primaryColor,
+                              foregroundColor: Colors
+                                  .black, // رنگ متن دکمه (کنتراست با فیروزه‌ای)
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                            ),
+                            onPressed: () {
+                              if (_formKey.currentState!.validate()) {
+                                final username = _usernameController.text
+                                    .trim();
+                                final password = _passwordController.text
+                                    .trim();
+
+                                context.read<AuthBloc>().add(
+                                  AuthLoginEvent(username, password),
+                                );
+                              }
+                            },
+                            child: const Text(
+                              'ورود به حساب',
+                              style: TextStyle(
+                                fontFamily: 'CR',
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ),
+                        );
                       },
-                      child: const Text(
-                        'ورود به اکانت',
-                        style: TextStyle(
-                          fontFamily: 'CR',
-                          fontSize: 18,
-                          color: Colors.black,
-                        ),
-                      ),
-                    );
-                  },
-                ),
-                const SizedBox(height: 10),
-                TextButton(
-                  onPressed: () {
-                    context.goNamed(RegisterScreen.namedRoute);
-                  },
-                  child: const Text(
-                    'ساخت اکانت جدید',
-                    style: TextStyle(
-                      color: Color.fromARGB(185, 33, 149, 243),
-                      fontFamily: 'CR',
-                      fontSize: 12,
                     ),
-                  ),
+                    const SizedBox(height: 24),
+
+                    // لینک ثبت نام
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      textDirection: TextDirection.rtl,
+                      children: [
+                        Text(
+                          'حساب کاربری ندارید؟',
+                          style: TextStyle(
+                            fontFamily: 'CR',
+                            fontSize: 14,
+                            color: hintColor,
+                          ),
+                        ),
+                        TextButton(
+                          style: TextButton.styleFrom(
+                            foregroundColor: primaryColor,
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                          ),
+                          onPressed: () {
+                            context.goNamed(RegisterScreen.namedRoute);
+                          },
+                          child: const Text(
+                            'ثبت نام کنید',
+                            style: TextStyle(
+                              fontFamily: 'CR',
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  // متد کمکی برای استایل‌دهی مدرن فیلدهای فرم
+  InputDecoration _buildInputDecoration({
+    required bool isDark,
+    required String hint,
+    required IconData icon,
+    required Color cardColor,
+    required Color primaryColor,
+    required Color hintColor,
+  }) {
+    return InputDecoration(
+      filled: true,
+      fillColor: cardColor,
+      hintText: hint,
+      hintStyle: TextStyle(fontFamily: 'CR', color: hintColor, fontSize: 15),
+      prefixIcon: Icon(icon, color: hintColor, size: 22),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide.none,
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide(
+          color: isDark
+              ? Colors.white.withOpacity(0.05)
+              : Colors.black.withOpacity(0.05),
+          width: 1,
+        ),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide(color: primaryColor, width: 1.5),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(
+          color: Color(0xFFFF3B30),
+          width: 1.2,
+        ), // رنگ ارور اپل
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(color: Color(0xFFFF3B30), width: 1.5),
       ),
     );
   }

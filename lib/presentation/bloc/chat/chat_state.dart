@@ -68,3 +68,9 @@ class CreateGroupSuccessState extends ChatState {
   final Either<ApiException, ConversationEntity> groupChat;
   CreateGroupSuccessState(this.groupChat);
 }
+
+class AddFriendToGroupSuccessState extends ChatState {
+  final Either<ApiException, ConversationEntity> result;
+
+  AddFriendToGroupSuccessState(this.result);
+}

@@ -214,4 +214,18 @@ class ChatRemoteDataSourceImpl implements IChatDatasource {
       throw ApiException('پیام ارسال نشد');
     }
   }
+
+  @override
+  Future<ConversationDto> addFriendToGroup(String userId, String chatId) async {
+    try {
+      final body = {'participants+': userId};
+
+      final record = await pb
+          .collection('chat')
+          .update(chatId, body: body, expand: 'participants');
+      return ConversationDto.fromRecord(record);
+    } catch (e) {
+      throw ApiException('خطا در افزودن عضو به گروه');
+    }
+  }
 }

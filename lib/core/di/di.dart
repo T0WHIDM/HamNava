@@ -1,4 +1,5 @@
 import 'package:flutter_chat_room_app/data/dataSource/userdatasource/user_data_source_remote.dart';
+import 'package:flutter_chat_room_app/domain/usecase/chat/add_friend_to_group_use_case.dart';
 import 'package:flutter_chat_room_app/domain/usecase/chat/create_group_use_case.dart';
 import 'package:flutter_chat_room_app/domain/usecase/chat/delete_chat_use_case.dart';
 import 'package:flutter_chat_room_app/domain/usecase/chat/delete_message_use_case.dart';
@@ -119,6 +120,9 @@ Future<void> getItInit() async {
   );
   locator.registerLazySingleton(
     () => PrivateChatUseCase(locator<IChatRepository>()),
+  );
+  locator.registerLazySingleton(
+    () => AddFriendToGroupUseCase(locator<IChatRepository>()),
   );
 
   // --- User ---

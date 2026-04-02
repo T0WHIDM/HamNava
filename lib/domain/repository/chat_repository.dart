@@ -20,6 +20,11 @@ abstract class IChatRepository {
 
   Future<Either<ApiException, void>> deleteChat(String chatId);
 
+  Future<Either<ApiException, ConversationEntity>> addFriendToGroup(
+    String userId,
+    String chatId,
+  );
+
   // ==================== Messages ====================
 
   Future<Either<ApiException, List<MessageEntity>>> getMessages(
