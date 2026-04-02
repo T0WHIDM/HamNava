@@ -38,33 +38,6 @@ class _ChatListItemState extends State<ChatListItem> {
   Widget build(BuildContext context) {
     final myUserId = locator<PocketBase>().authStore.record?.id ?? '';
 
-    if (_localChatList.isEmpty) {
-      return SliverFillRemaining(
-        hasScrollBody: false,
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.chat_bubble_outline_rounded,
-                size: 80,
-                color: Colors.grey.withValues(alpha: 0.5),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'هیچ گفتگویی ندارید',
-                style: TextStyle(
-                  fontFamily: 'GB',
-                  fontSize: 18,
-                  color: Colors.grey,
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
     return SliverList(
       delegate: SliverChildBuilderDelegate(childCount: _localChatList.length, (
         context,

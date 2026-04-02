@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_chat_room_app/core/di/di.dart';
@@ -23,157 +24,253 @@ class _FriendsListScreenState extends State<FriendsListScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    const primaryColor = Color(0xFF0ED0D3);
+
+    // رنگ‌های استایل iOS/Premium
+    final scaffoldBg = isDark ? const Color(0xFF000000) : const Color(0xFFF2F2F7);
+    final cardColor = isDark ? const Color(0xFF1C1C1E) : const Color(0xFFFFFFFF);
+    final dividerColor = isDark ? Colors.grey.shade800 : Colors.grey.shade200;
 
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        title: const Text(
-          'دوستان من',
-          style: TextStyle(fontFamily: 'CR', fontSize: 20),
-        ),
-        centerTitle: true,
-      ),
-      body: BlocBuilder<UserBloc, UserState>(
-        builder: (context, state) {
-          if (state is FriendsListLoadingState) {
-            return const Center(
-              child: CircularProgressIndicator(
-                color: Color.fromARGB(255, 14, 208, 211),
-              ),
-            );
-          }
-
-          if (state is FriendListSuccessState) {
-            return state.result.fold(
-              (failure) {
-                return Center(child: Text(failure.message));
-              },
-              (success) {
-                if (success.isEmpty) {
-                  return _buildEmptyState(context);
-                }
-
-                return RefreshIndicator(
-                  color: const Color.fromARGB(255, 14, 208, 211),
-                  onRefresh: () async {
-                    final userId = locator<PocketBase>().authStore.record!.id;
-                    context.read<UserBloc>().add(FriendListEvent(userId));
-                  },
-                  child: ListView.builder(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    itemCount: success.length,
-                    padding: const EdgeInsets.all(16),
-                    itemBuilder: (context, index) {
-                      final friend = success[index];
-                      return _buildFriendCard(context, friend);
-                    },
-                  ),
-                );
-              },
-            );
-          }
-
-          return _buildEmptyState(context);
+      backgroundColor: scaffoldBg,
+      body: RefreshIndicator(
+        color: primaryColor,
+        backgroundColor: cardColor,
+        onRefresh: () async {
+          final userId = locator<PocketBase>().authStore.record!.id;
+          context.read<UserBloc>().add(FriendListEvent(userId));
         },
-      ),
-    );
-  }
-
-  Widget _buildFriendCard(BuildContext context, UserEntity friend) {
-    return Card(
-      elevation: 3,
-      margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15),
-        side: BorderSide(color: Colors.grey.withValues(alpha: 0.2), width: 1),
-      ),
-
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4.0),
-        child: ListTile(
-          leading: InkWell(
-            onTap: () {
-              context.pushNamed(UserProfileScreen.routeName, extra: friend);
-            },
-            child: CircleAvatar(
-              radius: 24,
-              backgroundColor: const Color.fromARGB(
-                255,
-                14,
-                208,
-                211,
-              ).withValues(alpha: 0.2),
-
-              child: const Icon(
-                Icons.person,
-                color: Color.fromARGB(255, 14, 208, 211),
-              ),
-            ),
-          ),
-          title: Text(
-            friend.name,
-            style: const TextStyle(fontFamily: 'cr', fontSize: 16),
-          ),
-          subtitle: Text(
-            '@${friend.userName}',
-            style: const TextStyle(
-              fontFamily: 'CR',
-              fontSize: 13,
-              color: Colors.grey,
-            ),
-          ),
-          trailing: Container(
-            decoration: BoxDecoration(
-              color: Colors.green.withValues(alpha: 0.2),
-              shape: BoxShape.circle,
-            ),
-            child: IconButton(
-              icon: const Icon(
-                Icons.chat_bubble_rounded,
-                color: Color.fromARGB(255, 51, 185, 56),
-                size: 20,
-              ),
-              onPressed: () {
-                context.pushNamed(
-                  ChatScreen.routeName,
-                  pathParameters: {'friendId': friend.id},
-                  extra: friend,
-                );
-              },
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildEmptyState(BuildContext context) {
-    return RefreshIndicator(
-      color: const Color.fromARGB(255, 14, 208, 211),
-      onRefresh: () async {
-        final userId = locator<PocketBase>().authStore.record!.id;
-        context.read<UserBloc>().add(FriendListEvent(userId));
-      },
-      child: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        child: Container(
-          height: MediaQuery.of(context).size.height * 0.7,
-          alignment: Alignment.center,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.people_outline, size: 80, color: Colors.grey[300]),
-              const SizedBox(height: 16),
-              Text(
-                'شما هنوز دوستی اضافه نکرده‌اید',
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+          slivers: [
+            // 1. هدر صفحه
+            SliverAppBar(
+              expandedHeight: 60,
+              pinned: true,
+              backgroundColor: scaffoldBg,
+              surfaceTintColor: Colors.transparent,
+              title: const Text(
+                'دوستان من',
                 style: TextStyle(
                   fontFamily: 'CR',
-                  color: Colors.grey[500],
-                  fontSize: 16,
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              centerTitle: true,
+            ),
+      
+            // 2. بدنه صفحه (مدیریت State ها)
+            BlocBuilder<UserBloc, UserState>(
+              builder: (context, state) {
+                if (state is FriendsListLoadingState) {
+                  return const SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Center(
+                      child: CupertinoActivityIndicator(radius: 16),
+                    ),
+                  );
+                }
+      
+                if (state is FriendListSuccessState) {
+                  return state.result.fold(
+                    (failure) {
+                      return SliverFillRemaining(
+                        hasScrollBody: false,
+                        child: Center(
+                          child: Text(
+                            failure.message,
+                            style: const TextStyle(fontFamily: 'CR', color: Colors.redAccent),
+                          ),
+                        ),
+                      );
+                    },
+                    (success) {
+                      if (success.isEmpty) {
+                        return _buildEmptyState(isDark);
+                      }
+      
+                      // 3. لیست Inset-Grouped (طراحی مدرن)
+                      return SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: cardColor,
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: isDark ? [] : [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.03),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 2),
+                                )
+                              ],
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(20),
+                              child: ListView.separated(
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                padding: EdgeInsets.zero,
+                                itemCount: success.length,
+                                separatorBuilder: (context, index) => Divider(
+                                  height: 1,
+                                  indent: 80, // شروع خط از بعد از آواتار
+                                  endIndent: 16,
+                                  color: dividerColor,
+                                ),
+                                itemBuilder: (context, index) {
+                                  final friend = success[index];
+                                  return _buildFriendRow(context, friend, isDark, primaryColor);
+                                },
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                }
+      
+                return _buildEmptyState(isDark);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ویجت ردیف هر دوست
+  Widget _buildFriendRow(BuildContext context, UserEntity friend, bool isDark, Color primaryColor) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          context.pushNamed(UserProfileScreen.routeName, extra: friend);
+        },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
+            children: [
+              // آواتار
+              CircleAvatar(
+                radius: 26,
+                backgroundColor: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
+                // backgroundImage: friend.avatar != null ? NetworkImage(...) : null,
+                child: Icon(
+                  CupertinoIcons.person_fill,
+                  color: isDark ? Colors.grey.shade500 : Colors.grey.shade400,
+                  size: 26,
+                ),
+              ),
+              const SizedBox(width: 16),
+              
+              // اطلاعات کاربر
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      friend.name,
+                      style: TextStyle(
+                        fontFamily: 'CR',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: isDark ? Colors.white : Colors.black87,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '@${friend.userName}',
+                      style: TextStyle(
+                        fontFamily: 'CR',
+                        fontSize: 13,
+                        color: isDark ? Colors.grey.shade400 : Colors.grey.shade500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              
+              // دکمه شروع چت (شیک و کپسولی)
+              GestureDetector(
+                onTap: () {
+                  context.pushNamed(
+                    ChatScreen.routeName,
+                    pathParameters: {'friendId': friend.id},
+                    extra: friend,
+                  );
+                },
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: primaryColor.withValues(alpha: 0.12),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: Icon(
+                      CupertinoIcons.chat_bubble_text_fill,
+                      color: primaryColor,
+                      size: 20,
+                    ),
+                  ),
                 ),
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  // ویجت حالت خالی (وقتی دوستی وجود ندارد)
+  Widget _buildEmptyState(bool isDark) {
+    return SliverFillRemaining(
+      hasScrollBody: false,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+                shape: BoxShape.circle,
+                boxShadow: isDark ? [] : [
+                  BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 20, offset: const Offset(0, 10))
+                ],
+              ),
+              child: Icon(
+                CupertinoIcons.person_2_fill,
+                size: 64,
+                color: isDark ? Colors.grey.shade600 : Colors.grey.shade300,
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'لیست دوستان خالی است',
+              style: TextStyle(
+                fontFamily: 'CR',
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white : Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'شما هنوز هیچ دوستی اضافه نکرده‌اید',
+              style: TextStyle(
+                fontFamily: 'CR',
+                fontSize: 14,
+                color: isDark ? Colors.grey.shade400 : Colors.grey.shade500,
+              ),
+            ),
+            const SizedBox(height: 40), // برای ایجاد تعادل در وسط صفحه
+          ],
         ),
       ),
     );

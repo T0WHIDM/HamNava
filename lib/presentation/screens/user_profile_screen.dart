@@ -1,9 +1,12 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_room_app/domain/entity/user_entity.dart';
+import 'package:flutter_chat_room_app/presentation/screens/chat_screen.dart';
 import 'package:go_router/go_router.dart';
 
 class UserProfileScreen extends StatelessWidget {
-  final UserEntity user;
+  // ۱. ایمن‌سازی state.extra با قرار دادن نوع داده به صورت Nullable
+  final UserEntity? user;
 
   const UserProfileScreen(this.user, {super.key});
 
@@ -11,198 +14,251 @@ class UserProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ۲. مدیریت حالت Null برای جلوگیری از خطای type cast هنگام رفرش شدن روتر
+    if (user == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (context.canPop()) {
+          context.pop();
+        } else {
+          context.go('/'); // هدایت به صفحه اصلی در صورت نبود تاریخچه
+        }
+      });
+      return const Scaffold(
+        body: Center(child: CupertinoActivityIndicator()),
+      );
+    }
+
+    final nonNullUser = user!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    // پالت رنگی مدرن (Inset-Grouped)
+    final scaffoldBg = isDark ? const Color(0xFF000000) : const Color(0xFFF2F2F7);
+    final cardBg = isDark ? const Color(0xFF1C1C1E) : Colors.white;
+    final primaryColor = const Color(0xFF0ED0D3);
 
     return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 8.0),
-          child: IconButton(
-            onPressed: () => context.pop(),
-            icon: CircleAvatar(
-              backgroundColor: isDark ? Colors.black54 : Colors.white70,
-              child: Icon(
-                Icons.arrow_back_ios_new,
-                color: isDark ? Colors.white : Colors.black,
-                size: 20,
-              ),
-            ),
-          ),
-        ),
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Stack(
-              alignment: Alignment.bottomCenter,
-              children: [
-                Container(
-                  height: MediaQuery.of(context).size.height * 0.45,
-                  width: double.infinity,
-                  decoration: BoxDecoration(color: Colors.blue.shade100),
-                ),
-                Container(
-                  height: 150,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.transparent,
-                        Colors.black.withValues(alpha: 0.9),
-                      ],
+      backgroundColor: scaffoldBg,
+      body: Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
+          physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+          slivers: [
+            // هدر داینامیک و مدرن
+            SliverAppBar(
+              expandedHeight: 340,
+              stretch: true,
+              pinned: true,
+              backgroundColor: scaffoldBg,
+              surfaceTintColor: Colors.transparent,
+              leading: Padding(
+                padding: const EdgeInsets.all(12),
+                child: GestureDetector(
+                  onTap: () => context.pop(),
+                  child: CircleAvatar(
+                    backgroundColor: Colors.black.withOpacity(0.4),
+                    child: const Icon(
+                      CupertinoIcons.back,
+                      color: Colors.white,
+                      size: 24,
                     ),
                   ),
                 ),
-                Positioned(
-                  bottom: 20,
-                  left: 20,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        user.name,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 26,
-                          fontFamily: 'GB',
+              ),
+              flexibleSpace: FlexibleSpaceBar(
+                stretchModes: const [
+                  StretchMode.zoomBackground,
+                  StretchMode.blurBackground,
+                ],
+                background: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    // پس‌زمینه آواتار/کاور
+                    Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            primaryColor.withOpacity(0.6),
+                            primaryColor.withOpacity(0.2),
+                          ],
                         ),
                       ),
-                      Text(
-                        '@${user.userName}',
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.8),
-                          fontSize: 16,
-                          fontFamily: 'GR',
-                        ),
+                      child: Icon(
+                        CupertinoIcons.person_solid,
+                        size: 140,
+                        color: Colors.white.withOpacity(0.3),
                       ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 20),
-
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Column(
-                children: [
-                  _buildInfoTile(
-                    Icons.alternate_email,
-                    'ایمیل',
-                    user.email,
-                    context,
-                  ),
-                  const SizedBox(height: 30),
-
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: () {},
-                          icon: const Icon(
-                            Icons.chat_bubble_outline,
-                            color: Colors.white,
+                    ),
+                    
+                    // گرادینت تیره پایین هدر برای خوانایی بهتر متن
+                    Positioned(
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      height: 160,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Colors.transparent,
+                              isDark
+                                  ? Colors.black.withOpacity(0.9)
+                                  : Colors.black.withOpacity(0.7),
+                            ],
                           ),
-                          label: const Text(
-                            'پیام دادن',
-                            style: TextStyle(
-                              fontFamily: 'cr',
+                        ),
+                      ),
+                    ),
+                    
+                    // نام و یوزرنیم
+                    Positioned(
+                      bottom: 24,
+                      right: 24,
+                      left: 24,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            nonNullUser.name,
+                            style: const TextStyle(
+                              fontFamily: 'CR', // یا GB در صورت نیاز
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
                               color: Colors.white,
                             ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color.fromARGB(
-                              255,
-                              14,
-                              208,
-                              211,
+                          const SizedBox(height: 4),
+                          Text(
+                            '@${nonNullUser.userName}',
+                            style: TextStyle(
+                              fontFamily: 'CR',
+                              fontSize: 16,
+                              color: Colors.white.withOpacity(0.8),
                             ),
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(15),
-                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                        ),
+                        ],
                       ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
 
-                      const SizedBox(width: 10),
-                      InkWell(
-                        onTap: () {},
-                        child: Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: const Color.fromARGB(
-                              255,
-                              14,
-                              208,
-                              211,
-                            ).withValues(alpha: 0.2),
-                            shape: BoxShape.circle,
+            // محتوای صفحه
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // عنوان بخش
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8.0, bottom: 8.0),
+                      child: Text(
+                        'اطلاعات کاربر',
+                        style: TextStyle(
+                          fontFamily: 'CR',
+                          fontSize: 14,
+                          color: isDark ? Colors.grey[500] : Colors.grey[600],
+                        ),
+                      ),
+                    ),
+
+                    // کارت Inset-Grouped اطلاعات
+                    Container(
+                      decoration: BoxDecoration(
+                        color: cardBg,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Column(
+                        children: [
+                          ListTile(
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            leading: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: CupertinoColors.activeBlue.withOpacity(0.15),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: const Icon(
+                                CupertinoIcons.mail_solid,
+                                color: CupertinoColors.activeBlue,
+                                size: 22,
+                              ),
+                            ),
+                            title: Text(
+                              'ایمیل',
+                              style: TextStyle(
+                                fontFamily: 'CR',
+                                fontSize: 13,
+                                color: isDark ? Colors.grey[400] : Colors.grey[600],
+                              ),
+                            ),
+                            subtitle: Text(
+                              nonNullUser.email,
+                              style: TextStyle(
+                                fontFamily: 'CR', // یا GB برای وزن بیشتر
+                                fontSize: 16,
+                                color: isDark ? Colors.white : Colors.black87,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
-                          child: const Icon(
-                            Icons.person_add_alt_1_rounded,
-                            color: Color.fromARGB(255, 14, 208, 211),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 32),
+
+                    // دکمه پریمیوم ارسال پیام
+                    SizedBox(
+                      width: double.infinity,
+                      height: 52,
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          context.pushNamed(
+                            ChatScreen.routeName,
+                            extra: nonNullUser,
+                            pathParameters: {'friendId': nonNullUser.id},
+                          );
+                        },
+                        icon: const Icon(
+                          CupertinoIcons.chat_bubble_text_fill,
+                          color: Colors.black,
+                        ),
+                        label: const Text(
+                          'ارسال پیام',
+                          style: TextStyle(
+                            fontFamily: 'CR',
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primaryColor,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
                           ),
                         ),
                       ),
-                    ],
-                  ),
-                ],
+                    ),
+                    
+                    const SizedBox(height: 40),
+                  ],
+                ),
               ),
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildInfoTile(
-    IconData icon,
-    String label,
-    String value,
-    BuildContext context,
-  ) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 20),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Icon(icon, color: isDark ? Colors.white70 : Colors.black, size: 22),
-          const SizedBox(width: 15),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontFamily: 'cr',
-                    fontSize: 13,
-                    color: isDark
-                        ? Colors.grey[400]
-                        : const Color.fromARGB(255, 54, 53, 53),
-                  ),
-                ),
-                const SizedBox(height: 5),
-                Text(
-                  value,
-                  style: TextStyle(
-                    fontFamily: 'gb',
-                    fontSize: 16,
-                    color: isDark ? Colors.white : Colors.black87,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }

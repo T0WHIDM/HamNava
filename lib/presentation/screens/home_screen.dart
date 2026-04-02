@@ -1,4 +1,4 @@
-import 'dart:ui';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_chat_room_app/core/di/di.dart';
@@ -10,7 +10,6 @@ import 'package:flutter_chat_room_app/presentation/customWidget/chat_list_item.d
 import 'package:flutter_chat_room_app/presentation/screens/create_group_screen.dart';
 import 'package:flutter_chat_room_app/presentation/screens/group_chat_screen.dart';
 import 'package:flutter_chat_room_app/presentation/screens/user_search_screen.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pocketbase/pocketbase.dart';
 
@@ -26,6 +25,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   FocusNode searchFocusNode = FocusNode();
   String searchQuery = '';
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -39,37 +39,62 @@ class _HomeScreenState extends State<HomeScreen> {
   void dispose() {
     super.dispose();
     searchFocusNode.dispose();
+    _searchController.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    const primaryColor = Color(0xFF0ED0D3);
+
+    // رنگ‌های استایل iOS/Premium
+    final scaffoldBg = isDark ? const Color(0xFF000000) : const Color(0xFFFFFFFF);
+    final searchBgColor = isDark ? const Color(0xFF1C1C1E) : const Color(0xFFF2F2F7);
 
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 6.0),
+      backgroundColor: scaffoldBg,
+      body: Directionality(
+        textDirection: TextDirection.ltr,
         child: RefreshIndicator(
-          color: const Color.fromARGB(255, 14, 208, 211),
+          color: primaryColor,
+          backgroundColor: isDark ? const Color(0xFF1C1C1E) : Colors.white,
           onRefresh: () async {
             final userId = locator<PocketBase>().authStore.record!.id;
             context.read<ChatBloc>().add(GetChatListEvent(userId));
             await Future.delayed(const Duration(seconds: 1));
           },
           child: CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
             slivers: [
+              // 1. هدر صفحه (AppBar) مدرن
               SliverAppBar(
                 floating: true,
                 snap: true,
+                backgroundColor: scaffoldBg,
+                surfaceTintColor: Colors.transparent,
+                elevation: 0,
                 title: const Text(
                   'هم نوا',
-                  style: TextStyle(fontFamily: 'CR', fontSize: 24),
+                  style: TextStyle(
+                    fontFamily: 'CR',
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 centerTitle: true,
-                leading: IconButton(
-                  onPressed: () {
-                    context.pushNamed(UserSearchScreen.routeName);
-                  },
-                  icon: const Icon(Icons.add, size: 32),
+                
+                leading: Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: IconButton(
+                    onPressed: () {
+                      context.pushNamed(UserSearchScreen.routeName);
+                    },
+                    icon: Icon(
+                      CupertinoIcons.square_pencil, // آیکون مدرن ایجاد چت
+                      color: isDark ? Colors.white : Colors.black87,
+                      size: 24,
+                    ),
+                  ),
                 ),
                 actions: [
                   IconButton(
@@ -80,84 +105,106 @@ class _HomeScreenState extends State<HomeScreen> {
 
                       if (result != null && result is ConversationEntity) {
                         if (context.mounted) {
-                          final userId =
-                              locator<PocketBase>().authStore.record!.id;
-
-                          context.read<ChatBloc>().add(
-                            GetChatListEvent(userId),
-                          );
-
-                          context.pushNamed(
-                            GroupChatScreen.routeName,
-                            extra: result,
-                          );
+                          final userId = locator<PocketBase>().authStore.record!.id;
+                          context.read<ChatBloc>().add(GetChatListEvent(userId));
+                          context.pushNamed(GroupChatScreen.routeName, extra: result);
                         }
                       }
                     },
-                    icon: const Icon(FontAwesomeIcons.userGroup, size: 20),
+                    icon: Icon(
+                      CupertinoIcons.person_2, // آیکون مدرن ایجاد گروه
+                      color: isDark ? Colors.white : Colors.black87,
+                      size: 24,
+                    ),
                   ),
-                  const SizedBox(width: 15),
+                  const SizedBox(width: 12),
                 ],
               ),
+
+              // 2. نوار جستجوی اختصاصی (iOS Style)
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(15),
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        decoration: BoxDecoration(
-                          color: isDark
-                              ? Colors.white.withValues(alpha: 0.1)
-                              : Colors.black.withValues(alpha: 0.05),
-                          borderRadius: BorderRadius.circular(15),
-                          border: Border.all(
-                            color: isDark
-                                ? Colors.white.withValues(alpha: 0.1)
-                                : Colors.black.withValues(alpha: 0.1),
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                  child: Container(
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: searchBgColor,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Directionality(
+                      textDirection: TextDirection.rtl,
+                      child: Row(
+                        children: [
+                          const SizedBox(width: 12),
+                          Icon(
+                            CupertinoIcons.search,
+                            color: isDark ? Colors.grey.shade500 : Colors.grey.shade400,
+                            size: 20,
                           ),
-                        ),
-                        child: Directionality(
-                          textDirection: TextDirection.rtl,
-                          child: TextField(
-                            onChanged: (value) {
-                              setState(() {
-                                searchQuery = value;
-                              });
-                            },
-                            decoration: InputDecoration(
-                              hintText: 'جستجو در گفتگو ها ...',
-                              hintStyle: const TextStyle(
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: TextField(
+                              controller: _searchController,
+                              focusNode: searchFocusNode,
+                              onChanged: (value) {
+                                setState(() {
+                                  searchQuery = value;
+                                });
+                              },
+                              style: TextStyle(
                                 fontFamily: 'CR',
-                                fontSize: 14,
+                                fontSize: 16,
+                                color: isDark ? Colors.white : Colors.black87,
                               ),
-                              border: InputBorder.none,
-                              suffixIcon: IconButton(
-                                icon: const Icon(Icons.search),
-                                onPressed: () {},
+                              decoration: InputDecoration(
+                                hintText: 'جستجو در گفتگوها...',
+                                hintStyle: TextStyle(
+                                  fontFamily: 'CR',
+                                  fontSize: 15,
+                                  color: isDark ? Colors.grey.shade500 : Colors.grey.shade400,
+                                ),
+                                border: InputBorder.none,
+                                isDense: true,
+                                contentPadding: const EdgeInsets.symmetric(vertical: 10),
                               ),
                             ),
                           ),
-                        ),
+                          // دکمه پاک کردن متن جستجو
+                          if (searchQuery.isNotEmpty)
+                            GestureDetector(
+                              onTap: () {
+                                _searchController.clear();
+                                setState(() {
+                                  searchQuery = '';
+                                });
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 12),
+                                child: Icon(
+                                  CupertinoIcons.clear_thick_circled,
+                                  color: isDark ? Colors.grey.shade500 : Colors.grey.shade400,
+                                  size: 18,
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
                     ),
                   ),
                 ),
               ),
+
+              // 3. بدنه صفحه و لیست گفتگوها
               BlocBuilder<ChatBloc, ChatState>(
                 buildWhen: (previous, current) {
-                  return current is ChatLoadingState ||
-                      current is ChatListSUccessState;
+                  return current is ChatLoadingState || current is ChatListSUccessState;
                 },
                 builder: (context, state) {
                   if (state is ChatLoadingState) {
                     return const SliverFillRemaining(
+                      hasScrollBody: false,
                       child: Center(
-                        child: CircularProgressIndicator(
-                          color: Color.fromARGB(255, 14, 208, 211),
-                        ),
+                        child: CupertinoActivityIndicator(radius: 16),
                       ),
                     );
                   }
@@ -166,43 +213,32 @@ class _HomeScreenState extends State<HomeScreen> {
                     return state.result.fold(
                       (failure) {
                         return SliverFillRemaining(
+                          hasScrollBody: false,
                           child: Center(
                             child: Text(
                               failure.message,
-                              style: const TextStyle(fontFamily: 'cr'),
+                              style: const TextStyle(fontFamily: 'CR', color: Colors.redAccent),
                             ),
                           ),
                         );
                       },
                       (success) {
                         final filteredList = success.where((chat) {
-                          if (searchQuery.isEmpty) {
-                            return true;
-                          }
+                          if (searchQuery.isEmpty) return true;
 
                           final String rawChatName = chat.isGroup
                               ? (chat.name ?? 'گروه')
-                              : (chat.participants.isNotEmpty
-                                    ? chat.participants.last.name
-                                    : 'کاربر');
+                              : (chat.participants.isNotEmpty ? chat.participants.last.name : 'کاربر');
 
                           final searchLower = searchQuery.toLowerCase();
-
-                          return rawChatName.toLowerCase().contains(
-                            searchLower,
-                          );
+                          return rawChatName.toLowerCase().contains(searchLower);
                         }).toList();
 
                         if (filteredList.isEmpty) {
-                          return SliverFillRemaining(
-                            hasScrollBody: false,
-                            child: _buildEmptyState(
-                              context,
-                              isSearchEmpty: searchQuery.isNotEmpty,
-                            ),
-                          );
+                          return _buildEmptyState(context, isDark, isSearchEmpty: searchQuery.isNotEmpty);
                         }
 
+                        // نمایش لیست چت‌ها از فایل جداگانه (ChatListItem یک Sliver است)
                         return ChatListItem(filteredList);
                       },
                     );
@@ -219,31 +255,46 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildEmptyState(BuildContext context, {bool isSearchEmpty = false}) {
-    return SingleChildScrollView(
-      physics: const AlwaysScrollableScrollPhysics(),
-      child: Container(
-        height: MediaQuery.of(context).size.height * 0.7,
-        alignment: Alignment.center,
+  // 4. حالت خالی مدرن (وقتی چتی نیست یا جستجو نتیجه ندارد)
+  Widget _buildEmptyState(BuildContext context, bool isDark, {bool isSearchEmpty = false}) {
+    return SliverFillRemaining(
+      hasScrollBody: false,
+      child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              isSearchEmpty ? Icons.search_off : Icons.chat_bubble_outline,
-              size: 80,
-              color: isSearchEmpty ? Colors.redAccent : Colors.grey,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              isSearchEmpty
-                  ? 'گفتگویی با این نام پیدا نشد'
-                  : 'شما هنوز گفتگویی ندارید',
-              style: TextStyle(
-                fontFamily: 'CR',
-                color: isSearchEmpty ? Colors.redAccent : Colors.grey,
-                fontSize: 16,
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF1C1C1E) : const Color(0xFFF2F2F7),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                isSearchEmpty ? CupertinoIcons.search : CupertinoIcons.chat_bubble_2_fill,
+                size: 64,
+                color: isDark ? Colors.grey.shade600 : Colors.grey.shade400,
               ),
             ),
+            const SizedBox(height: 24),
+            Text(
+              isSearchEmpty ? 'گفتگویی پیدا نشد' : 'شما هنوز گفتگویی ندارید',
+              style: TextStyle(
+                fontFamily: 'CR',
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white : Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              isSearchEmpty ? 'نام دیگری را امتحان کنید' : 'از بالا سمت چپ گفتگو را آغاز کنید',
+              style: TextStyle(
+                fontFamily: 'CR',
+                fontSize: 14,
+                color: isDark ? Colors.grey.shade500 : Colors.grey.shade500,
+              ),
+            ),
+            const SizedBox(height: 40),
           ],
         ),
       ),

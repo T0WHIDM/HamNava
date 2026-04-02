@@ -1,11 +1,11 @@
-import 'dart:ui';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_chat_room_app/domain/entity/user_entity.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/user/user_bloc.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/user/user_event.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/user/user_state.dart';
-import 'package:flutter_chat_room_app/presentation/screens/home_screen.dart';
+import 'package:flutter_chat_room_app/presentation/screens/chat_screen.dart';
 import 'package:flutter_chat_room_app/presentation/screens/user_profile_screen.dart';
 import 'package:go_router/go_router.dart';
 
@@ -22,30 +22,57 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
   final TextEditingController _searchController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    // هر بار که متن تغییر کند، صفحه رفرش می‌شود تا وضعیت خالی بودن کادر بررسی شود
+    _searchController.addListener(() => setState(() {}));
+  }
+
+  @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  void _onSearchChanged(String query) {
+    // جلوگیری از ارسال درخواست وقتی کادر خالی است
+    if (query.trim().isEmpty) {
+      return;
+    }
+    context.read<UserBloc>().add(SearchUserEvent(query));
+  }
+
+  void _clearSearch() {
+    _searchController.clear();
+    // نیازی به کار اضافی نیست، listener بالا به طور خودکار صفحه را رفرش می‌کند
   }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
+    // پالت رنگی مدرن
+    final scaffoldBg = isDark ? Colors.black : const Color(0xFFF2F2F7);
+    final cardBg = isDark ? const Color(0xFF1C1C1E) : Colors.white;
+    final primaryColor = const Color(0xFF0ED0D3);
+
     return Scaffold(
+      backgroundColor: scaffoldBg,
       appBar: AppBar(
+        scrolledUnderElevation: 0,
+        backgroundColor: scaffoldBg,
         elevation: 0,
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 20.0),
-          child: IconButton(
-            onPressed: () {
-              context.goNamed(HomeScreen.namedRoute);
-            },
-            icon: const Icon(Icons.arrow_back_ios),
-          ),
+        leading: IconButton(
+          onPressed: () => context.pop(),
+          icon: const Icon(CupertinoIcons.back),
         ),
         title: const Text(
           'جستجوی دوستان',
-          style: TextStyle(fontFamily: 'CR', fontSize: 20),
+          style: TextStyle(
+            fontFamily: 'CR',
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         centerTitle: true,
       ),
@@ -56,10 +83,14 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
               (failure) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    backgroundColor: Colors.red,
+                    backgroundColor: CupertinoColors.destructiveRed,
+                    behavior: SnackBarBehavior.floating,
+                    margin: const EdgeInsets.all(16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                     content: Text(
                       failure.message,
-                      textDirection: TextDirection.rtl,
                       style: const TextStyle(
                         fontFamily: 'CR',
                         color: Colors.white,
@@ -70,12 +101,16 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
               },
               (success) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    duration: Duration(seconds: 1),
-                    backgroundColor: Colors.green,
-                    content: Text(
+                  SnackBar(
+                    duration: const Duration(seconds: 2),
+                    backgroundColor: CupertinoColors.activeGreen,
+                    behavior: SnackBarBehavior.floating,
+                    margin: const EdgeInsets.all(16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    content: const Text(
                       'درخواست دوستی ارسال شد',
-                      textDirection: TextDirection.rtl,
                       style: TextStyle(fontFamily: 'CR', color: Colors.white),
                     ),
                   ),
@@ -86,91 +121,30 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
         },
         child: Column(
           children: [
+            // نوار جستجوی مدرن
             Padding(
               padding: const EdgeInsets.symmetric(
-                horizontal: 22.0,
-                vertical: 10,
+                horizontal: 16.0,
+                vertical: 8.0,
               ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(15),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    decoration: BoxDecoration(
-                      color: isDark
-                          ? Colors.white.withValues(alpha: 0.1)
-                          : Colors.black.withValues(alpha: 0.05),
-                      borderRadius: BorderRadius.circular(15),
-                      border: Border.all(
-                        color: isDark
-                            ? Colors.white.withValues(alpha: 0.1)
-                            : Colors.black.withValues(alpha: 0.1),
-                      ),
-                    ),
-                    child: Directionality(
-                      textDirection: TextDirection.rtl,
-                      child: TextField(
-                        controller: _searchController,
-                        onChanged: (value) {
-                          if (value.isNotEmpty) {
-                            context.read<UserBloc>().add(
-                              SearchUserEvent(value),
-                            );
-                          }
-                        },
-                        decoration: InputDecoration(
-                          hintText: 'نام کاربری را وارد کنید...',
-                          hintStyle: const TextStyle(
-                            fontFamily: 'CR',
-                            fontSize: 14,
-                          ),
-                          border: InputBorder.none,
-                          suffixIcon: BlocBuilder<UserBloc, UserState>(
-                            buildWhen: (previous, current) =>
-                                current is UserSearchLoadingState ||
-                                current is AddFriendLoadingState ||
-                                current is UserSearchComplatedsState ||
-                                current is AddFriendComplatedState,
-
-                            builder: (context, state) {
-                              if (state is UserSearchLoadingState ||
-                                  state is AddFriendLoadingState) {
-                                return const Text('');
-                              }
-                              if (state is UserSearchLoadingState) {
-                                return const Padding(
-                                  padding: EdgeInsets.all(12.0),
-                                  child: SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child: CircularProgressIndicator(
-                                      color: Color.fromARGB(255, 14, 208, 211),
-                                      strokeWidth: 2,
-                                    ),
-                                  ),
-                                );
-                              }
-                              return IconButton(
-                                icon: const Icon(Icons.search),
-                                onPressed: () {
-                                  if (_searchController.text.isNotEmpty) {
-                                    context.read<UserBloc>().add(
-                                      SearchUserEvent(_searchController.text),
-                                    );
-                                  }
-                                },
-                              );
-                            },
-                          ),
-                        ),
-                      ),
-                    ),
+              child: Directionality(
+                textDirection: TextDirection.rtl,
+                child: CupertinoSearchTextField(
+                  controller: _searchController,
+                  onChanged: _onSearchChanged,
+                  placeholder: 'نام کاربری را وارد کنید...',
+                  style: TextStyle(
+                    fontFamily: 'CR',
+                    color: isDark ? Colors.white70 : Colors.black87,
                   ),
+                  suffixMode: OverlayVisibilityMode.editing,
+                  suffixIcon: const Icon(CupertinoIcons.xmark_circle_fill),
+                  onSuffixTap: _clearSearch,
                 ),
               ),
             ),
 
+            // لیست نتایج یا حالت‌های دیگر
             Expanded(
               child: BlocBuilder<UserBloc, UserState>(
                 buildWhen: (previous, current) {
@@ -178,21 +152,23 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
                       current is! AddFriendComplatedState;
                 },
                 builder: (context, state) {
-                  if (state is UserInitialState) {
-                    return buildEmptyState();
-                  } else if (state is UserSearchLoadingState) {
+                  // تغییر اصلی: اگر کادر جستجو خالی باشد، فوراً حالت راهنما نشان داده می‌شود
+                  if (_searchController.text.trim().isEmpty) {
+                    return _buildEmptyState();
+                  }
+
+                  if (state is UserSearchLoadingState) {
                     return const Center(
-                      child: CircularProgressIndicator(
-                        color: Color.fromARGB(255, 14, 208, 211),
-                      ),
+                      child: CupertinoActivityIndicator(radius: 14),
                     );
                   } else if (state is UserSearchComplatedsState) {
                     return state.result.fold(
-                      (exception) => buildErrorWidget(exception.message),
-                      (users) => buildUserList(users, context),
+                      (exception) => _buildErrorWidget(exception.message),
+                      (users) => _buildUserList(users, cardBg, primaryColor),
                     );
                   }
-                  return const SizedBox.shrink();
+
+                  return _buildEmptyState();
                 },
               ),
             ),
@@ -202,20 +178,32 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
     );
   }
 
-  Widget buildUserList(List<UserEntity> users, BuildContext context) {
+  Widget _buildUserList(
+    List<UserEntity> users,
+    Color cardBg,
+    Color primaryColor,
+  ) {
     if (users.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, color: Colors.red, size: 40),
-            SizedBox(height: 15),
-            Text(
-              'کاربری با این مشخصات پیدا نشد.',
+            const Icon(CupertinoIcons.person_2, color: Colors.grey, size: 70),
+            const SizedBox(height: 16),
+            const Text(
+              'کاربری پیدا نشد',
               style: TextStyle(
-                fontFamily: 'cr',
-                color: Colors.red,
-                fontSize: 18,
+                fontFamily: 'CR',
+                fontSize: 16,
+                color: Colors.grey,
+              ),
+            ),
+            Text(
+              'لطفاً نام کاربری دیگری را امتحان کنید',
+              style: TextStyle(
+                fontFamily: 'CR',
+                fontSize: 14,
+                color: Colors.grey[600],
               ),
             ),
           ],
@@ -223,86 +211,143 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
       );
     }
 
-    return ListView.builder(
-      itemCount: users.length,
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 5),
-      itemBuilder: (context, index) {
-        final user = users[index];
-        return Card(
-          margin: const EdgeInsets.only(bottom: 20),
-          elevation: 3,
-          color: Theme.of(context).cardColor,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: ListTile(
-            leading: InkWell(
-              onTap: () {
-                context.pushNamed(UserProfileScreen.routeName, extra: user);
-              },
-              child: const CircleAvatar(
-                backgroundColor: Color.fromARGB(255, 14, 208, 211),
-                child: Icon(Icons.person, color: Colors.white),
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Container(
+        clipBehavior: Clip.antiAlias,
+        decoration: BoxDecoration(
+          color: cardBg,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: ListView.separated(
+          physics: const BouncingScrollPhysics(),
+          itemCount: users.length,
+          padding: EdgeInsets.zero,
+          itemBuilder: (context, index) {
+            final user = users[index];
+            return ListTile(
+              onTap: () =>
+                  context.pushNamed(UserProfileScreen.routeName, extra: user),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 8,
               ),
-            ),
-            title: Text(user.name, style: const TextStyle(fontFamily: 'cr')),
-            subtitle: Text(
-              user.name.isNotEmpty ? '@${user.userName}' : user.email,
-              style: const TextStyle(fontFamily: 'cr', fontSize: 12),
-            ),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: const Icon(
-                    Icons.chat_bubble_outline,
-                    color: Color.fromARGB(255, 14, 208, 211),
-                  ),
-                  onPressed: () {},
+              leading: CircleAvatar(
+                backgroundColor: primaryColor.withOpacity(0.2),
+                child: Icon(CupertinoIcons.person_fill, color: primaryColor),
+              ),
+              title: Text(
+                user.name,
+                style: const TextStyle(fontFamily: 'GB', fontSize: 16),
+              ),
+              subtitle: Text(
+                '@${user.userName}',
+                style: TextStyle(
+                  fontFamily: 'CR',
+                  fontSize: 13,
+                  color: Colors.grey[500],
                 ),
-                IconButton(
-                  icon: const Icon(
-                    Icons.person_add_alt_1_rounded,
-                    color: Color.fromARGB(255, 14, 208, 211),
+              ),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: Icon(
+                      CupertinoIcons.chat_bubble_text_fill,
+                      color: primaryColor,
+                    ),
+                    onPressed: () {
+                      context.pushNamed(
+                        ChatScreen.routeName,
+                        extra: user,
+                        pathParameters: {'friendId': user.id},
+                      );
+                    },
                   ),
-                  onPressed: () {
-                    context.read<UserBloc>().add(AddFriendEvent(user.id));
-                  },
-                ),
-              ],
-            ),
+                  IconButton(
+                    icon: const Icon(
+                      CupertinoIcons.person_add,
+                      color: CupertinoColors.activeBlue,
+                    ),
+                    onPressed: () {
+                      context.read<UserBloc>().add(AddFriendEvent(user.id));
+                    },
+                  ),
+                ],
+              ),
+            );
+          },
+          separatorBuilder: (context, index) => Divider(
+            height: 1,
+            thickness: 0.5,
+            color: Colors.grey.withOpacity(0.2),
+            indent: 72,
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 
-  Widget buildErrorWidget(String message) {
+  Widget _buildErrorWidget(String message) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.error_outline, color: Colors.red, size: 40),
-          const SizedBox(height: 10),
+          const Icon(
+            CupertinoIcons.xmark_octagon,
+            color: CupertinoColors.destructiveRed,
+            size: 60,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'خطایی رخ داد',
+            style: TextStyle(
+              fontFamily: 'GB',
+              fontSize: 18,
+              color: Colors.grey[700],
+            ),
+          ),
+          const SizedBox(height: 4),
           Text(
             message,
-            style: const TextStyle(fontFamily: 'GR', color: Colors.red),
+            style: const TextStyle(fontFamily: 'CR', color: Colors.grey),
+            textAlign: TextAlign.center,
           ),
         ],
       ),
     );
   }
 
-  Widget buildEmptyState() {
+  Widget _buildEmptyState() {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.person_search, size: 80, color: Colors.grey[400]),
-          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: CupertinoColors.activeBlue.withOpacity(0.1),
+            ),
+            child: const Icon(
+              CupertinoIcons.search,
+              size: 50,
+              color: CupertinoColors.activeBlue,
+            ),
+          ),
+          const SizedBox(height: 24),
+          const Text(
+            'دوستان خود را پیدا کنید',
+            style: TextStyle(
+              fontFamily: 'cr',
+              fontSize: 18,
+              color: Colors.grey,
+            ),
+          ),
+          const SizedBox(height: 8),
           Text(
-            'نام کاربری دوست خود را جستجو کنید',
-            style: TextStyle(fontFamily: 'CR', color: Colors.grey[400]),
+            'برای شروع، نام کاربری مورد نظر را در بالا وارد کنید',
+            style: TextStyle(fontFamily: 'CR', color: Colors.grey[600]),
           ),
         ],
       ),
