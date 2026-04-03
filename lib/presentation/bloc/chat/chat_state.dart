@@ -80,3 +80,9 @@ class LeaveFromGroupSuccessState extends ChatState {
 
   LeaveFromGroupSuccessState(this.result);
 }
+
+class ChatLoadMoreResultState extends ChatState {
+  final Either<ApiException, List<MessageEntity>> result;
+
+  ChatLoadMoreResultState(this.result);
+}

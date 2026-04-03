@@ -22,7 +22,9 @@ class MessageMapper {
             ),
       isDeleted: messageDto.isDeleted,
       type: messageDto.type,
-      replyToId: messageDto.replyToId,
+      replyTo: messageDto.replyTo != null
+          ? MessageMapper.toDomain(messageDto.replyTo!)
+          : null,
       readBy: UserMapper.toDomainList(messageDto.readBy),
     );
   }

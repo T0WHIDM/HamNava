@@ -27,18 +27,32 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+
+  final FocusNode _focusNode = FocusNode();
+
+  MessageEntity? _replyingToMessage;
+
   bool _showScrollToBottom = false;
   String? _currentChatId;
   late String myUserId;
   List<MessageEntity> _messages = [];
   bool _isLoading = true;
+  int _currentPage = 1;
+  bool _isFetchingMore = false;
+  bool _hasReachedMax = false;
 
   void _scrollToBottom() {
     _scrollController.animateTo(
-      0.0, // Because of reverse: true, 0.0 is the bottom of the list
+      0.0,
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeOut,
     );
+  }
+
+  void _cancelReply() {
+    setState(() {
+      _replyingToMessage = null;
+    });
   }
 
   @override
@@ -62,6 +76,21 @@ class _ChatScreenState extends State<ChatScreen> {
           });
         }
       }
+
+      if (_scrollController.position.pixels >=
+          _scrollController.position.maxScrollExtent - 50) {
+        if (!_isFetchingMore && !_hasReachedMax && _currentChatId != null) {
+          setState(() {
+            _isFetchingMore = true;
+          });
+          context.read<ChatBloc>().add(
+            LoadMoreMessagesEvent(
+              chatId: _currentChatId!,
+              page: _currentPage + 1,
+            ),
+          );
+        }
+      }
     });
   }
 
@@ -69,13 +98,13 @@ class _ChatScreenState extends State<ChatScreen> {
   void dispose() {
     _messageController.dispose();
     _scrollController.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-
     final scaffoldBg = isDark ? Colors.black : const Color(0xFFF2F2F7);
 
     return Scaffold(
@@ -98,7 +127,6 @@ class _ChatScreenState extends State<ChatScreen> {
       appBar: _buildAppBar(context, widget.friend, isDark, scaffoldBg),
       body: BlocConsumer<ChatBloc, ChatState>(
         listener: (context, state) {
-          // لود یا ساخت چت روم
           if (state is ChatInitializedResultState) {
             state.result.fold(
               (failure) => ScaffoldMessenger.of(context).showSnackBar(
@@ -121,19 +149,35 @@ class _ChatScreenState extends State<ChatScreen> {
             );
           }
 
-          // دریافت پیام
           if (state is ChatMessagesResultState) {
             state.result.fold((failure) => setState(() => _isLoading = false), (
               messagesFromServer,
             ) {
               setState(() {
                 _messages = List.from(messagesFromServer);
+                _hasReachedMax = messagesFromServer.length < 30;
+                _currentPage = 1;
                 _isLoading = false;
               });
             });
           }
 
-          // ارسال پیام
+          if (state is ChatLoadMoreResultState) {
+            state.result.fold(
+              (failure) => setState(() => _isFetchingMore = false),
+              (newMessages) {
+                setState(() {
+                  if (newMessages.isEmpty || newMessages.length < 30) {
+                    _hasReachedMax = true;
+                  }
+                  _messages.addAll(newMessages);
+                  _currentPage++;
+                  _isFetchingMore = false;
+                });
+              },
+            );
+          }
+
           if (state is ChatMessageSentResultState) {
             state.result.fold(
               (failure) => ScaffoldMessenger.of(context).showSnackBar(
@@ -145,11 +189,13 @@ class _ChatScreenState extends State<ChatScreen> {
                   ),
                 ),
               ),
-              (success) => _messageController.clear(),
+              (success) {
+                _messageController.clear();
+                _cancelReply();
+              },
             );
           }
 
-          // دریافت پیام ریل تایم
           if (state is ChatNewMessageRealTimeState) {
             setState(() {
               if (!_messages.any((m) => m.id == state.result.id)) {
@@ -158,7 +204,6 @@ class _ChatScreenState extends State<ChatScreen> {
             });
           }
 
-          // ادیت پیام ریل تایم
           if (state is ChatMessageUpdatedRealtimeState) {
             setState(() {
               final index = _messages.indexWhere(
@@ -170,42 +215,10 @@ class _ChatScreenState extends State<ChatScreen> {
             });
           }
 
-          // دلیت پیام ریل تایم
           if (state is ChatMessageDeletedRealtimeState) {
             setState(() {
               _messages.removeWhere((m) => m.id == state.messageId);
             });
-          }
-
-          // دلیت پیام
-          if (state is DeleteMessageSuccessState) {
-            state.result.fold((failure) {
-              context.read<ChatBloc>().add(LoadMessagesEvent(_currentChatId!));
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  backgroundColor: Colors.red,
-                  content: Text(
-                    "خطا در حذف پیام از سرور",
-                    style: TextStyle(fontFamily: 'CR'),
-                  ),
-                ),
-              );
-            }, (success) {});
-          }
-
-          // ادیت پیام
-          if (state is EditMessageSuccessState) {
-            state.result.fold((failure) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  backgroundColor: Colors.red,
-                  content: Text(
-                    "خطا در ویرایش پیام",
-                    style: TextStyle(fontFamily: 'CR'),
-                  ),
-                ),
-              );
-            }, (editedMessage) {});
           }
         },
         builder: (context, state) {
@@ -236,37 +249,74 @@ class _ChatScreenState extends State<ChatScreen> {
     return ListView.builder(
       controller: _scrollController,
       physics: const BouncingScrollPhysics(),
-      reverse: true, // Scroll starts from bottom
+      reverse: true,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      itemCount: _messages.length,
+      itemCount: _messages.length + (_isFetchingMore ? 1 : 0),
       itemBuilder: (context, index) {
+        if (index == _messages.length) {
+          return const Padding(
+            padding: EdgeInsets.symmetric(vertical: 16),
+            child: Center(
+              child: SpinKitPulsingGrid(color: Color(0xFF0ED0D3), size: 20),
+            ),
+          );
+        }
+
         final message = _messages[index];
         bool isMe = message.sender.id == myUserId;
 
         return Dismissible(
           key: Key(message.id),
-          direction: isMe ? DismissDirection.endToStart : DismissDirection.none,
+          direction: isMe
+              ? DismissDirection.horizontal
+              : DismissDirection.startToEnd,
+
           background: Container(
-            alignment: Alignment.centerRight,
+            alignment: Alignment.centerLeft,
             padding: const EdgeInsets.symmetric(horizontal: 20),
-            margin: const EdgeInsets.symmetric(vertical: 4),
-            decoration: BoxDecoration(
-              color: CupertinoColors.destructiveRed,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: const Icon(
-              CupertinoIcons.delete,
-              color: Colors.white,
-              size: 24,
+            child: Icon(
+              CupertinoIcons.reply,
+              color: isDark ? Colors.white70 : Colors.black54,
+              size: 28,
             ),
           ),
+
+          secondaryBackground: isMe
+              ? Container(
+                  alignment: Alignment.centerRight,
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  margin: const EdgeInsets.symmetric(vertical: 4),
+                  decoration: BoxDecoration(
+                    color: CupertinoColors.destructiveRed,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Icon(
+                    CupertinoIcons.delete,
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                )
+              : null,
+
+          confirmDismiss: (direction) async {
+            if (direction == DismissDirection.startToEnd) {
+              setState(() {
+                _replyingToMessage = message;
+              });
+              _focusNode.requestFocus();
+              return false;
+            } else if (direction == DismissDirection.endToStart && isMe) {
+              context.read<ChatBloc>().add(
+                DeleteMessageEvent(message.id, message.chatId),
+              );
+              return true;
+            }
+            return false;
+          },
           onDismissed: (direction) {
             setState(() {
               _messages.removeAt(index);
             });
-            context.read<ChatBloc>().add(
-              DeleteMessageEvent(message.id, message.chatId),
-            );
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 backgroundColor: CupertinoColors.destructiveRed,
@@ -283,10 +333,317 @@ class _ChatScreenState extends State<ChatScreen> {
             onLongPress: () {
               if (isMe) _showEditDialog(message);
             },
-            child: _buildChatBubble(isMe, message.text ?? "", isDark),
+            child: _buildChatBubble(message, isMe, isDark),
           ),
         );
       },
+    );
+  }
+
+  Widget _buildChatBubble(MessageEntity message, bool isMe, bool isDark) {
+    final myBubbleColor = const Color(0xFF0ED0D3);
+    final otherBubbleColor = isDark ? const Color(0xFF2C2C2E) : Colors.white;
+    final textColor = isMe
+        ? Colors.black87
+        : (isDark ? Colors.white : Colors.black87);
+
+    return Align(
+      alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: isMe ? myBubbleColor : otherBubbleColor,
+          gradient: isMe
+              ? const LinearGradient(
+                  colors: [Color(0xFF0ED0D3), Color(0xFF0CB8B9)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                )
+              : null,
+          boxShadow: [
+            if (!isDark && !isMe)
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 5,
+                offset: const Offset(0, 2),
+              ),
+          ],
+          borderRadius: BorderRadius.only(
+            topLeft: const Radius.circular(20),
+            topRight: const Radius.circular(20),
+            bottomLeft: Radius.circular(isMe ? 20 : 4),
+            bottomRight: Radius.circular(isMe ? 4 : 20),
+          ),
+        ),
+        constraints: BoxConstraints(
+          maxWidth: MediaQuery.of(context).size.width * 0.75,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // ✅ نمایش دیتای پیام ریپلای شده داخل حباب
+            if (message.replyTo != null)
+              Container(
+                margin: const EdgeInsets.only(bottom: 8),
+                padding: const EdgeInsets.only(
+                  left: 8,
+                  right: 12,
+                  top: 4,
+                  bottom: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: isMe
+                      ? Colors.black.withOpacity(0.1)
+                      : (isDark
+                            ? Colors.white.withOpacity(0.05)
+                            : Colors.black.withOpacity(0.05)),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border(
+                    right: BorderSide(
+                      color: isMe ? Colors.black54 : const Color(0xFF0ED0D3),
+                      width: 4,
+                    ),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      message.replyTo!.sender.id == myUserId
+                          ? 'شما'
+                          : message.replyTo!.sender.name,
+                      style: TextStyle(
+                        fontFamily: 'GB',
+                        fontSize: 12,
+                        color: isMe ? Colors.black87 : const Color(0xFF0ED0D3),
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      message.replyTo!.text ?? 'فایل/تصویر',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontFamily: 'CR',
+                        fontSize: 13,
+                        color: textColor.withOpacity(0.8),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+            // متن اصلی پیام
+            Text(
+              message.text ?? "",
+              style: TextStyle(
+                fontFamily: 'CR',
+                fontSize: 15,
+                height: 1.3,
+                color: textColor,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMessageInput(bool isDark) {
+    final inputBg = isDark ? const Color(0xFF2C2C2E) : Colors.white;
+
+    return Container(
+      padding: const EdgeInsets.only(left: 8, right: 8, top: 12, bottom: 20),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // ✅ نمایش باکسی بالای کیبورد هنگام ریپلای کردن
+          if (_replyingToMessage != null)
+            Container(
+              margin: const EdgeInsets.only(bottom: 8, right: 40, left: 40),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: inputBg,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: isDark
+                      ? Colors.white.withOpacity(0.05)
+                      : Colors.black.withOpacity(0.05),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 4,
+                    height: 35,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0ED0D3),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _replyingToMessage!.sender.id == myUserId
+                              ? 'پاسخ به خودتان'
+                              : 'پاسخ به ${_replyingToMessage!.sender.name}',
+                          style: const TextStyle(
+                            fontFamily: 'GB',
+                            fontSize: 12,
+                            color: Color(0xFF0ED0D3),
+                          ),
+                        ),
+                        Text(
+                          _replyingToMessage!.text ?? 'فایل/تصویر',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontFamily: 'CR',
+                            fontSize: 13,
+                            color: isDark ? Colors.white70 : Colors.black54,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      CupertinoIcons.clear_circled_solid,
+                      color: isDark ? Colors.grey[600] : Colors.grey[400],
+                    ),
+                    onPressed: _cancelReply,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                ],
+              ),
+            ),
+
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  onPressed: () {},
+                  child: Icon(
+                    Icons.attach_file_sharp,
+                    color: isDark ? Colors.grey[400] : Colors.grey[600],
+                    size: 28,
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Directionality(
+                  textDirection: TextDirection.rtl,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: inputBg,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: isDark
+                            ? Colors.white.withOpacity(0.05)
+                            : Colors.black.withOpacity(0.05),
+                        width: 1,
+                      ),
+                    ),
+                    child: TextField(
+                      controller: _messageController,
+                      focusNode: _focusNode,
+                      minLines: 1,
+                      maxLines: 5,
+                      textInputAction: TextInputAction.newline,
+                      style: TextStyle(
+                        fontFamily: 'CR',
+                        fontSize: 15,
+                        color: isDark ? Colors.white : Colors.black87,
+                      ),
+                      decoration: InputDecoration(
+                        hintText: 'پیام...',
+                        hintStyle: TextStyle(
+                          fontFamily: 'CR',
+                          color: isDark ? Colors.grey[500] : Colors.grey[400],
+                        ),
+                        border: InputBorder.none,
+                        isDense: true,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 10,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 2),
+                child: ValueListenableBuilder<TextEditingValue>(
+                  valueListenable: _messageController,
+                  builder: (context, value, child) {
+                    final hasText = value.text.trim().isNotEmpty;
+                    return GestureDetector(
+                      onTap: () {
+                        if (hasText && _currentChatId != null) {
+                          context.read<ChatBloc>().add(
+                            SendMessageEvent(
+                              chatId: _currentChatId!,
+                              text: _messageController.text.trim(),
+                              replyId: _replyingToMessage
+                                  ?.id, // ✅ ارسال آیدی پیام ریپلای شده
+                            ),
+                          );
+                          // ✅ ریپلای را بعد از کلیک روی ارسال ببند
+                          _cancelReply();
+                        }
+                      },
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        height: 38,
+                        width: 38,
+                        decoration: BoxDecoration(
+                          color: hasText
+                              ? const Color(0xFF0ED0D3)
+                              : (isDark
+                                    ? const Color(0xFF2C2C2E)
+                                    : Colors.grey[300]),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            if (hasText)
+                              BoxShadow(
+                                color: const Color(0xFF0ED0D3).withOpacity(0.3),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                          ],
+                        ),
+                        child: Center(
+                          child: Icon(
+                            Icons.send,
+                            color: hasText
+                                ? Colors.black
+                                : (isDark
+                                      ? Colors.grey[500]
+                                      : Colors.grey[500]),
+                            size: 20,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(width: 4),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -341,191 +698,8 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  Widget _buildChatBubble(bool isMe, String text, bool isDark) {
-    final myBubbleColor = const Color(0xFF0ED0D3);
-    final otherBubbleColor = isDark ? const Color(0xFF2C2C2E) : Colors.white;
-    final textColor = isMe
-        ? Colors.black87
-        : (isDark ? Colors.white : Colors.black87);
-
-    return Align(
-      alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 4),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          // ✅ مشکل رنگ حل شد: حالا پیام‌های طرف مقابل رنگ مخصوص خود را دارند
-          color: isMe ? myBubbleColor : otherBubbleColor,
-          gradient: isMe
-              ? const LinearGradient(
-                  colors: [Color(0xFF0ED0D3), Color(0xFF0CB8B9)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                )
-              : null,
-          boxShadow: [
-            if (!isDark &&
-                !isMe) // فقط برای پیام طرف مقابل در حالت روز سایه ملایم می‌اندازیم
-              BoxShadow(
-                color: Colors.black.withOpacity(0.04),
-                blurRadius: 5,
-                offset: const Offset(0, 2),
-              ),
-          ],
-          // گوشه‌های پریمیوم به سبک iMessage
-          borderRadius: BorderRadius.only(
-            topLeft: const Radius.circular(20),
-            topRight: const Radius.circular(20),
-            bottomLeft: Radius.circular(isMe ? 20 : 4),
-            bottomRight: Radius.circular(isMe ? 4 : 20),
-          ),
-        ),
-        constraints: BoxConstraints(
-          maxWidth: MediaQuery.of(context).size.width * 0.75,
-        ),
-        child: Text(
-          text,
-          style: TextStyle(
-            fontFamily: 'CR',
-            fontSize: 15,
-            height: 1.3,
-            color: textColor,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMessageInput(bool isDark) {
-    // رنگ‌بندی مدرن مشابه اپل/تلگرام
-    final inputBg = isDark ? const Color(0xFF2C2C2E) : Colors.white;
-
-    return Container(
-      // اضافه کردن پدینگ پایین برای فاصله از لبه گوشی‌های مدرن (SafeArea)
-      padding: const EdgeInsets.only(left: 8, right: 8, top: 12, bottom: 20),
-
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          // دکمه الصاق فایل (استایل آیکون +)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 4),
-            child: CupertinoButton(
-              padding: EdgeInsets.zero,
-              onPressed: () {}, // اکشن الصاق فایل
-              child: Icon(
-                Icons.attach_file_sharp,
-                color: isDark ? Colors.grey[400] : Colors.grey[600],
-                size: 28,
-              ),
-            ),
-          ),
-
-          // تکست فیلد ورودی
-          Expanded(
-            child: Directionality(
-              textDirection: TextDirection.rtl,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: inputBg,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: isDark
-                        ? Colors.white.withOpacity(0.05)
-                        : Colors.black.withOpacity(0.05),
-                    width: 1,
-                  ),
-                ),
-                child: TextField(
-                  controller: _messageController,
-                  minLines: 1,
-                  maxLines: 5,
-                  textInputAction: TextInputAction.newline,
-                  style: TextStyle(
-                    fontFamily: 'CR',
-                    fontSize: 15,
-                    color: isDark ? Colors.white : Colors.black87,
-                  ),
-                  decoration: InputDecoration(
-                    hintText: 'پیام...',
-                    hintStyle: TextStyle(
-                      fontFamily: 'CR',
-                      color: isDark ? Colors.grey[500] : Colors.grey[400],
-                    ),
-                    border: InputBorder.none,
-                    isDense: true, // کوچک کردن ارتفاع پیش‌فرض
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 10,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-
-          const SizedBox(width: 8),
-
-          // ✅ دکمه ارسال هوشمند (فقط در صورتی روشن می‌شود که متنی تایپ شده باشد)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 2),
-            child: ValueListenableBuilder<TextEditingValue>(
-              valueListenable: _messageController,
-              builder: (context, value, child) {
-                final hasText = value.text.trim().isNotEmpty;
-                return GestureDetector(
-                  onTap: () {
-                    if (hasText && _currentChatId != null) {
-                      context.read<ChatBloc>().add(
-                        SendMessageEvent(
-                          chatId: _currentChatId!,
-                          text: _messageController.text.trim(),
-                        ),
-                      );
-                    }
-                  },
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    height: 38,
-                    width: 38,
-                    decoration: BoxDecoration(
-                      // اگر متن داشته باشد فیروزه‌ای، در غیر این صورت خاکستری
-                      color: hasText
-                          ? const Color(0xFF0ED0D3)
-                          : (isDark
-                                ? const Color(0xFF2C2C2E)
-                                : Colors.grey[300]),
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        if (hasText) // سایه درخشان هنگام تایپ
-                          BoxShadow(
-                            color: const Color(0xFF0ED0D3).withOpacity(0.3),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                      ],
-                    ),
-                    child: Center(
-                      child: Icon(
-                        Icons.send,
-                        color: hasText
-                            ? Colors.black
-                            : (isDark ? Colors.grey[500] : Colors.grey[500]),
-                        size: 20,
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-          const SizedBox(width: 4),
-        ],
-      ),
-    );
-  }
-
   Widget _buildEmptyState(bool isDark) {
+    // (بدون تغییر)
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

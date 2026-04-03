@@ -195,6 +195,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           if (!englishRegex.hasMatch(value)) {
                             return 'فقط حروف انگلیسی کوچک، عدد و _ مجاز است';
                           }
+                          if (value.length <= 3) {
+                            return 'نام کاربری باید بیشتر از سه حرف داشته باشد';
+                          }
                           return null;
                         },
                         decoration: _buildInputDecoration(

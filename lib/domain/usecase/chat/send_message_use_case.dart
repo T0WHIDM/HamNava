@@ -10,8 +10,9 @@ class SendMessageUseCase {
 
   Future<Either<ApiException, MessageEntity>> call({
     required String chatId,
-    String? text, 
+    String? text,
+    String? replyId,
   }) {
-    return repository.sendMessage(text: text, chatId: chatId);
+    return repository.sendMessage(text: text, chatId: chatId, replyId: replyId);
   }
 }

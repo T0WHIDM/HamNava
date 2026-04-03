@@ -9,6 +9,7 @@ import 'package:flutter_chat_room_app/presentation/bloc/chat/chat_bloc.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/chat/chat_event.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/chat/chat_state.dart';
 import 'package:flutter_chat_room_app/presentation/screens/group_info.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pocketbase/pocketbase.dart';
 
@@ -30,6 +31,9 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
   late String myUserId;
   List<MessageEntity> _messages = [];
   bool _isLoading = true;
+  int _currentPage = 1;
+  bool _isFetchingMore = false;
+  bool _hasReachedMax = false;
 
   late final Map<String, UserEntity> _participantsMap;
 
@@ -79,6 +83,22 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
           setState(() => _showScrollToBottom = false);
         }
       }
+      if (_scrollController.position.pixels >=
+          _scrollController.position.maxScrollExtent - 50) {
+        if (!_isFetchingMore &&
+            !_hasReachedMax &&
+            widget.conversation.id != null) {
+          setState(() {
+            _isFetchingMore = true;
+          });
+          context.read<ChatBloc>().add(
+            LoadMoreMessagesEvent(
+              chatId: widget.conversation.id,
+              page: _currentPage + 1,
+            ),
+          );
+        }
+      }
     });
   }
 
@@ -124,15 +144,35 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                 setState(() {
                   _messages = List.from(messagesFromServer);
                   _isLoading = false;
+                  _hasReachedMax = messagesFromServer.length < 30;
+                  _currentPage = 1;
                 });
               },
             );
-          } else if (state is ChatMessageSentResultState) {
+          }
+
+          if (state is ChatLoadMoreResultState) {
+            state.result.fold(
+              (failure) => setState(() => _isFetchingMore = false),
+              (newMessages) {
+                setState(() {
+                  if (newMessages.isEmpty || newMessages.length < 30) {
+                    _hasReachedMax = true;
+                  }
+                  _messages.addAll(newMessages);
+                  _currentPage++;
+                  _isFetchingMore = false;
+                });
+              },
+            );
+          }
+          if (state is ChatMessageSentResultState) {
             state.result.fold(
               (failure) => _showErrorSnackBar("خطا در ارسال پیام"),
               (success) => _messageController.clear(),
             );
-          } else if (state is ChatNewMessageRealTimeState) {
+          }
+          if (state is ChatNewMessageRealTimeState) {
             setState(() {
               if (!_messages.any((m) => m.id == state.result.id)) {
                 if (state.result.chatId == widget.conversation.id) {
@@ -140,25 +180,29 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                 }
               }
             });
-          } else if (state is ChatMessageUpdatedRealtimeState) {
+          }
+          if (state is ChatMessageUpdatedRealtimeState) {
             setState(() {
               final index = _messages.indexWhere(
                 (m) => m.id == state.message.id,
               );
               if (index != -1) _messages[index] = state.message;
             });
-          } else if (state is ChatMessageDeletedRealtimeState) {
+          }
+          if (state is ChatMessageDeletedRealtimeState) {
             setState(() {
               _messages.removeWhere((m) => m.id == state.messageId);
             });
-          } else if (state is DeleteMessageSuccessState) {
+          }
+          if (state is DeleteMessageSuccessState) {
             state.result.fold((failure) {
               context.read<ChatBloc>().add(
                 LoadMessagesEvent(widget.conversation.id),
               );
               _showErrorSnackBar("خطا در حذف پیام از سرور");
             }, (success) {});
-          } else if (state is EditMessageSuccessState) {
+          }
+          if (state is EditMessageSuccessState) {
             state.result.fold(
               (failure) => _showErrorSnackBar("خطا در ویرایش پیام"),
               (editedMessage) {},
@@ -259,9 +303,18 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
       controller: _scrollController,
       physics: const BouncingScrollPhysics(),
       reverse: true,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-      itemCount: _messages.length,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      itemCount: _messages.length + (_isFetchingMore ? 1 : 0),
       itemBuilder: (context, index) {
+        if (index == _messages.length) {
+          return const Padding(
+            padding: EdgeInsets.symmetric(vertical: 16),
+            child: Center(
+              child: SpinKitPulsingGrid(color: Color(0xFF0ED0D3), size: 20),
+            ),
+          );
+        }
+
         final message = _messages[index];
         bool isMe = message.sender.id == myUserId;
 

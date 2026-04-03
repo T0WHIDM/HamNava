@@ -10,7 +10,7 @@ class MessageEntity {
   final List<UserEntity> readBy;
   final String type;
   final bool isDeleted;
-  final String replyToId;
+  final MessageEntity? replyTo; 
 
   MessageEntity({
     required this.id,
@@ -22,6 +22,6 @@ class MessageEntity {
     required this.readBy,
     required this.type,
     required this.isDeleted,
-    required this.replyToId,
+    this.replyTo,
   });
 }

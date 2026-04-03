@@ -127,9 +127,14 @@ class ChatRepositoryImpl extends IChatRepository {
   Future<Either<ApiException, MessageEntity>> sendMessage({
     required String chatId,
     String? text,
+    String? replyId,
   }) async {
     try {
-      final dto = await dataSource.sendMessage(chatId: chatId, text: text);
+      final dto = await dataSource.sendMessage(
+        chatId: chatId,
+        text: text,
+        replyId: replyId,
+      );
 
       return Right(MessageMapper.toDomain(dto));
     } catch (e) {

@@ -12,7 +12,7 @@ class MessageDto {
   final List<UserDto> readBy;
   final String type;
   final bool isDeleted;
-  final String replyToId;
+  final MessageDto? replyTo;
 
   MessageDto({
     required this.id,
@@ -25,11 +25,19 @@ class MessageDto {
     required this.readBy,
     required this.type,
     required this.isDeleted,
-    required this.replyToId,
+    this.replyTo,
   });
 
   factory MessageDto.fromRecord(RecordModel record) {
+    MessageDto? replyData;
     RecordModel? senderRecord;
+    
+    try {
+      final singleReplyRecord = record.get<RecordModel>('expand.reply_to');
+      replyData = MessageDto.fromRecord(singleReplyRecord);
+    } catch (_) {
+      replyData = null;
+    }
 
     try {
       final senders = record.get<List<RecordModel>>('expand.sender_id');
@@ -58,7 +66,7 @@ class MessageDto {
       readBy: readByList.map((e) => UserDto.fromRecord(e)).toList(),
       type: record.getStringValue('type'),
       isDeleted: record.getBoolValue('is_deleted'),
-      replyToId: record.getStringValue('reply_to'),
+      replyTo: replyData,
     );
   }
 }
