@@ -68,6 +68,14 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       });
     });
 
+    on<LoadMoreMessagesEvent>((event, emit) async {
+      final result = await _getMessageUseCase.call(
+        event.chatId,
+        page: event.page,
+      );
+      emit(ChatLoadMoreResultState(result));
+    });
+
     on<ChatMessageReceivedFromStreamEvent>((event, emit) {
       if (event.action == 'create') {
         emit(ChatNewMessageRealTimeState(event.message));
@@ -82,6 +90,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       final result = await _sendMessageUseCase.call(
         chatId: event.chatId,
         text: event.text,
+        replyId: event.replyId,
       );
       emit(ChatMessageSentResultState(result));
     });

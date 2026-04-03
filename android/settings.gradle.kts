@@ -11,10 +11,8 @@ pluginManagement {
     includeBuild("$flutterSdkPath/packages/flutter_tools/gradle")
 
     repositories {
-        google()
-        mavenCentral()
-        gradlePluginPortal()
-    }
+    maven{ url = uri("https://pub-azs.ir/api/mavens/") }
+}
 }
 
 plugins {

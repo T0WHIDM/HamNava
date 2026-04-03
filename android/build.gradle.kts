@@ -1,8 +1,7 @@
 allprojects {
-    repositories {
-        google()
-        mavenCentral()
-    }
+  repositories {
+    maven{ url = uri("https://pub-azs.ir/api/mavens/") }
+}
 }
 
 val newBuildDir: Directory =

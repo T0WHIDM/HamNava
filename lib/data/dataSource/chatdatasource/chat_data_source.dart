@@ -26,6 +26,7 @@ abstract class IChatDatasource {
   Future<MessageDto> sendMessage({
     required String chatId,
     String? text,
+    String? replyId,
     // File? attachment, //
   });
 

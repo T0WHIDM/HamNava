@@ -12,8 +12,9 @@ class LoadMessagesEvent extends ChatEvent {
 class SendMessageEvent extends ChatEvent {
   final String chatId;
   final String text;
+  final String? replyId;
 
-  SendMessageEvent({required this.chatId, required this.text});
+  SendMessageEvent({required this.chatId, required this.text, this.replyId});
 }
 
 class ChatInitializeEvent extends ChatEvent {
@@ -76,4 +77,11 @@ class LeaveFromGroupEvent extends ChatEvent {
   final String userId;
 
   LeaveFromGroupEvent(this.chatId, this.userId);
+}
+
+class LoadMoreMessagesEvent extends ChatEvent {
+  final String chatId;
+  final int page;
+
+  LoadMoreMessagesEvent({required this.chatId, required this.page});
 }

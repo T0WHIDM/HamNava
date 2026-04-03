@@ -30,7 +30,6 @@ abstract class IChatRepository {
     String chatId,
   );
 
-  
   // ==================== Messages ====================
 
   Future<Either<ApiException, List<MessageEntity>>> getMessages(
@@ -41,6 +40,7 @@ abstract class IChatRepository {
   Future<Either<ApiException, MessageEntity>> sendMessage({
     required String chatId,
     String? text,
+    String? replyId,
     // File? attachment, //
   });
 

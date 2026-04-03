@@ -153,11 +153,11 @@ class ChatRemoteDataSourceImpl implements IChatDatasource {
       final result = await pb
           .collection('messages')
           .getList(
+            perPage: 30,
             page: page,
-            perPage: 40,
             filter: 'chat_id = "$chatId"',
             sort: '-created',
-            expand: 'sender_id',
+            expand: 'sender_id,reply_to',
           );
 
       return result.items
@@ -182,7 +182,7 @@ class ChatRemoteDataSourceImpl implements IChatDatasource {
           message: MessageDto.fromRecord(e.record!),
         ));
       }
-    });
+    }, expand: 'sender_id,reply_to');
 
     controller.onCancel = () {
       pb.collection('messages').unsubscribe('*');
@@ -193,17 +193,22 @@ class ChatRemoteDataSourceImpl implements IChatDatasource {
   }
 
   @override
-  Future<MessageDto> sendMessage({required String chatId, String? text}) async {
+  Future<MessageDto> sendMessage({
+    required String chatId,
+    String? text,
+    String? replyId,
+  }) async {
     try {
       final body = <String, dynamic>{
         "chat_id": chatId,
         "sender_id": pb.authStore.record?.id,
         "text": text,
       };
+      if (replyId != null) body["reply_to"] = replyId;
 
       final record = await pb
           .collection('messages')
-          .create(body: body, expand: 'sender_id');
+          .create(body: body, expand: 'sender_id,reply_to');
 
       await pb
           .collection('chat')
