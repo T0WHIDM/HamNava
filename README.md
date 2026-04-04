@@ -103,10 +103,7 @@ flutter run
 ---
 
 ## 📥 Download
-
-<a href="(https://github.com/Lilfibonacci/HamNava/releases/download/v1.0.0/HamNava.apk)">
-  <img src="https://img.shields.io/badge/Download-blue?style=for-the-badge" />
-</a>
+[<img src="https://img.shields.io/badge/Download-Latest%20APK-success?style=for-the-badge&logo=android" width="200" />](https://github.com/T0WHIDM/HamNava/releases)
 
 ## 🤝 Contributing
 
