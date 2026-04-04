@@ -81,15 +81,34 @@
 
 ---
 
+## 📸 اسکرین‌شات
+
+<img width="200" height="450" alt="Screenshot_1775312729" src="https://github.com/user-attachments/assets/b2371617-563b-43c8-9cd4-3f477af7919a" />
+<img width="200" height="450" alt="Screenshot_1775311365" src="https://github.com/user-attachments/assets/e9695f98-2ed5-44ae-baed-a55ee601a57e" />
+<img width="200" height="450" alt="Screenshot_1775311302" src="https://github.com/user-attachments/assets/4de5a68e-e838-40fb-af95-1b898c49c6c4" />
+<img width="200" height="450" alt="Screenshot_1775311283" src="https://github.com/user-attachments/assets/1842d524-ed75-43e8-9b22-ae39420b5613" />
+
+
+---
+
 ## 🛠️ راه‌اندازی
 
 ```bash
-git clone https://github.com/T0WHIDM/HamNava.git
+git clone https://github.com/your-username/hamnava.git
 cd hamnava
 flutter pub get
 flutter run
 ```
+
 ---
+
+## 📥 دانلود
+
+
+<a href="(https://github.com/Lilfibonacci/HamNava/releases/download/v1.0.0/HamNava.apk)">
+  <img src="https://img.shields.io/badge/Download-blue?style=for-the-badge" />
+</a>
+
 
 ## 🤝 مشارکت
 
