@@ -23,7 +23,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  // متغیر برای مدیریت نمایش/مخفی کردن رمز عبور
   bool _isPasswordObscured = true;
 
   @override
@@ -35,10 +34,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // تشخیص حالت دارک مود
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    // پالت رنگی پریمیوم
     final bgColor = isDark ? const Color(0xFF000000) : const Color(0xFFF2F2F7);
     final cardColor = isDark ? const Color(0xFF1C1C1E) : Colors.white;
     final primaryColor = const Color(0xFF0ED0D3);
@@ -62,7 +59,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       width: 80,
                       height: 80,
                       decoration: BoxDecoration(
-                        color: primaryColor.withOpacity(0.15),
+                        color: primaryColor.withValues(alpha: .15),
                         shape: BoxShape.circle,
                       ),
                       child: Center(
@@ -75,7 +72,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 24),
 
-                    // تیتر خوش‌آمدگویی (اختیاری برای زیبایی بیشتر)
                     Text(
                       'خوش آمدید',
                       style: TextStyle(
@@ -96,7 +92,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 32),
 
-                    // فیلد ایمیل
                     Directionality(
                       textDirection: TextDirection.rtl,
                       child: TextFormField(
@@ -132,7 +127,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 16),
 
-                    // فیلد رمز عبور
                     Directionality(
                       textDirection: TextDirection.rtl,
                       child: TextFormField(
@@ -159,7 +153,6 @@ class _LoginScreenState extends State<LoginScreen> {
                               primaryColor: primaryColor,
                               hintColor: hintColor,
                             ).copyWith(
-                              // اضافه کردن دکمه نمایش رمز
                               suffixIcon: IconButton(
                                 icon: Icon(
                                   _isPasswordObscured
@@ -178,13 +171,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 32),
 
-                    // دکمه لاگین / لودینگ
                     BlocConsumer<AuthBloc, AuthState>(
                       listener: (context, state) {
                         if (state is AuthSuccess) {
                           state.result.fold(
                             (failure) {
-                              // نمایش ارور با استایل اسنک‌بار شناور و مدرن
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   behavior: SnackBarBehavior.floating,
@@ -193,7 +184,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   ),
                                   backgroundColor: const Color(
                                     0xFFFF3B30,
-                                  ), // قرمز iOS
+                                  ), 
                                   content: Directionality(
                                     textDirection: TextDirection.rtl,
                                     child: Text(
@@ -237,7 +228,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             style: ElevatedButton.styleFrom(
                               backgroundColor: primaryColor,
                               foregroundColor: Colors
-                                  .black, // رنگ متن دکمه (کنتراست با فیروزه‌ای)
+                                  .black,
                               elevation: 0,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(16),
@@ -312,7 +303,6 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  // متد کمکی برای استایل‌دهی مدرن فیلدهای فرم
   InputDecoration _buildInputDecoration({
     required bool isDark,
     required String hint,
@@ -336,8 +326,8 @@ class _LoginScreenState extends State<LoginScreen> {
         borderRadius: BorderRadius.circular(16),
         borderSide: BorderSide(
           color: isDark
-              ? Colors.white.withOpacity(0.05)
-              : Colors.black.withOpacity(0.05),
+              ? Colors.white.withValues(alpha: .05)
+              : Colors.black.withValues(alpha: .05),
           width: 1,
         ),
       ),
@@ -350,7 +340,7 @@ class _LoginScreenState extends State<LoginScreen> {
         borderSide: const BorderSide(
           color: Color(0xFFFF3B30),
           width: 1.2,
-        ), // رنگ ارور اپل
+        ), 
       ),
       focusedErrorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),

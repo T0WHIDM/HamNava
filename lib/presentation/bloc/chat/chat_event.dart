@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_chat_room_app/domain/entity/message_entity.dart';
 import 'package:flutter_chat_room_app/domain/entity/user_entity.dart';
 
@@ -11,10 +13,16 @@ class LoadMessagesEvent extends ChatEvent {
 
 class SendMessageEvent extends ChatEvent {
   final String chatId;
-  final String text;
+  final String? text;
   final String? replyId;
+  final File? attachment;
 
-  SendMessageEvent({required this.chatId, required this.text, this.replyId});
+  SendMessageEvent({
+    required this.chatId,
+    this.text,
+    this.replyId,
+    this.attachment,
+  });
 }
 
 class ChatInitializeEvent extends ChatEvent {

@@ -27,7 +27,7 @@ class CustomSwitchWidget extends StatelessWidget {
           boxShadow: [
             BoxShadow(
               color: isDarkMode
-                  ? const Color(0xFF0ED0D3).withOpacity(0.3)
+                  ? const Color(0xFF0ED0D3).withValues(alpha: .3)
                   : Colors.transparent,
               blurRadius: 10,
               offset: const Offset(0, 2),
@@ -48,7 +48,7 @@ class CustomSwitchWidget extends StatelessWidget {
                 color: Colors.white,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withValues(alpha: .1),
                     blurRadius: 4,
                     offset: const Offset(0, 2),
                   ),
@@ -70,8 +70,7 @@ class CustomSwitchWidget extends StatelessWidget {
                     color: isDarkMode
                         ? const Color(0xFF0ED0D3)
                         : const Color(0xFFFF9500),
-                    // ✨ FIX: Explicitly remove any inherited text shadows
-                    shadows: const [], // <--- این خط مشکل را حل می‌کند
+                    shadows: const [],
                   ),
                 ),
               ),

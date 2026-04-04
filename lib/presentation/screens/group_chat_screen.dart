@@ -1,3 +1,6 @@
+import 'dart:io';
+import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,7 +12,7 @@ import 'package:flutter_chat_room_app/presentation/bloc/chat/chat_bloc.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/chat/chat_event.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/chat/chat_state.dart';
 import 'package:flutter_chat_room_app/presentation/screens/group_info.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:cached_network_image/cached_network_image.dart'; // ✅ اضافه شد
 import 'package:go_router/go_router.dart';
 import 'package:pocketbase/pocketbase.dart';
 
@@ -27,7 +30,15 @@ class GroupChatScreen extends StatefulWidget {
 class _GroupChatScreenState extends State<GroupChatScreen> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  bool _showScrollToBottom = false;
+
+  final FocusNode _focusNode = FocusNode();
+  MessageEntity? _replyingToMessage;
+
+  File? _selectedImage;
+  final ImagePicker _picker = ImagePicker();
+
+  final ValueNotifier<bool> _showScrollToBottom = ValueNotifier(false);
+
   late String myUserId;
   List<MessageEntity> _messages = [];
   bool _isLoading = true;
@@ -43,6 +54,36 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeOut,
     );
+  }
+
+  void _cancelReply() {
+    setState(() {
+      _replyingToMessage = null;
+    });
+  }
+
+  void _cancelSelectedImage() {
+    setState(() {
+      _selectedImage = null;
+    });
+  }
+
+  Future<void> _pickImage() async {
+    try {
+      final XFile? image = await _picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 70,
+      );
+
+      if (image != null) {
+        setState(() {
+          _selectedImage = File(image.path);
+        });
+        _focusNode.requestFocus();
+      }
+    } catch (e) {
+      _showErrorSnackBar("خطا در انتخاب عکس");
+    }
   }
 
   @override
@@ -75,14 +116,11 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
 
     _scrollController.addListener(() {
       if (_scrollController.offset > 200) {
-        if (!_showScrollToBottom) {
-          setState(() => _showScrollToBottom = true);
-        }
+        if (!_showScrollToBottom.value) _showScrollToBottom.value = true;
       } else {
-        if (_showScrollToBottom) {
-          setState(() => _showScrollToBottom = false);
-        }
+        if (_showScrollToBottom.value) _showScrollToBottom.value = false;
       }
+
       if (_scrollController.position.pixels >=
           _scrollController.position.maxScrollExtent - 50) {
         if (!_isFetchingMore &&
@@ -106,6 +144,8 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
   void dispose() {
     _messageController.dispose();
     _scrollController.dispose();
+    _showScrollToBottom.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
@@ -114,23 +154,27 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final scaffoldBg = isDark ? Colors.black : const Color(0xFFF2F2F7);
 
+    final maxBubbleWidth = MediaQuery.of(context).size.width * 0.7;
+
     return Scaffold(
       backgroundColor: scaffoldBg,
-      floatingActionButton: _showScrollToBottom
-          ? Padding(
-              padding: const EdgeInsets.only(bottom: 80),
-              child: FloatingActionButton.small(
-                backgroundColor: isDark
-                    ? const Color(0xFF1C1C1E)
-                    : Colors.white,
-                foregroundColor: isDark ? Colors.white : Colors.black87,
-                elevation: 4,
-                onPressed: _scrollToBottom,
-                shape: const CircleBorder(),
-                child: const Icon(CupertinoIcons.chevron_down),
-              ),
-            )
-          : null,
+      floatingActionButton: ValueListenableBuilder<bool>(
+        valueListenable: _showScrollToBottom,
+        builder: (context, show, child) {
+          if (!show) return const SizedBox.shrink();
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 80),
+            child: FloatingActionButton.small(
+              backgroundColor: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+              foregroundColor: isDark ? Colors.white : Colors.black87,
+              elevation: 4,
+              onPressed: _scrollToBottom,
+              shape: const CircleBorder(),
+              child: const Icon(CupertinoIcons.chevron_down),
+            ),
+          );
+        },
+      ),
       appBar: _buildAppBar(context, isDark, scaffoldBg),
       body: BlocConsumer<ChatBloc, ChatState>(
         listener: (context, state) {
@@ -169,7 +213,11 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
           if (state is ChatMessageSentResultState) {
             state.result.fold(
               (failure) => _showErrorSnackBar("خطا در ارسال پیام"),
-              (success) => _messageController.clear(),
+              (success) {
+                _messageController.clear();
+                _cancelReply();
+                _cancelSelectedImage();
+              },
             );
           }
           if (state is ChatNewMessageRealTimeState) {
@@ -202,19 +250,15 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
               _showErrorSnackBar("خطا در حذف پیام از سرور");
             }, (success) {});
           }
-          if (state is EditMessageSuccessState) {
-            state.result.fold(
-              (failure) => _showErrorSnackBar("خطا در ویرایش پیام"),
-              (editedMessage) {},
-            );
-          }
         },
         builder: (context, state) {
-          return Column(
-            children: [
-              Expanded(child: _buildMessagesList()),
-              _buildMessageInput(isDark),
-            ],
+          return SafeArea(
+            child: Column(
+              children: [
+                Expanded(child: _buildMessagesList(maxBubbleWidth)),
+                _buildMessageInput(isDark),
+              ],
+            ),
           );
         },
       ),
@@ -254,7 +298,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
         child: Row(
           children: [
             CircleAvatar(
-              backgroundColor: const Color(0xFF0ED0D3).withOpacity(0.2),
+              backgroundColor: const Color(0xFF0ED0D3).withValues(alpha: .2),
               radius: 20,
               child: const Icon(
                 CupertinoIcons.group_solid,
@@ -290,7 +334,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     );
   }
 
-  Widget _buildMessagesList() {
+  Widget _buildMessagesList(double maxBubbleWidth) {
     if (_isLoading) {
       return const Center(child: CupertinoActivityIndicator(radius: 16));
     }
@@ -299,19 +343,20 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
       return buildEmptyState();
     }
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return ListView.builder(
       controller: _scrollController,
       physics: const BouncingScrollPhysics(),
       reverse: true,
+      addAutomaticKeepAlives: false,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       itemCount: _messages.length + (_isFetchingMore ? 1 : 0),
       itemBuilder: (context, index) {
         if (index == _messages.length) {
           return const Padding(
             padding: EdgeInsets.symmetric(vertical: 16),
-            child: Center(
-              child: SpinKitPulsingGrid(color: Color(0xFF0ED0D3), size: 20),
-            ),
+            child: Center(child: CupertinoActivityIndicator(radius: 12)),
           );
         }
 
@@ -320,35 +365,68 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
 
         return Dismissible(
           key: Key(message.id),
-          direction: isMe ? DismissDirection.endToStart : DismissDirection.none,
+          direction: isMe
+              ? DismissDirection.horizontal
+              : DismissDirection.startToEnd,
           background: Container(
-            alignment: Alignment.centerRight,
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            margin: const EdgeInsets.symmetric(vertical: 4),
-            decoration: BoxDecoration(
-              color: CupertinoColors.destructiveRed,
-              borderRadius: BorderRadius.circular(18),
+            alignment: Alignment.centerLeft,
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Icon(
+              CupertinoIcons.reply,
+              color: isDark ? Colors.white70 : Colors.black54,
+              size: 28,
             ),
-            child: const Icon(CupertinoIcons.delete, color: Colors.white),
           ),
+          secondaryBackground: isMe
+              ? Container(
+                  alignment: Alignment.centerRight,
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  margin: const EdgeInsets.symmetric(vertical: 4),
+                  decoration: BoxDecoration(
+                    color: CupertinoColors.destructiveRed,
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  child: const Icon(CupertinoIcons.delete, color: Colors.white),
+                )
+              : null,
+          confirmDismiss: (direction) async {
+            if (direction == DismissDirection.startToEnd) {
+              setState(() {
+                _replyingToMessage = message;
+              });
+              _focusNode.requestFocus();
+              return false;
+            } else if (direction == DismissDirection.endToStart && isMe) {
+              context.read<ChatBloc>().add(
+                DeleteMessageEvent(message.id, widget.conversation.id),
+              );
+              return true;
+            }
+            return false;
+          },
           onDismissed: (direction) {
             setState(() => _messages.removeAt(index));
-            context.read<ChatBloc>().add(
-              DeleteMessageEvent(message.id, widget.conversation.id),
-            );
           },
           child: GestureDetector(
             onLongPress: () {
-              if (isMe) _showEditDialog(message);
+              _showMessageOptions(message, isMe, isDark);
             },
-            child: _buildChatBubble(isMe, message),
+            child: _buildChatBubble(isMe, message, maxBubbleWidth),
           ),
         );
       },
     );
   }
 
-  Widget _buildChatBubble(bool isMe, MessageEntity message) {
+  Widget _buildChatBubble(
+    bool isMe,
+    MessageEntity message,
+    double maxBubbleWidth,
+  ) {
+    final DateTime time =
+        message.created.toLocal();
+    final String formattedTime =
+        '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final senderInfo = _participantsMap[message.sender.id];
     final senderName = senderInfo?.name ?? 'کاربر';
@@ -357,6 +435,24 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     final bubbleBg = isMe
         ? primaryColor
         : (isDark ? const Color(0xFF1C1C1E) : Colors.white);
+
+    String replySenderName = 'کاربر ناشناس';
+    bool isReplyToMe = false;
+
+    if (message.replyTo != null) {
+      MessageEntity? originalReplyMsg;
+      try {
+        originalReplyMsg = _messages.firstWhere(
+          (m) => m.id == message.replyTo!.id,
+        );
+      } catch (_) {}
+
+      final replySenderId =
+          originalReplyMsg?.sender.id ?? message.replyTo!.sender.id;
+      replySenderName =
+          originalReplyMsg?.sender.name ?? message.replyTo!.sender.name;
+      isReplyToMe = replySenderId == myUserId;
+    }
 
     Widget bubbleAndName = Column(
       crossAxisAlignment: isMe
@@ -391,28 +487,129 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
               bottomLeft: Radius.circular(isMe ? 18 : 4),
               bottomRight: Radius.circular(isMe ? 4 : 18),
             ),
-            boxShadow: [
-              if (!isDark && !isMe)
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 5,
-                  offset: const Offset(0, 2),
-                ),
-            ],
           ),
           constraints: BoxConstraints(
-            maxWidth: MediaQuery.of(context).size.width * 0.7,
+            maxWidth: maxBubbleWidth, 
           ),
-          child: Text(
-            message.text ?? "",
-            style: TextStyle(
-              fontFamily: 'CR',
-              fontSize: 15,
-              height: 1.4,
-              color: isMe
-                  ? Colors.black
-                  : (isDark ? Colors.white : Colors.black87),
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (message.attachment != null && message.attachment!.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: CachedNetworkImage(
+                      imageUrl: message.attachment!,
+                      memCacheWidth: 600, 
+                      width:
+                          maxBubbleWidth - 32, 
+                      fit: BoxFit.cover,
+                      placeholder: (context, url) => Container(
+                        width: maxBubbleWidth - 32,
+                        height: 150, 
+                        color: isDark ? Colors.white10 : Colors.black12,
+                        child: const Center(
+                          child: CupertinoActivityIndicator(),
+                        ),
+                      ),
+                      errorWidget: (context, url, error) =>
+                          const Icon(CupertinoIcons.exclamationmark_triangle),
+                    ),
+                  ),
+                ),
+
+              if (message.replyTo != null)
+                Container(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  padding: const EdgeInsets.only(
+                    left: 8,
+                    right: 12,
+                    top: 4,
+                    bottom: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isMe
+                        ? Colors.black.withValues(alpha: .1)
+                        : (isDark
+                              ? Colors.white.withValues(alpha: .05)
+                              : Colors.black.withValues(alpha: .05)),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border(
+                      right: BorderSide(
+                        color: isMe ? Colors.black54 : const Color(0xFF0ED0D3),
+                        width: 4,
+                      ),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        isReplyToMe
+                            ? 'شما'
+                            : replySenderName,
+                        style: TextStyle(
+                          fontFamily: 'GB',
+                          fontSize: 12,
+                          color: isMe
+                              ? Colors.black87
+                              : const Color(0xFF0ED0D3),
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        message.replyTo!.text ?? 'فایل/تصویر',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontFamily: 'CR',
+                          fontSize: 13,
+                          color: isMe
+                              ? Colors.black87.withValues(alpha: .8)
+                              : (isDark
+                                    ? Colors.white70
+                                    : Colors.black87.withValues(alpha: .8)),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+              if (message.text != null && message.text!.isNotEmpty)
+                Wrap(
+                  alignment: WrapAlignment.end,
+                  crossAxisAlignment: WrapCrossAlignment.end,
+                  children: [
+                    Text(
+                      message.text ?? "",
+                      style: TextStyle(
+                        fontFamily: 'CR',
+                        fontSize: 15,
+                        height: 1.4,
+                        color: isMe
+                            ? Colors.black
+                            : (isDark ? Colors.white : Colors.black87),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 2),
+                      child: Text(
+                        formattedTime,
+                        style: TextStyle(
+                          fontFamily: 'CR',
+                          fontSize: 10,
+                          color: isMe
+                              ? Colors.black54
+                              : (isDark ? Colors.white54 : Colors.black54),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+            ],
           ),
         ),
       ],
@@ -452,129 +649,234 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
   }
 
   Widget _buildMessageInput(bool isDark) {
-    // رنگ‌بندی مدرن مشابه اپل/تلگرام
     final inputBg = isDark ? const Color(0xFF2C2C2E) : Colors.white;
 
     return Container(
-      // اضافه کردن پدینگ پایین برای فاصله از لبه گوشی‌های مدرن (SafeArea)
       padding: const EdgeInsets.only(left: 8, right: 8, top: 12, bottom: 20),
-
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          // دکمه الصاق فایل (استایل آیکون +)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 4),
-            child: CupertinoButton(
-              padding: EdgeInsets.zero,
-              onPressed: () {}, // اکشن الصاق فایل
-              child: Icon(
-                Icons.attach_file_sharp,
-                color: isDark ? Colors.grey[400] : Colors.grey[600],
-                size: 28,
-              ),
-            ),
-          ),
-
-          // تکست فیلد ورودی
-          Expanded(
-            child: Directionality(
-              textDirection: TextDirection.rtl,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: inputBg,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: isDark
-                        ? Colors.white.withOpacity(0.05)
-                        : Colors.black.withOpacity(0.05),
-                    width: 1,
-                  ),
-                ),
-                child: TextField(
-                  controller: _messageController,
-                  minLines: 1,
-                  maxLines: 5,
-                  textInputAction: TextInputAction.newline,
-                  style: TextStyle(
-                    fontFamily: 'CR',
-                    fontSize: 15,
-                    color: isDark ? Colors.white : Colors.black87,
-                  ),
-                  decoration: InputDecoration(
-                    hintText: 'پیام...',
-                    hintStyle: TextStyle(
-                      fontFamily: 'CR',
-                      color: isDark ? Colors.grey[500] : Colors.grey[400],
-                    ),
-                    border: InputBorder.none,
-                    isDense: true, // کوچک کردن ارتفاع پیش‌فرض
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 10,
-                    ),
-                  ),
+          if (_selectedImage != null)
+            Container(
+              margin: const EdgeInsets.only(bottom: 8, right: 40, left: 40),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: inputBg,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: isDark
+                      ? Colors.white.withValues(alpha: .05)
+                      : Colors.black.withValues(alpha: .05),
                 ),
               ),
-            ),
-          ),
-
-          const SizedBox(width: 8),
-
-          // ✅ دکمه ارسال هوشمند (فقط در صورتی روشن می‌شود که متنی تایپ شده باشد)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 2),
-            child: ValueListenableBuilder<TextEditingValue>(
-              valueListenable: _messageController,
-              builder: (context, value, child) {
-                final hasText = value.text.trim().isNotEmpty;
-                return GestureDetector(
-                  onTap: () {
-                    if (hasText) {
-                      context.read<ChatBloc>().add(
-                        SendMessageEvent(
-                          chatId: widget.conversation.id,
-                          text: _messageController.text.trim(),
-                        ),
-                      );
-                    }
-                  },
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    height: 38,
-                    width: 38,
-                    decoration: BoxDecoration(
-                      // اگر متن داشته باشد فیروزه‌ای، در غیر این صورت خاکستری
-                      color: hasText
-                          ? const Color(0xFF0ED0D3)
-                          : (isDark
-                                ? const Color(0xFF2C2C2E)
-                                : Colors.grey[300]),
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        if (hasText) // سایه درخشان هنگام تایپ
-                          BoxShadow(
-                            color: const Color(0xFF0ED0D3).withOpacity(0.3),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                      ],
+              child: Row(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.file(
+                      _selectedImage!,
+                      width: 45,
+                      height: 45,
+                      fit: BoxFit.cover,
                     ),
-                    child: Center(
-                      child: Icon(
-                        Icons.send,
-                        color: hasText
-                            ? Colors.black
-                            : (isDark ? Colors.grey[500] : Colors.grey[500]),
-                        size: 20,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'عکس انتخاب شد',
+                      style: TextStyle(
+                        fontFamily: 'CR',
+                        fontSize: 13,
+                        color: isDark ? Colors.white : Colors.black87,
                       ),
                     ),
                   ),
-                );
-              },
+                  IconButton(
+                    icon: Icon(
+                      CupertinoIcons.clear_circled_solid,
+                      color: isDark ? Colors.grey[600] : Colors.grey[400],
+                    ),
+                    onPressed: _cancelSelectedImage,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                ],
+              ),
             ),
+
+          if (_replyingToMessage != null)
+            Container(
+              margin: const EdgeInsets.only(bottom: 8, right: 40, left: 40),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: inputBg,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: isDark
+                      ? Colors.white.withValues(alpha: .05)
+                      : Colors.black.withValues(alpha: .05),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 4,
+                    height: 35,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0ED0D3),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _replyingToMessage!.sender.id == myUserId
+                              ? 'پاسخ به خودتان'
+                              : 'پاسخ به ${_replyingToMessage!.sender.name}',
+                          style: const TextStyle(
+                            fontFamily: 'GB',
+                            fontSize: 12,
+                            color: Color(0xFF0ED0D3),
+                          ),
+                        ),
+                        Text(
+                          _replyingToMessage!.text ?? 'فایل/تصویر',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontFamily: 'CR',
+                            fontSize: 13,
+                            color: isDark ? Colors.white70 : Colors.black54,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      CupertinoIcons.clear_circled_solid,
+                      color: isDark ? Colors.grey[600] : Colors.grey[400],
+                    ),
+                    onPressed: _cancelReply,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                ],
+              ),
+            ),
+
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  onPressed: _pickImage,
+                  child: Icon(
+                    Icons.attach_file_rounded,
+                    color: isDark ? Colors.grey[400] : Colors.grey[600],
+                    size: 28,
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Directionality(
+                  textDirection: TextDirection.rtl,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: inputBg,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: isDark
+                            ? Colors.white.withValues(alpha: .05)
+                            : Colors.black.withValues(alpha: .05),
+                        width: 1,
+                      ),
+                    ),
+                    child: TextField(
+                      controller: _messageController,
+                      focusNode: _focusNode,
+                      minLines: 1,
+                      maxLines: 5,
+                      textInputAction: TextInputAction.newline,
+                      style: TextStyle(
+                        fontFamily: 'CR',
+                        fontSize: 15,
+                        color: isDark ? Colors.white : Colors.black87,
+                      ),
+                      decoration: InputDecoration(
+                        hintText: 'پیام...',
+                        hintStyle: TextStyle(
+                          fontFamily: 'CR',
+                          color: isDark ? Colors.grey[500] : Colors.grey[400],
+                        ),
+                        border: InputBorder.none,
+                        isDense: true,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 10,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 2),
+                child: ValueListenableBuilder<TextEditingValue>(
+                  valueListenable: _messageController,
+                  builder: (context, value, child) {
+                    final hasContent =
+                        value.text.trim().isNotEmpty || _selectedImage != null;
+                    return GestureDetector(
+                      onTap: () {
+                        if (hasContent) {
+                          context.read<ChatBloc>().add(
+                            SendMessageEvent(
+                              chatId: widget.conversation.id,
+                              text: _messageController.text.trim(),
+                              replyId: _replyingToMessage?.id,
+                              attachment: _selectedImage,
+                            ),
+                          );
+                        }
+                      },
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        height: 38,
+                        width: 38,
+                        decoration: BoxDecoration(
+                          color: hasContent
+                              ? const Color(0xFF0ED0D3)
+                              : (isDark
+                                    ? const Color(0xFF2C2C2E)
+                                    : Colors.grey[300]),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Icon(
+                            Icons.send,
+                            color: hasContent
+                                ? Colors.black
+                                : (isDark
+                                      ? Colors.grey[500]
+                                      : Colors.grey[500]),
+                            size: 20,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(width: 4),
+            ],
           ),
-          const SizedBox(width: 4),
         ],
       ),
     );
@@ -589,7 +891,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: const Color(0xFF0ED0D3).withOpacity(0.1),
+              color: const Color(0xFF0ED0D3).withValues(alpha: .1),
             ),
             child: const Icon(
               CupertinoIcons.chat_bubble_2_fill,
@@ -689,6 +991,81 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
               ),
             ),
           ],
+        );
+      },
+    );
+  }
+
+  void _showMessageOptions(MessageEntity message, bool isMe, bool isDark) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (bottomSheetContext) {
+        return SafeArea(
+          child: Directionality(
+            textDirection: TextDirection.rtl,
+            child: Wrap(
+              children: [
+                if (message.text != null && message.text!.isNotEmpty)
+                  ListTile(
+                    leading: Icon(
+                      CupertinoIcons.doc_on_clipboard,
+                      color: isDark ? Colors.white70 : Colors.black87,
+                    ),
+                    title: Text(
+                      'کپی کردن متن',
+                      style: TextStyle(
+                        fontFamily: 'CR',
+                        color: isDark ? Colors.white : Colors.black87,
+                      ),
+                    ),
+                    onTap: () async {
+                      Navigator.pop(bottomSheetContext);
+                      await Clipboard.setData(
+                        ClipboardData(text: message.text!),
+                      );
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            backgroundColor: Color(0xFF0ED0D3),
+                            content: Text(
+                              'متن کپی شد',
+                              textDirection: TextDirection.rtl,
+                              style: TextStyle(
+                                fontFamily: 'CR',
+                                color: Colors.black87,
+                              ),
+                            ),
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
+                      }
+                    },
+                  ),
+                if (isMe)
+                  ListTile(
+                    leading: Icon(
+                      CupertinoIcons.pencil,
+                      color: isDark ? Colors.white70 : Colors.black87,
+                    ),
+                    title: Text(
+                      'ویرایش پیام',
+                      style: TextStyle(
+                        fontFamily: 'CR',
+                        color: isDark ? Colors.white : Colors.black87,
+                      ),
+                    ),
+                    onTap: () {
+                      Navigator.pop(bottomSheetContext);
+                      _showEditDialog(message);
+                    },
+                  ),
+              ],
+            ),
+          ),
         );
       },
     );

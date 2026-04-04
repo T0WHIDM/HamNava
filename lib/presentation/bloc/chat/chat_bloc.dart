@@ -91,6 +91,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         chatId: event.chatId,
         text: event.text,
         replyId: event.replyId,
+        attachment: event.attachment,
       );
       emit(ChatMessageSentResultState(result));
     });

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dartz/dartz.dart';
 import 'package:flutter_chat_room_app/core/exception/api_exeption.dart';
 import 'package:flutter_chat_room_app/domain/entity/conversation_entity.dart';
@@ -41,7 +43,7 @@ abstract class IChatRepository {
     required String chatId,
     String? text,
     String? replyId,
-    // File? attachment, //
+    File? attachment,
   });
 
   Stream<({String action, MessageEntity message})> listenToMessages(

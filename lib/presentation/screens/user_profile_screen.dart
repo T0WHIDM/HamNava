@@ -2,10 +2,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_room_app/domain/entity/user_entity.dart';
 import 'package:flutter_chat_room_app/presentation/screens/chat_screen.dart';
+import 'package:flutter_chat_room_app/presentation/screens/home_screen.dart';
 import 'package:go_router/go_router.dart';
 
 class UserProfileScreen extends StatelessWidget {
-  // ۱. ایمن‌سازی state.extra با قرار دادن نوع داده به صورت Nullable
   final UserEntity? user;
 
   const UserProfileScreen(this.user, {super.key});
@@ -14,13 +14,12 @@ class UserProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // ۲. مدیریت حالت Null برای جلوگیری از خطای type cast هنگام رفرش شدن روتر
     if (user == null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (context.canPop()) {
           context.pop();
         } else {
-          context.go('/'); // هدایت به صفحه اصلی در صورت نبود تاریخچه
+          context.goNamed(HomeScreen.namedRoute); 
         }
       });
       return const Scaffold(
@@ -31,7 +30,6 @@ class UserProfileScreen extends StatelessWidget {
     final nonNullUser = user!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
-    // پالت رنگی مدرن (Inset-Grouped)
     final scaffoldBg = isDark ? const Color(0xFF000000) : const Color(0xFFF2F2F7);
     final cardBg = isDark ? const Color(0xFF1C1C1E) : Colors.white;
     final primaryColor = const Color(0xFF0ED0D3);
@@ -43,7 +41,6 @@ class UserProfileScreen extends StatelessWidget {
         child: CustomScrollView(
           physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
           slivers: [
-            // هدر داینامیک و مدرن
             SliverAppBar(
               expandedHeight: 340,
               stretch: true,
@@ -55,7 +52,7 @@ class UserProfileScreen extends StatelessWidget {
                 child: GestureDetector(
                   onTap: () => context.pop(),
                   child: CircleAvatar(
-                    backgroundColor: Colors.black.withOpacity(0.4),
+                    backgroundColor: Colors.black.withValues(alpha: .4),
                     child: const Icon(
                       CupertinoIcons.back,
                       color: Colors.white,
@@ -72,26 +69,24 @@ class UserProfileScreen extends StatelessWidget {
                 background: Stack(
                   fit: StackFit.expand,
                   children: [
-                    // پس‌زمینه آواتار/کاور
                     Container(
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                           colors: [
-                            primaryColor.withOpacity(0.6),
-                            primaryColor.withOpacity(0.2),
+                            primaryColor.withValues(alpha: .6),
+                            primaryColor.withValues(alpha: .2),
                           ],
                         ),
                       ),
                       child: Icon(
                         CupertinoIcons.person_solid,
                         size: 140,
-                        color: Colors.white.withOpacity(0.3),
+                        color: Colors.white.withValues(alpha: .3),
                       ),
                     ),
                     
-                    // گرادینت تیره پایین هدر برای خوانایی بهتر متن
                     Positioned(
                       bottom: 0,
                       left: 0,
@@ -105,15 +100,14 @@ class UserProfileScreen extends StatelessWidget {
                             colors: [
                               Colors.transparent,
                               isDark
-                                  ? Colors.black.withOpacity(0.9)
-                                  : Colors.black.withOpacity(0.7),
+                                  ? Colors.black.withValues(alpha: .9)
+                                  : Colors.black.withValues(alpha: .7),
                             ],
                           ),
                         ),
                       ),
                     ),
                     
-                    // نام و یوزرنیم
                     Positioned(
                       bottom: 24,
                       right: 24,
@@ -124,7 +118,7 @@ class UserProfileScreen extends StatelessWidget {
                           Text(
                             nonNullUser.name,
                             style: const TextStyle(
-                              fontFamily: 'CR', // یا GB در صورت نیاز
+                              fontFamily: 'CR', 
                               fontSize: 28,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
@@ -138,7 +132,7 @@ class UserProfileScreen extends StatelessWidget {
                             style: TextStyle(
                               fontFamily: 'CR',
                               fontSize: 16,
-                              color: Colors.white.withOpacity(0.8),
+                              color: Colors.white.withValues(alpha: .8),
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -151,15 +145,13 @@ class UserProfileScreen extends StatelessWidget {
               ),
             ),
 
-            // محتوای صفحه
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // عنوان بخش
-                    Padding(
+                   Padding(
                       padding: const EdgeInsets.only(right: 8.0, bottom: 8.0),
                       child: Text(
                         'اطلاعات کاربر',
@@ -171,7 +163,6 @@ class UserProfileScreen extends StatelessWidget {
                       ),
                     ),
 
-                    // کارت Inset-Grouped اطلاعات
                     Container(
                       decoration: BoxDecoration(
                         color: cardBg,
@@ -184,7 +175,7 @@ class UserProfileScreen extends StatelessWidget {
                             leading: Container(
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                color: CupertinoColors.activeBlue.withOpacity(0.15),
+                                color: CupertinoColors.activeBlue.withValues(alpha: .15),
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: const Icon(
@@ -204,7 +195,7 @@ class UserProfileScreen extends StatelessWidget {
                             subtitle: Text(
                               nonNullUser.email,
                               style: TextStyle(
-                                fontFamily: 'CR', // یا GB برای وزن بیشتر
+                                fontFamily: 'CR',
                                 fontSize: 16,
                                 color: isDark ? Colors.white : Colors.black87,
                                 fontWeight: FontWeight.bold,
@@ -217,7 +208,6 @@ class UserProfileScreen extends StatelessWidget {
 
                     const SizedBox(height: 32),
 
-                    // دکمه پریمیوم ارسال پیام
                     SizedBox(
                       width: double.infinity,
                       height: 52,

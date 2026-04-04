@@ -103,7 +103,7 @@ class GroupInfoScreen extends StatelessWidget {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(
-                            failure.message, // نمایش پیام خطای سرور
+                            failure.message,
                             style: const TextStyle(
                               fontFamily: 'cr',
                               color: Colors.white,

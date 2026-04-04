@@ -24,7 +24,6 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
   @override
   void initState() {
     super.initState();
-    // هر بار که متن تغییر کند، صفحه رفرش می‌شود تا وضعیت خالی بودن کادر بررسی شود
     _searchController.addListener(() => setState(() {}));
   }
 
@@ -35,7 +34,6 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
   }
 
   void _onSearchChanged(String query) {
-    // جلوگیری از ارسال درخواست وقتی کادر خالی است
     if (query.trim().isEmpty) {
       return;
     }
@@ -44,14 +42,12 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
 
   void _clearSearch() {
     _searchController.clear();
-    // نیازی به کار اضافی نیست، listener بالا به طور خودکار صفحه را رفرش می‌کند
   }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    // پالت رنگی مدرن
     final scaffoldBg = isDark ? Colors.black : const Color(0xFFF2F2F7);
     final cardBg = isDark ? const Color(0xFF1C1C1E) : Colors.white;
     final primaryColor = const Color(0xFF0ED0D3);
@@ -121,7 +117,6 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
         },
         child: Column(
           children: [
-            // نوار جستجوی مدرن
             Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: 16.0,
@@ -144,7 +139,6 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
               ),
             ),
 
-            // لیست نتایج یا حالت‌های دیگر
             Expanded(
               child: BlocBuilder<UserBloc, UserState>(
                 buildWhen: (previous, current) {
@@ -152,7 +146,6 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
                       current is! AddFriendComplatedState;
                 },
                 builder: (context, state) {
-                  // تغییر اصلی: اگر کادر جستجو خالی باشد، فوراً حالت راهنما نشان داده می‌شود
                   if (_searchController.text.trim().isEmpty) {
                     return _buildEmptyState();
                   }
@@ -233,7 +226,7 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
                 vertical: 8,
               ),
               leading: CircleAvatar(
-                backgroundColor: primaryColor.withOpacity(0.2),
+                backgroundColor: primaryColor.withValues(alpha: .2),
                 child: Icon(CupertinoIcons.person_fill, color: primaryColor),
               ),
               title: Text(
@@ -280,7 +273,7 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
           separatorBuilder: (context, index) => Divider(
             height: 1,
             thickness: 0.5,
-            color: Colors.grey.withOpacity(0.2),
+            color: Colors.grey.withValues(alpha: .2),
             indent: 72,
           ),
         ),
@@ -327,7 +320,7 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: CupertinoColors.activeBlue.withOpacity(0.1),
+              color: CupertinoColors.activeBlue.withValues(alpha: .1),
             ),
             child: const Icon(
               CupertinoIcons.search,

@@ -26,7 +26,6 @@ class _FriendsListScreenState extends State<FriendsListScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     const primaryColor = Color(0xFF0ED0D3);
 
-    // رنگ‌های استایل iOS/Premium
     final scaffoldBg = isDark ? const Color(0xFF000000) : const Color(0xFFF2F2F7);
     final cardColor = isDark ? const Color(0xFF1C1C1E) : const Color(0xFFFFFFFF);
     final dividerColor = isDark ? Colors.grey.shade800 : Colors.grey.shade200;
@@ -43,7 +42,6 @@ class _FriendsListScreenState extends State<FriendsListScreen> {
         child: CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
           slivers: [
-            // 1. هدر صفحه
             SliverAppBar(
               expandedHeight: 60,
               pinned: true,
@@ -60,7 +58,6 @@ class _FriendsListScreenState extends State<FriendsListScreen> {
               centerTitle: true,
             ),
       
-            // 2. بدنه صفحه (مدیریت State ها)
             BlocBuilder<UserBloc, UserState>(
               builder: (context, state) {
                 if (state is FriendsListLoadingState) {
@@ -90,7 +87,6 @@ class _FriendsListScreenState extends State<FriendsListScreen> {
                         return _buildEmptyState(isDark);
                       }
       
-                      // 3. لیست Inset-Grouped (طراحی مدرن)
                       return SliverToBoxAdapter(
                         child: Padding(
                           padding: const EdgeInsets.all(16.0),
@@ -115,7 +111,7 @@ class _FriendsListScreenState extends State<FriendsListScreen> {
                                 itemCount: success.length,
                                 separatorBuilder: (context, index) => Divider(
                                   height: 1,
-                                  indent: 80, // شروع خط از بعد از آواتار
+                                  indent: 80,
                                   endIndent: 16,
                                   color: dividerColor,
                                 ),
@@ -141,7 +137,6 @@ class _FriendsListScreenState extends State<FriendsListScreen> {
     );
   }
 
-  // ویجت ردیف هر دوست
   Widget _buildFriendRow(BuildContext context, UserEntity friend, bool isDark, Color primaryColor) {
     return Material(
       color: Colors.transparent,
@@ -153,7 +148,6 @@ class _FriendsListScreenState extends State<FriendsListScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Row(
             children: [
-              // آواتار
               CircleAvatar(
                 radius: 26,
                 backgroundColor: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
@@ -166,7 +160,6 @@ class _FriendsListScreenState extends State<FriendsListScreen> {
               ),
               const SizedBox(width: 16),
               
-              // اطلاعات کاربر
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -195,7 +188,6 @@ class _FriendsListScreenState extends State<FriendsListScreen> {
                 ),
               ),
               
-              // دکمه شروع چت (شیک و کپسولی)
               GestureDetector(
                 onTap: () {
                   context.pushNamed(
@@ -227,7 +219,6 @@ class _FriendsListScreenState extends State<FriendsListScreen> {
     );
   }
 
-  // ویجت حالت خالی (وقتی دوستی وجود ندارد)
   Widget _buildEmptyState(bool isDark) {
     return SliverFillRemaining(
       hasScrollBody: false,
@@ -269,7 +260,7 @@ class _FriendsListScreenState extends State<FriendsListScreen> {
                 color: isDark ? Colors.grey.shade400 : Colors.grey.shade500,
               ),
             ),
-            const SizedBox(height: 40), // برای ایجاد تعادل در وسط صفحه
+            const SizedBox(height: 40), 
           ],
         ),
       ),

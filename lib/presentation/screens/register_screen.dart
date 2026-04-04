@@ -46,10 +46,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // تشخیص حالت دارک مود
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    // پالت رنگی پریمیوم
     final bgColor = isDark ? const Color(0xFF000000) : const Color(0xFFF2F2F7);
     final cardColor = isDark ? const Color(0xFF1C1C1E) : Colors.white;
     final primaryColor = const Color(0xFF0ED0D3);
@@ -93,7 +91,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                     const SizedBox(height: 24),
 
-                    // بخش انتخاب عکس پروفایل به سبک iOS
                     Stack(
                       children: [
                         Container(
@@ -125,7 +122,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           bottom: 0,
                           child: GestureDetector(
                             onTap: () {
-                              // اکشن انتخاب عکس
                             },
                             child: Container(
                               width: 36,
@@ -147,7 +143,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                     const SizedBox(height: 32),
 
-                    // فیلد نام
                     Directionality(
                       textDirection: TextDirection.rtl,
                       child: TextFormField(
@@ -176,7 +171,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                     const SizedBox(height: 16),
 
-                    // فیلد نام کاربری
                     Directionality(
                       textDirection: TextDirection.rtl,
                       child: TextFormField(
@@ -212,7 +206,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                     const SizedBox(height: 16),
 
-                    // فیلد ایمیل
                     Directionality(
                       textDirection: TextDirection.rtl,
                       child: TextFormField(
@@ -248,7 +241,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                     const SizedBox(height: 16),
 
-                    // فیلد رمز عبور
                     Directionality(
                       textDirection: TextDirection.rtl,
                       child: TextFormField(
@@ -296,7 +288,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                     const SizedBox(height: 16),
 
-                    // فیلد تکرار رمز عبور
                     Directionality(
                       textDirection: TextDirection.rtl,
                       child: TextFormField(
@@ -345,7 +336,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                     const SizedBox(height: 32),
 
-                    // دکمه ثبت نام / لودینگ
                     BlocConsumer<AuthBloc, AuthState>(
                       listener: (context, state) {
                         if (state is AuthSuccess) {
@@ -435,7 +425,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                     const SizedBox(height: 24),
 
-                    // لینک ورود به اکانت
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       textDirection: TextDirection.rtl,
@@ -477,7 +466,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  // متد کمکی برای استایل‌دهی یکپارچه به فیلدها
   InputDecoration _buildInputDecoration({
     required bool isDark,
     required String hint,
@@ -501,8 +489,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
         borderRadius: BorderRadius.circular(16),
         borderSide: BorderSide(
           color: isDark
-              ? Colors.white.withOpacity(0.05)
-              : Colors.black.withOpacity(0.05),
+              ? Colors.white.withValues(alpha: .05)
+              : Colors.black.withValues(alpha: .05),
           width: 1,
         ),
       ),
@@ -515,7 +503,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         borderSide: const BorderSide(
           color: Color(0xFFFF3B30),
           width: 1.2,
-        ), // قرمز استاندارد iOS
+        ),
       ),
       focusedErrorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),

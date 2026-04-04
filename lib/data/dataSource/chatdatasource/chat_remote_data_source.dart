@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter_chat_room_app/core/di/di.dart';
 import 'package:flutter_chat_room_app/core/exception/api_exeption.dart';
 import 'package:flutter_chat_room_app/data/dataSource/chatdatasource/chat_data_source.dart';
 import 'package:flutter_chat_room_app/data/dtos/conversation_dto.dart';
 import 'package:flutter_chat_room_app/data/dtos/message_dto.dart';
+import 'package:http/http.dart' as http;
 import 'package:pocketbase/pocketbase.dart';
 
 class ChatRemoteDataSourceImpl implements IChatDatasource {
@@ -197,18 +199,26 @@ class ChatRemoteDataSourceImpl implements IChatDatasource {
     required String chatId,
     String? text,
     String? replyId,
+    File? attachment,
   }) async {
     try {
       final body = <String, dynamic>{
         "chat_id": chatId,
         "sender_id": pb.authStore.record?.id,
-        "text": text,
       };
+
+      if (text != null && text.isNotEmpty) body["text"] = text;
+
       if (replyId != null) body["reply_to"] = replyId;
+
+      List<http.MultipartFile> files = [];
+      if (attachment != null) {
+        files.add(await http.MultipartFile.fromPath('file', attachment.path));
+      }
 
       final record = await pb
           .collection('messages')
-          .create(body: body, expand: 'sender_id,reply_to');
+          .create(body: body, files: files, expand: 'sender_id,reply_to');
 
       await pb
           .collection('chat')

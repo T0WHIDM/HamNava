@@ -13,7 +13,6 @@ import 'package:flutter_chat_room_app/presentation/customWidget/custom_switch_wi
 import 'package:flutter_chat_room_app/presentation/screens/about_screen.dart';
 import 'package:flutter_chat_room_app/presentation/screens/edit_profile_screen.dart';
 import 'package:flutter_chat_room_app/presentation/screens/login_screen.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -32,7 +31,6 @@ class _SettingScreenState extends State<SettingScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     const primaryColor = Color(0xFF0ED0D3);
 
-    // رنگ‌های استایل iOS/Premium
     final scaffoldBg = isDark
         ? const Color(0xFF000000)
         : const Color(0xFFF2F2F7);
@@ -85,7 +83,6 @@ class _SettingScreenState extends State<SettingScreen> {
               parent: AlwaysScrollableScrollPhysics(),
             ),
             slivers: [
-              // 1. هدر صفحه (AppBar)
               SliverAppBar(
                 expandedHeight: 60.0,
                 pinned: true,
@@ -137,7 +134,6 @@ class _SettingScreenState extends State<SettingScreen> {
                           return Column(
                             children: [
                               const SizedBox(height: 20),
-                              // 2. بخش پروفایل کاربری
                               Hero(
                                 tag: 'user_avatar',
                                 child: Container(
@@ -228,7 +224,6 @@ class _SettingScreenState extends State<SettingScreen> {
                                         color: Colors.blueAccent,
                                         isDark: isDark,
                                         onTap: () {
-                                          // TODO: پیاده‌سازی تغییر عکس
                                         },
                                       ),
                                     ),
@@ -246,7 +241,6 @@ class _SettingScreenState extends State<SettingScreen> {
                 ),
               ),
 
-              // 4. کارت تنظیمات عمومی
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),

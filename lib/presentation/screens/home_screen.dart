@@ -47,7 +47,6 @@ class _HomeScreenState extends State<HomeScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     const primaryColor = Color(0xFF0ED0D3);
 
-    // رنگ‌های استایل iOS/Premium
     final scaffoldBg = isDark ? const Color(0xFF000000) : const Color(0xFFFFFFFF);
     final searchBgColor = isDark ? const Color(0xFF1C1C1E) : const Color(0xFFF2F2F7);
 
@@ -66,7 +65,6 @@ class _HomeScreenState extends State<HomeScreen> {
           child: CustomScrollView(
             physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
             slivers: [
-              // 1. هدر صفحه (AppBar) مدرن
               SliverAppBar(
                 floating: true,
                 snap: true,
@@ -90,7 +88,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       context.pushNamed(UserSearchScreen.routeName);
                     },
                     icon: Icon(
-                      CupertinoIcons.square_pencil, // آیکون مدرن ایجاد چت
+                      CupertinoIcons.square_pencil, 
                       color: isDark ? Colors.white : Colors.black87,
                       size: 24,
                     ),
@@ -112,7 +110,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       }
                     },
                     icon: Icon(
-                      CupertinoIcons.person_2, // آیکون مدرن ایجاد گروه
+                      CupertinoIcons.person_2, 
                       color: isDark ? Colors.white : Colors.black87,
                       size: 24,
                     ),
@@ -121,7 +119,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
 
-              // 2. نوار جستجوی اختصاصی (iOS Style)
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
@@ -169,7 +166,6 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             ),
                           ),
-                          // دکمه پاک کردن متن جستجو
                           if (searchQuery.isNotEmpty)
                             GestureDetector(
                               onTap: () {
@@ -194,7 +190,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
 
-              // 3. بدنه صفحه و لیست گفتگوها
               BlocBuilder<ChatBloc, ChatState>(
                 buildWhen: (previous, current) {
                   return current is ChatLoadingState || current is ChatListSUccessState;
@@ -238,7 +233,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           return _buildEmptyState(context, isDark, isSearchEmpty: searchQuery.isNotEmpty);
                         }
 
-                        // نمایش لیست چت‌ها از فایل جداگانه (ChatListItem یک Sliver است)
                         return ChatListItem(filteredList);
                       },
                     );
@@ -255,7 +249,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // 4. حالت خالی مدرن (وقتی چتی نیست یا جستجو نتیجه ندارد)
   Widget _buildEmptyState(BuildContext context, bool isDark, {bool isSearchEmpty = false}) {
     return SliverFillRemaining(
       hasScrollBody: false,

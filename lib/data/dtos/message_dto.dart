@@ -31,35 +31,42 @@ class MessageDto {
   factory MessageDto.fromRecord(RecordModel record) {
     MessageDto? replyData;
     RecordModel? senderRecord;
-    
-    try {
-      final singleReplyRecord = record.get<RecordModel>('expand.reply_to');
-      replyData = MessageDto.fromRecord(singleReplyRecord);
-    } catch (_) {
-      replyData = null;
-    }
-
-    try {
-      final senders = record.get<List<RecordModel>>('expand.sender_id');
-      if (senders.isNotEmpty) {
-        senderRecord = senders.first;
-      }
-    } catch (_) {
-      senderRecord = null;
-    }
-
     List<RecordModel> readByList = [];
-    try {
-      readByList = record.get<List<RecordModel>>('expand.read_by');
-    } catch (_) {
-      readByList = [];
+
+    // دسترسی مستقیم به مپ اکسپند بدون ایجاد خطای پرهزینه
+    final expand = record.expand;
+
+    // 1. بررسی و استخراج reply_to
+    if (expand.containsKey('reply_to')) {
+      final replyObj = expand['reply_to'];
+      if (replyObj != null && replyObj.isNotEmpty) {
+        // پاکت‌بیس معمولا expand را به صورت لیست برمی‌گرداند حتی برای سینگل
+        replyData = MessageDto.fromRecord(replyObj.first);
+      }
+    }
+
+    // 2. بررسی و استخراج sender_id
+    if (expand.containsKey('sender_id')) {
+      final senderObj = expand['sender_id'];
+      if (senderObj != null && senderObj.isNotEmpty) {
+        senderRecord = senderObj.first;
+      }
+    }
+
+    // 3. بررسی و استخراج read_by
+    if (expand.containsKey('read_by')) {
+      final readByObj = expand['read_by'];
+      if (readByObj != null) {
+        // cast سریع لیست
+        readByList = List<RecordModel>.from(readByObj);
+      }
     }
 
     return MessageDto(
       id: record.id,
       text: record.getStringValue('text'),
       chatId: record.getStringValue('chat_id'),
-      attachment: record.getStringValue('attachment'),
+      attachment: record.getStringValue('file'),
       created: DateTime.parse(record.getStringValue('created')),
       sender: senderRecord != null ? UserDto.fromRecord(senderRecord) : null,
       senderId: record.getStringValue('sender_id'),

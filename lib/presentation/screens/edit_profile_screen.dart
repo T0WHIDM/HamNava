@@ -64,7 +64,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    // پالت رنگی مدرن
     final scaffoldBg = isDark ? Colors.black : const Color(0xFFF2F2F7);
     final cardBg = isDark ? const Color(0xFF1C1C1E) : Colors.white;
     final primaryColor = const Color(0xFF0ED0D3);
@@ -148,7 +147,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        // کارت حاوی فیلدهای فرم
                         Container(
                           decoration: BoxDecoration(
                             color: cardBg,
@@ -163,15 +161,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                 label: 'نام و نام خانوادگی',
                                 isDark: isDark,
                                 validator: (value) {
-                                  if (value == null || value.trim().isEmpty)
+                                  if (value == null || value.trim().isEmpty) {
                                     return 'لطفاً نام خود را وارد کنید';
+                                  }
                                   return null;
                                 },
                               ),
                               Divider(
                                 height: 1,
                                 thickness: 0.5,
-                                color: Colors.grey.withOpacity(0.2),
+                                color: Colors.grey.withValues(alpha: .2),
                                 indent: 56,
                               ),
                               _buildTextField(
@@ -181,17 +180,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                 label: 'نام کاربری (یوزرنیم)',
                                 isDark: isDark,
                                 validator: (value) {
-                                  if (value == null || value.trim().isEmpty)
+                                  if (value == null || value.trim().isEmpty) {
                                     return 'لطفاً نام کاربری را وارد کنید';
-                                  if (value.length < 3)
+                                  }
+                                  if (value.length < 3) {
                                     return 'نام کاربری باید حداقل ۳ حرف باشد';
+                                  }
                                   return null;
                                 },
                               ),
                               Divider(
                                 height: 1,
                                 thickness: 0.5,
-                                color: Colors.grey.withOpacity(0.2),
+                                color: Colors.grey.withValues(alpha: .2),
                                 indent: 56,
                               ),
                               _buildTextField(
@@ -202,11 +203,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                 keyboardType: TextInputType.emailAddress,
                                 isDark: isDark,
                                 validator: (value) {
-                                  if (value == null || value.trim().isEmpty)
+                                  if (value == null || value.trim().isEmpty) {
                                     return 'لطفاً ایمیل خود را وارد کنید';
+                                  }
                                   if (!value.contains('@') ||
-                                      !value.contains('.'))
+                                      !value.contains('.')) {
                                     return 'ایمیل نامعتبر است';
+                                  }
                                   return null;
                                 },
                               ),
@@ -219,7 +222,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 ),
               ),
 
-              // دکمه ذخیره در پایین صفحه
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: BlocBuilder<UserBloc, UserState>(
@@ -255,7 +257,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   },
                 ),
               ),
-              // فاصله برای دستگاه‌های دارای Notch پایین
               SizedBox(height: MediaQuery.of(context).padding.bottom),
             ],
           ),

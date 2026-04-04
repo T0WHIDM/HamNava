@@ -99,7 +99,6 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
       userName: myUserName,
       email: myEmail,
       friends: [],
-      // فرض بر این است که آواتار هم دارید، اگر در کانستراکتور required است آن را اضافه کنید
       // avatar: pb.authStore.record?.getStringValue('avatar') ?? '',
     );
 
@@ -171,7 +170,6 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
             children: [
               Column(
                 children: [
-                  // 1. Group Name Input (Inset-Grouped Style)
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                     child: Container(
@@ -211,7 +209,6 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                     ),
                   ),
       
-                  // 2. Selected Friends Horizontal List
                   AnimatedSize(
                     duration: const Duration(milliseconds: 300),
                     curve: Curves.easeOutCubic,
@@ -243,7 +240,6 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                                               backgroundColor: isDark
                                                   ? Colors.grey[800]
                                                   : Colors.grey[200],
-                                              // در صورتی که فیلد آواتار دارید از این کد استفاده کنید:
                                               // backgroundImage: friend.avatar.isNotEmpty ? NetworkImage(friend.avatar) : null,
                                               child: Icon(
                                                 CupertinoIcons.person_fill,
@@ -259,7 +255,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                                               child: Container(
                                                 decoration: BoxDecoration(
                                                   color:
-                                                      scaffoldBg, // رنگ حاشیه آیکون حذف برای تمیزی بیشتر
+                                                      scaffoldBg,
                                                   shape: BoxShape.circle,
                                                 ),
                                                 child: const Icon(
@@ -300,7 +296,6 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                         : const SizedBox.shrink(),
                   ),
       
-                  // 3. Section Title
                   Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 24.0,
@@ -319,7 +314,6 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                     ),
                   ),
       
-                  // 4. Friends List (Inset-Grouped)
                   Expanded(
                     child: BlocBuilder<UserBloc, UserState>(
                       builder: (context, userState) {
@@ -367,10 +361,10 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                                     separatorBuilder: (context, index) => Divider(
                                       height: 1,
                                       indent:
-                                          64, // خطوط جداساز از بعد از عکس شروع شوند
+                                          64, 
                                       color: isDark
                                           ? Colors.white12
-                                          : Colors.black.withOpacity(0.05),
+                                          : Colors.black.withValues(alpha: .05),
                                     ),
                                     itemBuilder: (context, index) {
                                       final friend = friendsList[index];
@@ -440,7 +434,6 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                     ),
                   ),
       
-                  // 5. Create Button
                   SafeArea(
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
@@ -476,10 +469,9 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                 ],
               ),
       
-              // Overlay Loader for blocking interactions
               if (isLoading)
                 Container(
-                  color: Colors.black.withOpacity(0.3),
+                  color: Colors.black.withValues(alpha: .3),
                   child: const Center(
                     child: CupertinoActivityIndicator(radius: 16),
                   ),

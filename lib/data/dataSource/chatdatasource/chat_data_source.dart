@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_chat_room_app/data/dtos/conversation_dto.dart';
 import 'package:flutter_chat_room_app/data/dtos/message_dto.dart';
 
@@ -27,7 +29,7 @@ abstract class IChatDatasource {
     required String chatId,
     String? text,
     String? replyId,
-    // File? attachment, //
+    File? attachment,
   });
 
   Stream<({String action, MessageDto message})> listenToMessages(String chatId);

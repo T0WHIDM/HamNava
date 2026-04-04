@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dartz/dartz.dart';
 import 'package:flutter_chat_room_app/core/exception/api_exeption.dart';
 import 'package:flutter_chat_room_app/data/dataSource/chatdatasource/chat_data_source.dart';
@@ -128,12 +130,14 @@ class ChatRepositoryImpl extends IChatRepository {
     required String chatId,
     String? text,
     String? replyId,
+    File? attachment 
   }) async {
     try {
       final dto = await dataSource.sendMessage(
         chatId: chatId,
         text: text,
         replyId: replyId,
+        attachment: attachment
       );
 
       return Right(MessageMapper.toDomain(dto));
