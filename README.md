@@ -49,11 +49,13 @@ It ensures **secure, real-time, and stable communication** even in restricted ne
 
 * Add friends via ID
 * Friends list management
+* Authentication 
 
 ### ✏️ Messages
 
 * Edit messages
 * Delete messages
+* reply to messages 
 
 ### 🎨 UI
 
