@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -12,10 +14,13 @@ import 'package:flutter_chat_room_app/presentation/bloc/chat/chat_state.dart';
 import 'package:flutter_chat_room_app/presentation/screens/home_screen.dart';
 import 'package:flutter_chat_room_app/presentation/screens/user_profile_screen.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:gal/gal.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:pocketbase/pocketbase.dart';
-import 'package:cached_network_image/cached_network_image.dart'; 
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:video_player/video_player.dart';
 
 class ChatScreen extends StatefulWidget {
   final UserEntity friend;
@@ -48,22 +53,48 @@ class _ChatScreenState extends State<ChatScreen> {
   bool _isFetchingMore = false;
   bool _hasReachedMax = false;
 
-  Future<void> _pickImage() async {
-    try {
-      final XFile? image = await _picker.pickImage(
-        source: ImageSource.gallery,
-        imageQuality: 50,
-        maxWidth: 1080,
-      );
+  Timer? _cleanupTimer;
 
-      if (image != null) {
-        setState(() {
-          _selectedAttachment = File(image.path);
-        });
-        _focusNode.requestFocus();
+  bool _isVideoFile(String filePath) {
+    final ext = filePath.split('.').last.toLowerCase();
+    return ['mp4', 'mov', 'avi', 'mkv'].contains(ext);
+  }
+
+  Future<void> _pickMedia() async {
+    try {
+      final XFile? media = await _picker.pickMedia(imageQuality: 50);
+
+      if (media == null) {
+        debugPrint('هیچ فایلی انتخاب نشد.');
+        return;
+      }
+
+      debugPrint('فایل انتخاب شد. مسیر: ${media.path}');
+
+      setState(() {
+        _selectedAttachment = File(media.path);
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: Colors.green,
+            content: Text(
+              textAlign: TextAlign.right,
+              'توجه: فایل‌های ارسالی شما پس از ۵ دقیقه به صورت خودکار حذف خواهند شد.',
+              style: TextStyle(
+                fontFamily: 'CR',
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+              textDirection: TextDirection.rtl,
+            ),
+            duration: Duration(seconds: 4),
+          ),
+        );
       }
     } catch (e) {
-      debugPrint("خطا در انتخاب عکس: $e");
+      debugPrint('خطای کلی در انتخاب فایل: $e');
     }
   }
 
@@ -87,13 +118,120 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 
+  void _cleanupExpiredMedia() {
+    if (_messages.isEmpty) return;
+
+    final now = DateTime.now();
+    debugPrint('--- رفتگر بیدار شد --- زمان فعلی گوشی: $now');
+
+    final messagesToCheck = List<MessageEntity>.from(_messages);
+
+    for (var message in messagesToCheck) {
+      if (message.attachment != null && message.attachment!.isNotEmpty) {
+        final msgTime = message.created.toLocal();
+        final difference = now.difference(msgTime);
+
+        debugPrint('بررسی پیام ${message.id}:');
+        debugPrint('   زمان ثبت پیام: $msgTime');
+        debugPrint('   مدت زمان گذشته: ${difference.inMinutes} دقیقه');
+
+        if (difference.inMinutes >= 5) {
+          debugPrint('>>> دستور حذف پیام ${message.id} به BLoC ارسال شد!');
+
+          context.read<ChatBloc>().add(
+            DeleteMessageEvent(message.id, message.chatId),
+          );
+        }
+      }
+    }
+  }
+
+  Future<void> _saveMediaToGallery(String fileUrl, String fileName) async {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        backgroundColor: Colors.green,
+        content: Text(
+          textDirection: TextDirection.rtl,
+          'در حال دانلود و ذخیره در گالری...',
+          style: TextStyle(fontFamily: 'CR'),
+        ),
+      ),
+    );
+
+    try {
+      final tempDir = await getTemporaryDirectory();
+      final savePath = "${tempDir.path}/$fileName";
+
+      await Dio().download(fileUrl, savePath);
+
+      bool hasAccess = await Gal.hasAccess();
+      if (!hasAccess) {
+        hasAccess = await Gal.requestAccess();
+      }
+
+      if (hasAccess) {
+        final isVideo =
+            fileName.toLowerCase().endsWith('.mp4') ||
+            fileName.toLowerCase().endsWith('.mov');
+
+        if (isVideo) {
+          await Gal.putVideo(savePath);
+        } else {
+          await Gal.putImage(savePath);
+        }
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              backgroundColor: Colors.green,
+              content: Text(
+                textDirection: TextDirection.rtl,
+
+                'با موفقیت در گالری ذخیره شد',
+                style: TextStyle(fontFamily: 'CR', color: Colors.white),
+              ),
+            ),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              backgroundColor: Colors.red,
+              content: Text(
+                textDirection: TextDirection.rtl,
+
+                'دسترسی به گالری داده نشد!',
+                style: TextStyle(fontFamily: 'CR', color: Colors.white),
+              ),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: Colors.red,
+            content: Text(
+              textDirection: TextDirection.rtl,
+
+              'خطا در ذخیره: $e',
+              style: const TextStyle(fontFamily: 'CR', color: Colors.white),
+            ),
+          ),
+        );
+      }
+    }
+  }
+
   @override
   void initState() {
     super.initState();
 
     final pb = locator<PocketBase>();
     myUserId = pb.authStore.record?.id ?? '';
-    pbBaseUrl = pb.baseURL; 
+    pbBaseUrl = pb.baseURL;
 
     _scrollController.addListener(() {
       if (_scrollController.offset > 200) {
@@ -125,10 +263,15 @@ class _ChatScreenState extends State<ChatScreen> {
         }
       }
     });
+
+    _cleanupTimer = Timer.periodic(const Duration(minutes: 1), (timer) {
+      _cleanupExpiredMedia();
+    });
   }
 
   @override
   void dispose() {
+    _cleanupTimer?.cancel();
     _messageController.dispose();
     _scrollController.dispose();
     _focusNode.dispose();
@@ -257,10 +400,14 @@ class _ChatScreenState extends State<ChatScreen> {
         },
         builder: (context, state) {
           return SafeArea(
-            child: Column(
+            child: Stack(
               children: [
-                Expanded(child: _buildMessagesList(state, isDark)),
-                _buildMessageInput(isDark),
+                Column(
+                  children: [
+                    Expanded(child: _buildMessagesList(state, isDark)),
+                    _buildMessageInput(isDark),
+                  ],
+                ),
               ],
             ),
           );
@@ -352,17 +499,6 @@ class _ChatScreenState extends State<ChatScreen> {
             setState(() {
               _messages.removeAt(index);
             });
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                backgroundColor: CupertinoColors.destructiveRed,
-                content: Text(
-                  'پیام حذف شد',
-                  textDirection: TextDirection.rtl,
-                  style: TextStyle(fontFamily: 'CR'),
-                ),
-                duration: Duration(seconds: 1),
-              ),
-            );
           },
           child: GestureDetector(
             onLongPress: () {
@@ -376,8 +512,7 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Widget _buildChatBubble(MessageEntity message, bool isMe, bool isDark) {
-    final DateTime time =
-        message.created.toLocal();
+    final DateTime time = message.created.toLocal();
     final String formattedTime =
         '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
     final myBubbleColor = const Color(0xFF0ED0D3);
@@ -386,10 +521,15 @@ class _ChatScreenState extends State<ChatScreen> {
         ? Colors.black87
         : (isDark ? Colors.white : Colors.black87);
 
-    final imageUrl =
-        message.attachment != null && message.attachment!.isNotEmpty
-        ? '$pbBaseUrl/api/files/messages/${message.id}/${message.attachment}?thumb=300x0'
+    final hasAttachment =
+        message.attachment != null && message.attachment!.isNotEmpty;
+    final isVideo = hasAttachment && _isVideoFile(message.attachment!);
+
+    final fileUrl = hasAttachment
+        ? '$pbBaseUrl/api/files/messages/${message.id}/${message.attachment}'
         : null;
+
+    final imageUrl = hasAttachment && !isVideo ? '$fileUrl?thumb=300x0' : null;
 
     String replySenderName = '';
     if (message.replyTo != null) {
@@ -481,14 +621,25 @@ class _ChatScreenState extends State<ChatScreen> {
                 ),
               ),
 
-            if (imageUrl != null)
+            // نمایش ویدیو
+            if (hasAttachment && isVideo)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: VideoPlayerWidget(videoUrl: fileUrl!),
+                ),
+              ),
+
+            // نمایش عکس
+            if (hasAttachment && !isVideo)
               Padding(
                 padding: const EdgeInsets.only(bottom: 8.0),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(12),
                   child: CachedNetworkImage(
                     memCacheWidth: 400,
-                    imageUrl: imageUrl,
+                    imageUrl: imageUrl!,
                     fit: BoxFit.cover,
                     placeholder: (context, url) => const SizedBox(
                       height: 150,
@@ -573,17 +724,29 @@ class _ChatScreenState extends State<ChatScreen> {
                 children: [
                   ClipRRect(
                     borderRadius: BorderRadius.circular(8),
-                    child: Image.file(
-                      _selectedAttachment!,
-                      height: 45,
-                      width: 45,
-                      fit: BoxFit.cover,
-                    ),
+                    child: _isVideoFile(_selectedAttachment!.path)
+                        ? Container(
+                            height: 45,
+                            width: 45,
+                            color: Colors.black12,
+                            child: const Icon(
+                              Icons.videocam,
+                              color: Colors.grey,
+                            ),
+                          )
+                        : Image.file(
+                            _selectedAttachment!,
+                            height: 45,
+                            width: 45,
+                            fit: BoxFit.cover,
+                          ),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      'عکس انتخاب شده',
+                      _isVideoFile(_selectedAttachment!.path)
+                          ? 'ویدیو انتخاب شد'
+                          : 'عکس انتخاب شد',
                       style: TextStyle(
                         fontFamily: 'CR',
                         fontSize: 13,
@@ -675,7 +838,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 padding: const EdgeInsets.only(bottom: 4),
                 child: CupertinoButton(
                   padding: EdgeInsets.zero,
-                  onPressed: _pickImage,
+                  onPressed: _pickMedia, // جایگزینی _pickImage با _pickMedia
                   child: Icon(
                     Icons.attach_file_sharp,
                     color: isDark ? Colors.grey[400] : Colors.grey[600],
@@ -733,7 +896,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   builder: (context, value, child) {
                     final hasText = value.text.trim().isNotEmpty;
                     final hasAttachment = _selectedAttachment != null;
-                    final canSend = hasText || hasAttachment;
+                    final canSend = (hasText || hasAttachment);
 
                     return GestureDetector(
                       onTap: () {
@@ -798,6 +961,7 @@ class _ChatScreenState extends State<ChatScreen> {
     bool isDark,
     Color scaffoldbg,
   ) {
+    // ... محتوای AppBar بدون تغییر
     return AppBar(
       backgroundColor: scaffoldbg,
       surfaceTintColor: Colors.transparent,
@@ -844,6 +1008,7 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Widget _buildEmptyState(bool isDark) {
+    // ... محتوای EmptyState بدون تغییر
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -885,6 +1050,7 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   void _showEditDialog(MessageEntity message) {
+    // ... محتوای دیالوگ ویرایش بدون تغییر
     final TextEditingController editController = TextEditingController(
       text: message.text,
     );
@@ -982,6 +1148,13 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   void _showMessageOptions(MessageEntity message, bool isMe, bool isDark) {
+    // ---> این دو خط اضافه شد تا لینک فایل را بسازد <---
+    final hasAttachment =
+        message.attachment != null && message.attachment!.isNotEmpty;
+    final fileUrl = hasAttachment
+        ? '$pbBaseUrl/api/files/messages/${message.id}/${message.attachment}'
+        : null;
+
     showModalBottomSheet(
       context: context,
       backgroundColor: isDark ? const Color(0xFF1C1C1E) : Colors.white,
@@ -994,6 +1167,25 @@ class _ChatScreenState extends State<ChatScreen> {
             textDirection: TextDirection.rtl,
             child: Wrap(
               children: [
+                if (hasAttachment)
+                  ListTile(
+                    leading: Icon(
+                      CupertinoIcons.arrow_down_to_line,
+                      color: isDark ? Colors.white70 : Colors.black87,
+                    ),
+                    title: Text(
+                      'ذخیره در گالری',
+                      style: TextStyle(
+                        fontFamily: 'CR',
+                        color: isDark ? Colors.white : Colors.black87,
+                      ),
+                    ),
+                    onTap: () {
+                      Navigator.pop(bottomSheetContext);
+                      _saveMediaToGallery(fileUrl!, message.attachment!);
+                    },
+                  ),
+
                 if (message.text != null && message.text!.isNotEmpty)
                   ListTile(
                     leading: Icon(
@@ -1030,6 +1222,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       }
                     },
                   ),
+
                 if (isMe)
                   ListTile(
                     leading: Icon(
@@ -1053,6 +1246,83 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
         );
       },
+    );
+  }
+}
+
+
+class VideoPlayerWidget extends StatefulWidget {
+  final String videoUrl;
+
+  const VideoPlayerWidget({super.key, required this.videoUrl});
+
+  @override
+  State<VideoPlayerWidget> createState() => _VideoPlayerWidgetState();
+}
+
+class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
+  late VideoPlayerController _controller;
+  bool _isInitialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = VideoPlayerController.networkUrl(Uri.parse(widget.videoUrl))
+      ..initialize().then((_) {
+        setState(() {
+          _isInitialized = true;
+        });
+      });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_isInitialized) {
+      return Container(
+        height: 200,
+        color: Colors.black12,
+        child: const Center(child: SpinKitPulse(color: Colors.grey, size: 30)),
+      );
+    }
+
+    return Container(
+      constraints: const BoxConstraints(maxHeight: 300),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          AspectRatio(
+            aspectRatio: _controller.value.aspectRatio,
+            child: VideoPlayer(_controller),
+          ),
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                _controller.value.isPlaying
+                    ? _controller.pause()
+                    : _controller.play();
+              });
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.5),
+                shape: BoxShape.circle,
+              ),
+              padding: const EdgeInsets.all(12),
+              child: Icon(
+                _controller.value.isPlaying ? Icons.pause : Icons.play_arrow,
+                color: Colors.white,
+                size: 30,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

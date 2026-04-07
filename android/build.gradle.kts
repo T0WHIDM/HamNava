@@ -1,6 +1,7 @@
 allprojects {
-  repositories {
-    maven{ url = uri("https://pub-azs.ir/api/mavens/") }
+repositories {
+    google()
+    mavenCentral()
 }
 }
 

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
@@ -12,9 +13,12 @@ import 'package:flutter_chat_room_app/presentation/bloc/chat/chat_bloc.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/chat/chat_event.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/chat/chat_state.dart';
 import 'package:flutter_chat_room_app/presentation/screens/group_info.dart';
-import 'package:cached_network_image/cached_network_image.dart'; // ✅ اضافه شد
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pocketbase/pocketbase.dart';
+import 'package:dio/dio.dart';
+import 'package:gal/gal.dart';
+import 'package:path_provider/path_provider.dart';
 
 class GroupChatScreen extends StatefulWidget {
   final ConversationEntity conversation;
@@ -45,6 +49,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
   int _currentPage = 1;
   bool _isFetchingMore = false;
   bool _hasReachedMax = false;
+  Timer? _cleanupTimer;
 
   late final Map<String, UserEntity> _participantsMap;
 
@@ -80,9 +85,88 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
           _selectedImage = File(image.path);
         });
         _focusNode.requestFocus();
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: Colors.orange.shade700,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              content: const Text(
+                'توجه: فایل‌های ارسالی شما پس از ۵ دقیقه به صورت خودکار حذف خواهند شد.',
+                style: TextStyle(fontFamily: 'CR', color: Colors.white),
+                textDirection: TextDirection.rtl,
+              ),
+              duration: const Duration(seconds: 4),
+            ),
+          );
+        }
       }
     } catch (e) {
       _showErrorSnackBar("خطا در انتخاب عکس");
+    }
+  }
+
+  void _startCleanupTimer() {
+    _cleanupTimer = Timer.periodic(const Duration(minutes: 1), (timer) {
+      _cleanupExpiredMedia();
+    });
+  }
+
+  void _cleanupExpiredMedia() {
+    if (!mounted) return;
+    final now = DateTime.now();
+
+    for (var message in _messages.toList()) {
+      if (message.attachment != null &&
+          message.attachment!.isNotEmpty &&
+          message.sender.id == myUserId) {
+        final messageTime = message.created.toLocal();
+        final difference = now.difference(messageTime).inMinutes;
+
+        if (difference >= 5) {
+          context.read<ChatBloc>().add(
+            DeleteMessageEvent(message.id, widget.conversation.id),
+          );
+        }
+      }
+    }
+  }
+
+  Future<void> _saveMediaToGallery(String imageUrl) async {
+    try {
+      bool hasAccess = await Gal.hasAccess();
+      if (!hasAccess) {
+        await Gal.requestAccess();
+      }
+
+      final tempDir = await getTemporaryDirectory();
+      final savePath =
+          '${tempDir.path}/group_chat_${DateTime.now().millisecondsSinceEpoch}.jpg';
+
+      await Dio().download(imageUrl, savePath);
+      await Gal.putImage(savePath);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: const Color(0xFF0ED0D3),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            content: const Text(
+              'عکس با موفقیت در گالری ذخیره شد.',
+              style: TextStyle(fontFamily: 'CR', color: Colors.black87),
+              textDirection: TextDirection.rtl,
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      _showErrorSnackBar("خطا در ذخیره عکس: $e");
     }
   }
 
@@ -114,6 +198,9 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
       context.read<ChatBloc>().add(LoadMessagesEvent(widget.conversation.id));
     });
 
+    // شروع بکار رفتگر ۵ دقیقه‌ای پیام‌های عکس‌دار
+    _startCleanupTimer();
+
     _scrollController.addListener(() {
       if (_scrollController.offset > 200) {
         if (!_showScrollToBottom.value) _showScrollToBottom.value = true;
@@ -142,6 +229,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
 
   @override
   void dispose() {
+    _cleanupTimer?.cancel(); // متوقف کردن تایمر قبل از نابودی ویجت
     _messageController.dispose();
     _scrollController.dispose();
     _showScrollToBottom.dispose();
@@ -273,6 +361,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         content: Text(
           message,
+          textDirection: TextDirection.rtl,
           style: const TextStyle(fontFamily: 'CR', color: Colors.white),
         ),
       ),
@@ -423,8 +512,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     MessageEntity message,
     double maxBubbleWidth,
   ) {
-    final DateTime time =
-        message.created.toLocal();
+    final DateTime time = message.created.toLocal();
     final String formattedTime =
         '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -488,9 +576,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
               bottomRight: Radius.circular(isMe ? 4 : 18),
             ),
           ),
-          constraints: BoxConstraints(
-            maxWidth: maxBubbleWidth, 
-          ),
+          constraints: BoxConstraints(maxWidth: maxBubbleWidth),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
@@ -502,13 +588,12 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                     borderRadius: BorderRadius.circular(12),
                     child: CachedNetworkImage(
                       imageUrl: message.attachment!,
-                      memCacheWidth: 600, 
-                      width:
-                          maxBubbleWidth - 32, 
+                      memCacheWidth: 600,
+                      width: maxBubbleWidth - 32,
                       fit: BoxFit.cover,
                       placeholder: (context, url) => Container(
                         width: maxBubbleWidth - 32,
-                        height: 150, 
+                        height: 150,
                         color: isDark ? Colors.white10 : Colors.black12,
                         child: const Center(
                           child: CupertinoActivityIndicator(),
@@ -547,9 +632,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        isReplyToMe
-                            ? 'شما'
-                            : replySenderName,
+                        isReplyToMe ? 'شما' : replySenderName,
                         style: TextStyle(
                           fontFamily: 'GB',
                           fontSize: 12,
@@ -577,25 +660,32 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                   ),
                 ),
 
-              if (message.text != null && message.text!.isNotEmpty)
-                Wrap(
+              Align(
+                alignment: Alignment
+                    .bottomRight, // برای اینکه ساعت همیشه سمت راست پایین باشد
+                child: Wrap(
                   alignment: WrapAlignment.end,
                   crossAxisAlignment: WrapCrossAlignment.end,
                   children: [
-                    Text(
-                      message.text ?? "",
-                      style: TextStyle(
-                        fontFamily: 'CR',
-                        fontSize: 15,
-                        height: 1.4,
-                        color: isMe
-                            ? Colors.black
-                            : (isDark ? Colors.white : Colors.black87),
+                    // شرط if فقط برای متن اجرا می‌شود
+                    if (message.text != null && message.text!.isNotEmpty) ...[
+                      Text(
+                        message.text!,
+                        style: TextStyle(
+                          fontFamily: 'CR',
+                          fontSize: 15,
+                          height: 1.4,
+                          color: isMe
+                              ? Colors.black
+                              : (isDark ? Colors.white : Colors.black87),
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 8),
+                      const SizedBox(width: 8), // فاصله بین متن و ساعت
+                    ],
+
+                    // ساعت پیام (بدون شرط - همیشه رندر می‌شود)
                     Padding(
-                      padding: const EdgeInsets.only(bottom: 2),
+                      padding: const EdgeInsets.only(bottom: 8, top: 8),
                       child: Text(
                         formattedTime,
                         style: TextStyle(
@@ -609,7 +699,8 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                     ),
                   ],
                 ),
-            ],
+              ),
+            ], // پایان
           ),
         ),
       ],
@@ -1045,6 +1136,27 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                       }
                     },
                   ),
+
+                if (message.attachment != null &&
+                    message.attachment!.isNotEmpty)
+                  ListTile(
+                    leading: Icon(
+                      CupertinoIcons.arrow_down_to_line,
+                      color: isDark ? Colors.white70 : Colors.black87,
+                    ),
+                    title: Text(
+                      'ذخیره در گالری',
+                      style: TextStyle(
+                        fontFamily: 'CR',
+                        color: isDark ? Colors.white : Colors.black87,
+                      ),
+                    ),
+                    onTap: () {
+                      Navigator.pop(bottomSheetContext);
+                      _saveMediaToGallery(message.attachment!);
+                    },
+                  ),
+
                 if (isMe)
                   ListTile(
                     leading: Icon(
