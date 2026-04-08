@@ -10,6 +10,7 @@ import 'package:flutter_chat_room_app/presentation/customWidget/chat_list_item.d
 import 'package:flutter_chat_room_app/presentation/screens/create_group_screen.dart';
 import 'package:flutter_chat_room_app/presentation/screens/group_chat_screen.dart';
 import 'package:flutter_chat_room_app/presentation/screens/user_search_screen.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pocketbase/pocketbase.dart';
 
@@ -47,8 +48,12 @@ class _HomeScreenState extends State<HomeScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     const primaryColor = Color(0xFF0ED0D3);
 
-    final scaffoldBg = isDark ? const Color(0xFF000000) : const Color(0xFFFFFFFF);
-    final searchBgColor = isDark ? const Color(0xFF1C1C1E) : const Color(0xFFF2F2F7);
+    final scaffoldBg = isDark
+        ? const Color(0xFF000000)
+        : const Color(0xFFFFFFFF);
+    final searchBgColor = isDark
+        ? const Color(0xFF1C1C1E)
+        : const Color(0xFFF2F2F7);
 
     return Scaffold(
       backgroundColor: scaffoldBg,
@@ -63,7 +68,9 @@ class _HomeScreenState extends State<HomeScreen> {
             await Future.delayed(const Duration(seconds: 1));
           },
           child: CustomScrollView(
-            physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+            physics: const AlwaysScrollableScrollPhysics(
+              parent: BouncingScrollPhysics(),
+            ),
             slivers: [
               SliverAppBar(
                 floating: true,
@@ -80,7 +87,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 centerTitle: true,
-                
+
                 leading: Padding(
                   padding: const EdgeInsets.only(left: 8.0),
                   child: IconButton(
@@ -88,7 +95,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       context.pushNamed(UserSearchScreen.routeName);
                     },
                     icon: Icon(
-                      CupertinoIcons.square_pencil, 
+                      CupertinoIcons.square_pencil,
                       color: isDark ? Colors.white : Colors.black87,
                       size: 24,
                     ),
@@ -103,14 +110,20 @@ class _HomeScreenState extends State<HomeScreen> {
 
                       if (result != null && result is ConversationEntity) {
                         if (context.mounted) {
-                          final userId = locator<PocketBase>().authStore.record!.id;
-                          context.read<ChatBloc>().add(GetChatListEvent(userId));
-                          context.pushNamed(GroupChatScreen.routeName, extra: result);
+                          final userId =
+                              locator<PocketBase>().authStore.record!.id;
+                          context.read<ChatBloc>().add(
+                            GetChatListEvent(userId),
+                          );
+                          context.pushNamed(
+                            GroupChatScreen.routeName,
+                            extra: result,
+                          );
                         }
                       }
                     },
                     icon: Icon(
-                      CupertinoIcons.person_2, 
+                      CupertinoIcons.person_2,
                       color: isDark ? Colors.white : Colors.black87,
                       size: 24,
                     ),
@@ -135,7 +148,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           const SizedBox(width: 12),
                           Icon(
                             CupertinoIcons.search,
-                            color: isDark ? Colors.grey.shade500 : Colors.grey.shade400,
+                            color: isDark
+                                ? Colors.grey.shade500
+                                : Colors.grey.shade400,
                             size: 20,
                           ),
                           const SizedBox(width: 8),
@@ -158,11 +173,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                 hintStyle: TextStyle(
                                   fontFamily: 'CR',
                                   fontSize: 15,
-                                  color: isDark ? Colors.grey.shade500 : Colors.grey.shade400,
+                                  color: isDark
+                                      ? Colors.grey.shade500
+                                      : Colors.grey.shade400,
                                 ),
                                 border: InputBorder.none,
                                 isDense: true,
-                                contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  vertical: 10,
+                                ),
                               ),
                             ),
                           ),
@@ -175,10 +194,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                 });
                               },
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 12),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                ),
                                 child: Icon(
                                   CupertinoIcons.clear_thick_circled,
-                                  color: isDark ? Colors.grey.shade500 : Colors.grey.shade400,
+                                  color: isDark
+                                      ? Colors.grey.shade500
+                                      : Colors.grey.shade400,
                                   size: 18,
                                 ),
                               ),
@@ -192,14 +215,18 @@ class _HomeScreenState extends State<HomeScreen> {
 
               BlocBuilder<ChatBloc, ChatState>(
                 buildWhen: (previous, current) {
-                  return current is ChatLoadingState || current is ChatListSUccessState;
+                  return current is ChatLoadingState ||
+                      current is ChatListSUccessState;
                 },
                 builder: (context, state) {
                   if (state is ChatLoadingState) {
                     return const SliverFillRemaining(
                       hasScrollBody: false,
                       child: Center(
-                        child: CupertinoActivityIndicator(radius: 16),
+                        child: SpinKitPulsingGrid(
+                          color: Color.fromARGB(255, 14, 208, 211),
+                          size: 24,
+                        ),
                       ),
                     );
                   }
@@ -212,7 +239,10 @@ class _HomeScreenState extends State<HomeScreen> {
                           child: Center(
                             child: Text(
                               failure.message,
-                              style: const TextStyle(fontFamily: 'CR', color: Colors.redAccent),
+                              style: const TextStyle(
+                                fontFamily: 'CR',
+                                color: Colors.redAccent,
+                              ),
                             ),
                           ),
                         );
@@ -223,14 +253,22 @@ class _HomeScreenState extends State<HomeScreen> {
 
                           final String rawChatName = chat.isGroup
                               ? (chat.name ?? 'گروه')
-                              : (chat.participants.isNotEmpty ? chat.participants.last.name : 'کاربر');
+                              : (chat.participants.isNotEmpty
+                                    ? chat.participants.last.name
+                                    : 'کاربر');
 
                           final searchLower = searchQuery.toLowerCase();
-                          return rawChatName.toLowerCase().contains(searchLower);
+                          return rawChatName.toLowerCase().contains(
+                            searchLower,
+                          );
                         }).toList();
 
                         if (filteredList.isEmpty) {
-                          return _buildEmptyState(context, isDark, isSearchEmpty: searchQuery.isNotEmpty);
+                          return _buildEmptyState(
+                            context,
+                            isDark,
+                            isSearchEmpty: searchQuery.isNotEmpty,
+                          );
                         }
 
                         return ChatListItem(filteredList);
@@ -249,7 +287,11 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildEmptyState(BuildContext context, bool isDark, {bool isSearchEmpty = false}) {
+  Widget _buildEmptyState(
+    BuildContext context,
+    bool isDark, {
+    bool isSearchEmpty = false,
+  }) {
     return SliverFillRemaining(
       hasScrollBody: false,
       child: Center(
@@ -259,11 +301,15 @@ class _HomeScreenState extends State<HomeScreen> {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF1C1C1E) : const Color(0xFFF2F2F7),
+                color: isDark
+                    ? const Color(0xFF1C1C1E)
+                    : const Color(0xFFF2F2F7),
                 shape: BoxShape.circle,
               ),
               child: Icon(
-                isSearchEmpty ? CupertinoIcons.search : CupertinoIcons.chat_bubble_2_fill,
+                isSearchEmpty
+                    ? CupertinoIcons.search
+                    : CupertinoIcons.chat_bubble_2_fill,
                 size: 64,
                 color: isDark ? Colors.grey.shade600 : Colors.grey.shade400,
               ),
@@ -280,7 +326,9 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              isSearchEmpty ? 'نام دیگری را امتحان کنید' : 'از بالا سمت چپ گفتگو را آغاز کنید',
+              isSearchEmpty
+                  ? 'نام دیگری را امتحان کنید'
+                  : 'از بالا سمت چپ گفتگو را آغاز کنید',
               style: TextStyle(
                 fontFamily: 'CR',
                 fontSize: 14,

@@ -93,7 +93,7 @@ class ChatRepositoryImpl extends IChatRepository {
       final entities = ConversationMapper.toDomainList(dtos);
       return Right(entities);
     } catch (e) {
-      return Left(ApiException('خطا در دریافت لیست چت‌ها: ${e.toString()}'));
+      return Left(ApiException('خطا در دریافت لیست چت‌ها'));
     }
   }
 

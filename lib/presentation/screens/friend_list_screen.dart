@@ -7,6 +7,7 @@ import 'package:flutter_chat_room_app/presentation/bloc/user/user_event.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/user/user_state.dart';
 import 'package:flutter_chat_room_app/presentation/screens/chat_screen.dart';
 import 'package:flutter_chat_room_app/presentation/screens/user_profile_screen.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_chat_room_app/domain/entity/user_entity.dart';
 import 'package:pocketbase/pocketbase.dart';
@@ -26,8 +27,12 @@ class _FriendsListScreenState extends State<FriendsListScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     const primaryColor = Color(0xFF0ED0D3);
 
-    final scaffoldBg = isDark ? const Color(0xFF000000) : const Color(0xFFF2F2F7);
-    final cardColor = isDark ? const Color(0xFF1C1C1E) : const Color(0xFFFFFFFF);
+    final scaffoldBg = isDark
+        ? const Color(0xFF000000)
+        : const Color(0xFFF2F2F7);
+    final cardColor = isDark
+        ? const Color(0xFF1C1C1E)
+        : const Color(0xFFFFFFFF);
     final dividerColor = isDark ? Colors.grey.shade800 : Colors.grey.shade200;
 
     return Scaffold(
@@ -40,7 +45,9 @@ class _FriendsListScreenState extends State<FriendsListScreen> {
           context.read<UserBloc>().add(FriendListEvent(userId));
         },
         child: CustomScrollView(
-          physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+          physics: const AlwaysScrollableScrollPhysics(
+            parent: BouncingScrollPhysics(),
+          ),
           slivers: [
             SliverAppBar(
               expandedHeight: 60,
@@ -57,18 +64,21 @@ class _FriendsListScreenState extends State<FriendsListScreen> {
               ),
               centerTitle: true,
             ),
-      
+
             BlocBuilder<UserBloc, UserState>(
               builder: (context, state) {
                 if (state is FriendsListLoadingState) {
                   return const SliverFillRemaining(
                     hasScrollBody: false,
                     child: Center(
-                      child: CupertinoActivityIndicator(radius: 16),
+                      child: SpinKitPulsingGrid(
+                        color: Color.fromARGB(255, 14, 208, 211),
+                        size: 24,
+                      ),
                     ),
                   );
                 }
-      
+
                 if (state is FriendListSuccessState) {
                   return state.result.fold(
                     (failure) {
@@ -77,7 +87,10 @@ class _FriendsListScreenState extends State<FriendsListScreen> {
                         child: Center(
                           child: Text(
                             failure.message,
-                            style: const TextStyle(fontFamily: 'CR', color: Colors.redAccent),
+                            style: const TextStyle(
+                              fontFamily: 'CR',
+                              color: Colors.redAccent,
+                            ),
                           ),
                         ),
                       );
@@ -86,7 +99,7 @@ class _FriendsListScreenState extends State<FriendsListScreen> {
                       if (success.isEmpty) {
                         return _buildEmptyState(isDark);
                       }
-      
+
                       return SliverToBoxAdapter(
                         child: Padding(
                           padding: const EdgeInsets.all(16.0),
@@ -94,13 +107,17 @@ class _FriendsListScreenState extends State<FriendsListScreen> {
                             decoration: BoxDecoration(
                               color: cardColor,
                               borderRadius: BorderRadius.circular(20),
-                              boxShadow: isDark ? [] : [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.03),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 2),
-                                )
-                              ],
+                              boxShadow: isDark
+                                  ? []
+                                  : [
+                                      BoxShadow(
+                                        color: Colors.black.withValues(
+                                          alpha: 0.03,
+                                        ),
+                                        blurRadius: 10,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
                             ),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(20),
@@ -117,7 +134,12 @@ class _FriendsListScreenState extends State<FriendsListScreen> {
                                 ),
                                 itemBuilder: (context, index) {
                                   final friend = success[index];
-                                  return _buildFriendRow(context, friend, isDark, primaryColor);
+                                  return _buildFriendRow(
+                                    context,
+                                    friend,
+                                    isDark,
+                                    primaryColor,
+                                  );
                                 },
                               ),
                             ),
@@ -127,7 +149,7 @@ class _FriendsListScreenState extends State<FriendsListScreen> {
                     },
                   );
                 }
-      
+
                 return _buildEmptyState(isDark);
               },
             ),
@@ -137,7 +159,12 @@ class _FriendsListScreenState extends State<FriendsListScreen> {
     );
   }
 
-  Widget _buildFriendRow(BuildContext context, UserEntity friend, bool isDark, Color primaryColor) {
+  Widget _buildFriendRow(
+    BuildContext context,
+    UserEntity friend,
+    bool isDark,
+    Color primaryColor,
+  ) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -150,7 +177,9 @@ class _FriendsListScreenState extends State<FriendsListScreen> {
             children: [
               CircleAvatar(
                 radius: 26,
-                backgroundColor: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
+                backgroundColor: isDark
+                    ? Colors.grey.shade800
+                    : Colors.grey.shade200,
                 // backgroundImage: friend.avatar != null ? NetworkImage(...) : null,
                 child: Icon(
                   CupertinoIcons.person_fill,
@@ -159,7 +188,7 @@ class _FriendsListScreenState extends State<FriendsListScreen> {
                 ),
               ),
               const SizedBox(width: 16),
-              
+
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -181,13 +210,15 @@ class _FriendsListScreenState extends State<FriendsListScreen> {
                       style: TextStyle(
                         fontFamily: 'CR',
                         fontSize: 13,
-                        color: isDark ? Colors.grey.shade400 : Colors.grey.shade500,
+                        color: isDark
+                            ? Colors.grey.shade400
+                            : Colors.grey.shade500,
                       ),
                     ),
                   ],
                 ),
               ),
-              
+
               GestureDetector(
                 onTap: () {
                   context.pushNamed(
@@ -231,9 +262,15 @@ class _FriendsListScreenState extends State<FriendsListScreen> {
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
                 shape: BoxShape.circle,
-                boxShadow: isDark ? [] : [
-                  BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 20, offset: const Offset(0, 10))
-                ],
+                boxShadow: isDark
+                    ? []
+                    : [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.05),
+                          blurRadius: 20,
+                          offset: const Offset(0, 10),
+                        ),
+                      ],
               ),
               child: Icon(
                 CupertinoIcons.person_2_fill,
@@ -260,7 +297,7 @@ class _FriendsListScreenState extends State<FriendsListScreen> {
                 color: isDark ? Colors.grey.shade400 : Colors.grey.shade500,
               ),
             ),
-            const SizedBox(height: 40), 
+            const SizedBox(height: 40),
           ],
         ),
       ),

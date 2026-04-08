@@ -47,9 +47,9 @@ Future<void> getItInit() async {
     save: (String data) async => await prefs.setString('pb_auth', data),
     clear: () async => await prefs.remove('pb_auth'),
   );
-
+  const apiUrl = String.fromEnvironment('API_URL');
   locator.registerSingleton<PocketBase>(
-    PocketBase('https://messageflow-aelbqjwyta.liara.run', authStore: store),
+    PocketBase(apiUrl, authStore: store),
   );
 
   //--- DataSources ---
@@ -138,3 +138,4 @@ Future<void> getItInit() async {
     () => GetProfileInfoUseCase(locator<IUserRepository>()),
   );
 }
+
