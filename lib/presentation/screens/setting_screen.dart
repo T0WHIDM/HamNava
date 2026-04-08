@@ -13,6 +13,7 @@ import 'package:flutter_chat_room_app/presentation/customWidget/custom_switch_wi
 import 'package:flutter_chat_room_app/presentation/screens/about_screen.dart';
 import 'package:flutter_chat_room_app/presentation/screens/edit_profile_screen.dart';
 import 'package:flutter_chat_room_app/presentation/screens/login_screen.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -109,7 +110,10 @@ class _SettingScreenState extends State<SettingScreen> {
                       return const Padding(
                         padding: EdgeInsets.only(top: 100),
                         child: Center(
-                          child: CupertinoActivityIndicator(radius: 16),
+                          child: SpinKitPulsingGrid(
+                            color: Color.fromARGB(255, 14, 208, 211),
+                            size: 24,
+                          ),
                         ),
                       );
                     }
@@ -223,8 +227,7 @@ class _SettingScreenState extends State<SettingScreen> {
                                         icon: CupertinoIcons.camera_fill,
                                         color: Colors.blueAccent,
                                         isDark: isDark,
-                                        onTap: () {
-                                        },
+                                        onTap: () {},
                                       ),
                                     ),
                                   ],

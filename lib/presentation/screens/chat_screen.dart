@@ -20,7 +20,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:video_player/video_player.dart';
+import '../customWidget/video_player.dart';
 
 class ChatScreen extends StatefulWidget {
   final UserEntity friend;
@@ -38,15 +38,12 @@ class _ChatScreenState extends State<ChatScreen> {
   final ScrollController _scrollController = ScrollController();
   final FocusNode _focusNode = FocusNode();
   final ImagePicker _picker = ImagePicker();
-
   MessageEntity? _replyingToMessage;
   File? _selectedAttachment;
-
   bool _showScrollToBottom = false;
   String? _currentChatId;
   late String myUserId;
   late String pbBaseUrl;
-
   List<MessageEntity> _messages = [];
   bool _isLoading = true;
   int _currentPage = 1;
@@ -65,36 +62,64 @@ class _ChatScreenState extends State<ChatScreen> {
       final XFile? media = await _picker.pickMedia(imageQuality: 50);
 
       if (media == null) {
-        debugPrint('هیچ فایلی انتخاب نشد.');
         return;
       }
-
-      debugPrint('فایل انتخاب شد. مسیر: ${media.path}');
 
       setState(() {
         _selectedAttachment = File(media.path);
       });
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            backgroundColor: Colors.green,
-            content: Text(
-              textAlign: TextAlign.right,
-              'توجه: فایل‌های ارسالی شما پس از ۵ دقیقه به صورت خودکار حذف خواهند شد.',
-              style: TextStyle(
-                fontFamily: 'CR',
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(32),
               ),
-              textDirection: TextDirection.rtl,
-            ),
-            duration: Duration(seconds: 4),
-          ),
+              title: const Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    'توجه',
+                    style: TextStyle(
+                      fontFamily: 'cr',
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(width: 8),
+                  Icon(Icons.warning_amber_rounded, color: Colors.orange),
+                ],
+              ),
+              content: const Text(
+                'این فایل پس از ۵ دقیقه به صورت خودکار برای همه حذف خواهد شد',
+                textDirection: TextDirection.rtl,
+                textAlign: TextAlign.right,
+                style: TextStyle(fontFamily: 'cr'),
+              ),
+              actions: [
+                Center(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF0ED0D3),
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text(
+                      'فهمیدم',
+                      style: TextStyle(fontFamily: 'cr', color: Colors.white),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
         );
       }
     } catch (e) {
-      debugPrint('خطای کلی در انتخاب فایل: $e');
+      debugPrint('خطای در انتخاب فایل');
     }
   }
 
@@ -122,7 +147,6 @@ class _ChatScreenState extends State<ChatScreen> {
     if (_messages.isEmpty) return;
 
     final now = DateTime.now();
-    debugPrint('--- رفتگر بیدار شد --- زمان فعلی گوشی: $now');
 
     final messagesToCheck = List<MessageEntity>.from(_messages);
 
@@ -131,13 +155,7 @@ class _ChatScreenState extends State<ChatScreen> {
         final msgTime = message.created.toLocal();
         final difference = now.difference(msgTime);
 
-        debugPrint('بررسی پیام ${message.id}:');
-        debugPrint('   زمان ثبت پیام: $msgTime');
-        debugPrint('   مدت زمان گذشته: ${difference.inMinutes} دقیقه');
-
-        if (difference.inMinutes >= 5) {
-          debugPrint('>>> دستور حذف پیام ${message.id} به BLoC ارسال شد!');
-
+        if (difference.inSeconds >= 300) {
           context.read<ChatBloc>().add(
             DeleteMessageEvent(message.id, message.chatId),
           );
@@ -264,7 +282,7 @@ class _ChatScreenState extends State<ChatScreen> {
       }
     });
 
-    _cleanupTimer = Timer.periodic(const Duration(minutes: 1), (timer) {
+    _cleanupTimer = Timer.periodic(const Duration(seconds: 15), (timer) {
       _cleanupExpiredMedia();
     });
   }
@@ -621,7 +639,6 @@ class _ChatScreenState extends State<ChatScreen> {
                 ),
               ),
 
-            // نمایش ویدیو
             if (hasAttachment && isVideo)
               Padding(
                 padding: const EdgeInsets.only(bottom: 8.0),
@@ -631,7 +648,6 @@ class _ChatScreenState extends State<ChatScreen> {
                 ),
               ),
 
-            // نمایش عکس
             if (hasAttachment && !isVideo)
               Padding(
                 padding: const EdgeInsets.only(bottom: 8.0),
@@ -838,7 +854,9 @@ class _ChatScreenState extends State<ChatScreen> {
                 padding: const EdgeInsets.only(bottom: 4),
                 child: CupertinoButton(
                   padding: EdgeInsets.zero,
-                  onPressed: _pickMedia, // جایگزینی _pickImage با _pickMedia
+                  onPressed: () {
+                    _pickMedia();
+                  },
                   child: Icon(
                     Icons.attach_file_sharp,
                     color: isDark ? Colors.grey[400] : Colors.grey[600],
@@ -961,7 +979,6 @@ class _ChatScreenState extends State<ChatScreen> {
     bool isDark,
     Color scaffoldbg,
   ) {
-    // ... محتوای AppBar بدون تغییر
     return AppBar(
       backgroundColor: scaffoldbg,
       surfaceTintColor: Colors.transparent,
@@ -1008,7 +1025,6 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Widget _buildEmptyState(bool isDark) {
-    // ... محتوای EmptyState بدون تغییر
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -1050,7 +1066,6 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   void _showEditDialog(MessageEntity message) {
-    // ... محتوای دیالوگ ویرایش بدون تغییر
     final TextEditingController editController = TextEditingController(
       text: message.text,
     );
@@ -1148,7 +1163,6 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   void _showMessageOptions(MessageEntity message, bool isMe, bool isDark) {
-    // ---> این دو خط اضافه شد تا لینک فایل را بسازد <---
     final hasAttachment =
         message.attachment != null && message.attachment!.isNotEmpty;
     final fileUrl = hasAttachment
@@ -1246,83 +1260,6 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
         );
       },
-    );
-  }
-}
-
-
-class VideoPlayerWidget extends StatefulWidget {
-  final String videoUrl;
-
-  const VideoPlayerWidget({super.key, required this.videoUrl});
-
-  @override
-  State<VideoPlayerWidget> createState() => _VideoPlayerWidgetState();
-}
-
-class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
-  late VideoPlayerController _controller;
-  bool _isInitialized = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = VideoPlayerController.networkUrl(Uri.parse(widget.videoUrl))
-      ..initialize().then((_) {
-        setState(() {
-          _isInitialized = true;
-        });
-      });
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (!_isInitialized) {
-      return Container(
-        height: 200,
-        color: Colors.black12,
-        child: const Center(child: SpinKitPulse(color: Colors.grey, size: 30)),
-      );
-    }
-
-    return Container(
-      constraints: const BoxConstraints(maxHeight: 300),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          AspectRatio(
-            aspectRatio: _controller.value.aspectRatio,
-            child: VideoPlayer(_controller),
-          ),
-          GestureDetector(
-            onTap: () {
-              setState(() {
-                _controller.value.isPlaying
-                    ? _controller.pause()
-                    : _controller.play();
-              });
-            },
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.5),
-                shape: BoxShape.circle,
-              ),
-              padding: const EdgeInsets.all(12),
-              child: Icon(
-                _controller.value.isPlaying ? Icons.pause : Icons.play_arrow,
-                color: Colors.white,
-                size: 30,
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
