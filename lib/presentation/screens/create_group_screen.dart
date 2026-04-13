@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_chat_room_app/constants/color.dart';
 import 'package:flutter_chat_room_app/core/di/di.dart';
 import 'package:flutter_chat_room_app/domain/entity/user_entity.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/chat/chat_bloc.dart';
@@ -8,6 +9,7 @@ import 'package:flutter_chat_room_app/presentation/bloc/chat/chat_event.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/chat/chat_state.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/user/user_bloc.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/user/user_state.dart';
+import 'package:flutter_chat_room_app/presentation/customWidget/custom_snack_bar.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pocketbase/pocketbase.dart';
 
@@ -44,46 +46,30 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
     final groupName = _groupNameController.text.trim();
 
     if (groupName.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          backgroundColor: CupertinoColors.destructiveRed,
-          content: const Text(
-            'لطفاً نام گروه را وارد کنید',
-            textDirection: TextDirection.rtl,
-            style: TextStyle(
-              fontFamily: 'CR',
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
+      final snackBar = buildCustomSnackBar(
+        title: 'failure',
+        message: 'لطفا نام گروه را وارد کنید',
+        color: CustomColor.yellow,
+        type: .warning,
       );
+
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(snackBar);
       return;
     }
 
     if (_selectedFriends.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          backgroundColor: CupertinoColors.destructiveRed,
-          content: const Text(
-            'حداقل یک نفر را برای گروه انتخاب کنید',
-            textDirection: TextDirection.rtl,
-            style: TextStyle(
-              fontFamily: 'CR',
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
+      final snackBar = buildCustomSnackBar(
+        title: 'failure',
+        message: 'حداقل یک عضو را برای افزودن انتخاب کنید',
+        color: CustomColor.red,
+        type: .failure,
       );
+
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(snackBar);
       return;
     }
 
@@ -151,21 +137,22 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
         listener: (context, state) {
           if (state is CreateGroupSuccessState) {
             state.groupChat.fold((error) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    error.message,
-                    style: const TextStyle(fontFamily: 'CR'),
-                  ),
-                  backgroundColor: CupertinoColors.destructiveRed,
-                ),
+              final snackBar = buildCustomSnackBar(
+                title: 'failure',
+                message: error.message,
+                color: CustomColor.red,
+                type: .failure,
               );
+
+              ScaffoldMessenger.of(context)
+                ..hideCurrentSnackBar()
+                ..showSnackBar(snackBar);
             }, (conversation) => context.pop(conversation));
           }
         },
         builder: (context, state) {
           final isLoading = state is ChatLoadingState;
-      
+
           return Stack(
             children: [
               Column(
@@ -208,7 +195,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                       ),
                     ),
                   ),
-      
+
                   AnimatedSize(
                     duration: const Duration(milliseconds: 300),
                     curve: Curves.easeOutCubic,
@@ -254,8 +241,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                                               right: -4,
                                               child: Container(
                                                 decoration: BoxDecoration(
-                                                  color:
-                                                      scaffoldBg,
+                                                  color: scaffoldBg,
                                                   shape: BoxShape.circle,
                                                 ),
                                                 child: const Icon(
@@ -295,7 +281,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                           )
                         : const SizedBox.shrink(),
                   ),
-      
+
                   Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 24.0,
@@ -313,7 +299,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                       ),
                     ),
                   ),
-      
+
                   Expanded(
                     child: BlocBuilder<UserBloc, UserState>(
                       builder: (context, userState) {
@@ -322,7 +308,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                             child: CupertinoActivityIndicator(radius: 14),
                           );
                         }
-      
+
                         if (userState is FriendListSuccessState) {
                           return userState.result.fold(
                             (failure) => const Center(
@@ -345,7 +331,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                                   ),
                                 );
                               }
-      
+
                               return Padding(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 16.0,
@@ -358,19 +344,21 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                                   child: ListView.separated(
                                     padding: EdgeInsets.zero,
                                     itemCount: friendsList.length,
-                                    separatorBuilder: (context, index) => Divider(
-                                      height: 1,
-                                      indent:
-                                          64, 
-                                      color: isDark
-                                          ? Colors.white12
-                                          : Colors.black.withValues(alpha: .05),
-                                    ),
+                                    separatorBuilder: (context, index) =>
+                                        Divider(
+                                          height: 1,
+                                          indent: 64,
+                                          color: isDark
+                                              ? Colors.white12
+                                              : Colors.black.withValues(
+                                                  alpha: .05,
+                                                ),
+                                        ),
                                     itemBuilder: (context, index) {
                                       final friend = friendsList[index];
                                       final isSelected = _selectedFriends
                                           .contains(friend);
-      
+
                                       return ListTile(
                                         contentPadding:
                                             const EdgeInsets.symmetric(
@@ -423,7 +411,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                             },
                           );
                         }
-      
+
                         return const Center(
                           child: Text(
                             'خطا در بارگذاری مخاطبین',
@@ -433,7 +421,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                       },
                     ),
                   ),
-      
+
                   SafeArea(
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
@@ -468,7 +456,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                   ),
                 ],
               ),
-      
+
               if (isLoading)
                 Container(
                   color: Colors.black.withValues(alpha: .3),

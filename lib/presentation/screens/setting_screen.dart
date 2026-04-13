@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_chat_room_app/constants/color.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/authentication/auth_bloc.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/authentication/auth_event.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/authentication/auth_state.dart';
@@ -9,6 +10,7 @@ import 'package:flutter_chat_room_app/presentation/bloc/theme/theme_event.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/user/user_bloc.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/user/user_event.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/user/user_state.dart';
+import 'package:flutter_chat_room_app/presentation/customWidget/custom_snack_bar.dart';
 import 'package:flutter_chat_room_app/presentation/customWidget/custom_switch_widget.dart';
 import 'package:flutter_chat_room_app/presentation/screens/about_screen.dart';
 import 'package:flutter_chat_room_app/presentation/screens/edit_profile_screen.dart';
@@ -48,26 +50,16 @@ class _SettingScreenState extends State<SettingScreen> {
         if (state is AuthSuccess) {
           state.result.fold(
             (failure) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  behavior: SnackBarBehavior.floating,
-                  backgroundColor: Colors.redAccent,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  content: Directionality(
-                    textDirection: TextDirection.rtl,
-                    child: Text(
-                      failure.message,
-                      style: const TextStyle(
-                        fontFamily: 'CR',
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
+              final snackBar = buildCustomSnackBar(
+                title: 'failure',
+                message: failure.message,
+                color: CustomColor.red,
+                type: .failure,
               );
+
+              ScaffoldMessenger.of(context)
+                ..hideCurrentSnackBar()
+                ..showSnackBar(snackBar);
             },
             (success) {
               context.goNamed(LoginScreen.namedRoute);

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_chat_room_app/constants/color.dart';
 import 'package:flutter_chat_room_app/core/di/di.dart';
 import 'package:flutter_chat_room_app/domain/entity/conversation_entity.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/chat/chat_bloc.dart';
@@ -8,6 +9,7 @@ import 'package:flutter_chat_room_app/presentation/bloc/chat/chat_state.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/user/user_bloc.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/user/user_event.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/user/user_state.dart';
+import 'package:flutter_chat_room_app/presentation/customWidget/custom_snack_bar.dart';
 import 'package:flutter_chat_room_app/presentation/screens/home_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/cupertino.dart';
@@ -100,34 +102,28 @@ class GroupInfoScreen extends StatelessWidget {
                 if (state is AddFriendToGroupSuccessState) {
                   state.result.fold(
                     (failure) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            failure.message,
-                            style: const TextStyle(
-                              fontFamily: 'cr',
-                              color: Colors.white,
-                            ),
-                          ),
-                          backgroundColor: Colors.redAccent,
-                          behavior: SnackBarBehavior.floating,
-                        ),
+                      final snackBar = buildCustomSnackBar(
+                        title: 'failure',
+                        message: failure.message,
+                        color: CustomColor.red,
+                        type: .failure,
                       );
+
+                      ScaffoldMessenger.of(context)
+                        ..hideCurrentSnackBar()
+                        ..showSnackBar(snackBar);
                     },
                     (success) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'کاربر با موفقیت به گروه اضافه شد',
-                            style: TextStyle(
-                              fontFamily: 'cr',
-                              color: Colors.white,
-                            ),
-                          ),
-                          backgroundColor: Colors.green,
-                          behavior: SnackBarBehavior.floating,
-                        ),
+                      final snackBar = buildCustomSnackBar(
+                        title: 'success',
+                        message: 'کاربر با موفقیت به گروه اضافه شد',
+                        color: CustomColor.green,
+                        type: .success,
                       );
+
+                      ScaffoldMessenger.of(context)
+                        ..hideCurrentSnackBar()
+                        ..showSnackBar(snackBar);
                     },
                   );
                 }
@@ -135,34 +131,28 @@ class GroupInfoScreen extends StatelessWidget {
                 if (state is LeaveFromGroupSuccessState) {
                   state.result.fold(
                     (error) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            textDirection: TextDirection.rtl,
-                            error.message,
-                            style: const TextStyle(
-                              fontFamily: 'cr',
-                              color: Colors.white,
-                            ),
-                          ),
-                          backgroundColor: Colors.red,
-                        ),
+                      final snackBar = buildCustomSnackBar(
+                        title: 'failure',
+                        message: error.message,
+                        color: CustomColor.red,
+                        type: .failure,
                       );
+
+                      ScaffoldMessenger.of(context)
+                        ..hideCurrentSnackBar()
+                        ..showSnackBar(snackBar);
                     },
                     (success) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            textDirection: TextDirection.rtl,
-                            'با موفقیت از گروه خارج شدید',
-                            style: TextStyle(
-                              fontFamily: 'CR',
-                              color: Colors.white,
-                            ),
-                          ),
-                          backgroundColor: Colors.green,
-                        ),
+                      final snackBar = buildCustomSnackBar(
+                        title: 'success',
+                        message: 'با موفقیت از گروه خارج شدید',
+                        color: CustomColor.green,
+                        type: .success,
                       );
+
+                      ScaffoldMessenger.of(context)
+                        ..hideCurrentSnackBar()
+                        ..showSnackBar(snackBar);
                       final userId = locator<PocketBase>().authStore.record!.id;
 
                       context.read<UserBloc>().add(FriendListEvent(userId));

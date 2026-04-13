@@ -48,9 +48,7 @@ Future<void> getItInit() async {
     clear: () async => await prefs.remove('pb_auth'),
   );
   const apiUrl = String.fromEnvironment('API_URL');
-  locator.registerSingleton<PocketBase>(
-    PocketBase(apiUrl, authStore: store),
-  );
+  locator.registerSingleton<PocketBase>(PocketBase(apiUrl, authStore: store));
 
   //--- DataSources ---
   locator.registerLazySingleton<IAuthDataSource>(
@@ -138,4 +136,3 @@ Future<void> getItInit() async {
     () => GetProfileInfoUseCase(locator<IUserRepository>()),
   );
 }
-

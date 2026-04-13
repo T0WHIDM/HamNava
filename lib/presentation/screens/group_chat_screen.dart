@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/services.dart';
+import 'package:flutter_chat_room_app/constants/color.dart';
+import 'package:flutter_chat_room_app/presentation/customWidget/custom_snack_bar.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -111,7 +113,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                 ],
               ),
               content: const Text(
-                'این ویدیو پس از ۵ دقیقه به صورت خودکار برای همه حذف خواهد شد',
+                'در این بخش تنها امکان ارسال عکس و ویدیو وجود دارد. فایل‌های ارسالی پس از ۵ دقیقه به صورت خودکار حذف خواهند شد. همچنین حداکثر حجم مجاز برای هر فایل ۵۰ مگابایت می‌باشد.',
                 textDirection: TextDirection.rtl,
                 textAlign: TextAlign.right,
                 style: TextStyle(fontFamily: 'cr'),
@@ -199,26 +201,31 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
         }
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              backgroundColor: const Color(0xFF0ED0D3),
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              content: Text(
-                isVideo
-                    ? 'ویدیو با موفقیت در گالری ذخیره شد.'
-                    : 'عکس با موفقیت در گالری ذخیره شد.',
-                style: const TextStyle(fontFamily: 'CR', color: Colors.black87),
-                textDirection: TextDirection.rtl,
-              ),
-            ),
+          final snackBar = buildCustomSnackBar(
+            title: 'success',
+            message: isVideo
+                ? 'ویدیو با موفقیت در گالری ذخیره شد.'
+                : 'عکس با موفقیت در گالری ذخیره شد.',
+            color: CustomColor.green,
+            type: .success,
           );
+
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(snackBar);
         }
       }
     } catch (e) {
-      _showErrorSnackBar("خطا در ذخیره فایل: $e");
+      final snackBar = buildCustomSnackBar(
+        title: 'failure',
+        message: 'خطا در ذخیره فایل $e',
+        color: CustomColor.red,
+        type: .failure,
+      );
+
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(snackBar);
     }
   }
 
@@ -320,7 +327,16 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
             state.result.fold(
               (failure) {
                 setState(() => _isLoading = false);
-                _showErrorSnackBar("خطا در دریافت پیام‌ها");
+                final snackBar = buildCustomSnackBar(
+                  title: 'failure',
+                  message: 'خطا در دریافت پیام ها',
+                  color: CustomColor.red,
+                  type: .failure,
+                );
+
+                ScaffoldMessenger.of(context)
+                  ..hideCurrentSnackBar()
+                  ..showSnackBar(snackBar);
               },
               (messagesFromServer) {
                 setState(() {
@@ -350,7 +366,18 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
           }
           if (state is ChatMessageSentResultState) {
             state.result.fold(
-              (failure) => _showErrorSnackBar("خطا در ارسال پیام"),
+              (failure) {
+                final snackBar = buildCustomSnackBar(
+                  title: 'failure',
+                  message: 'خطا در ارسال پیام',
+                  color: CustomColor.red,
+                  type: .failure,
+                );
+
+                ScaffoldMessenger.of(context)
+                  ..hideCurrentSnackBar()
+                  ..showSnackBar(snackBar);
+              },
               (success) {
                 _messageController.clear();
                 _cancelReply();
@@ -385,7 +412,17 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
               context.read<ChatBloc>().add(
                 LoadMessagesEvent(widget.conversation.id),
               );
-              _showErrorSnackBar("خطا در حذف پیام از سرور");
+              final snackBar = buildCustomSnackBar(
+                title: 'failure',
+                message: 'خطا در حذف پیام از سرور',
+                color: CustomColor.red,
+                type: .failure,
+              );
+
+              ScaffoldMessenger.of(context)
+                ..hideCurrentSnackBar()
+                ..showSnackBar(snackBar);
+              ;
             }, (success) {});
           }
         },
@@ -399,21 +436,6 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
             ),
           );
         },
-      ),
-    );
-  }
-
-  void _showErrorSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        backgroundColor: CupertinoColors.destructiveRed,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        content: Text(
-          message,
-          textDirection: TextDirection.rtl,
-          style: const TextStyle(fontFamily: 'CR', color: Colors.white),
-        ),
       ),
     );
   }
@@ -1208,20 +1230,16 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                         ClipboardData(text: message.text!),
                       );
                       if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            backgroundColor: Color(0xFF0ED0D3),
-                            content: Text(
-                              'متن کپی شد',
-                              textDirection: TextDirection.rtl,
-                              style: TextStyle(
-                                fontFamily: 'CR',
-                                color: Colors.black87,
-                              ),
-                            ),
-                            duration: Duration(seconds: 2),
-                          ),
+                        final snackBar = buildCustomSnackBar(
+                          title: 'success',
+                          message: 'متن کپی شد',
+                          color: CustomColor.green,
+                          type: .success,
                         );
+
+                        ScaffoldMessenger.of(context)
+                          ..hideCurrentSnackBar()
+                          ..showSnackBar(snackBar);
                       }
                     },
                   ),

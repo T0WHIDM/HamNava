@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_chat_room_app/constants/color.dart';
 import 'package:flutter_chat_room_app/core/di/di.dart';
 import 'package:flutter_chat_room_app/domain/entity/conversation_entity.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/chat/chat_bloc.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/chat/chat_event.dart';
+import 'package:flutter_chat_room_app/presentation/customWidget/custom_snack_bar.dart';
 import 'package:flutter_chat_room_app/presentation/screens/chat_screen.dart';
 import 'package:flutter_chat_room_app/presentation/screens/group_chat_screen.dart';
 import 'package:go_router/go_router.dart';
@@ -75,18 +77,16 @@ class _ChatListItemState extends State<ChatListItem> {
             });
             context.read<ChatBloc>().add(DeleteChatEvent(chat.id));
 
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                behavior: SnackBarBehavior.floating,
-                backgroundColor: Colors.red,
-                content: Text(
-                  textDirection: TextDirection.rtl,
-                  'گفتگو حذف شد',
-                  style: TextStyle(fontFamily: 'CR'),
-                ),
-                duration: Duration(seconds: 1),
-              ),
+            final snackBar = buildCustomSnackBar(
+              title: 'success',
+              message: 'گفتگو با موفقیت حذف شد',
+              color: CustomColor.green,
+              type: .success,
             );
+
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(snackBar);
           },
 
           child: Padding(

@@ -1,9 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_chat_room_app/constants/color.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/authentication/auth_bloc.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/authentication/auth_event.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/authentication/auth_state.dart';
+import 'package:flutter_chat_room_app/presentation/customWidget/custom_snack_bar.dart';
 import 'package:flutter_chat_room_app/presentation/screens/home_screen.dart';
 import 'package:flutter_chat_room_app/presentation/screens/register_screen.dart';
 import 'package:go_router/go_router.dart';
@@ -176,28 +178,16 @@ class _LoginScreenState extends State<LoginScreen> {
                         if (state is AuthSuccess) {
                           state.result.fold(
                             (failure) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  behavior: SnackBarBehavior.floating,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  backgroundColor: const Color(
-                                    0xFFFF3B30,
-                                  ), 
-                                  content: Directionality(
-                                    textDirection: TextDirection.rtl,
-                                    child: Text(
-                                      failure.message,
-                                      style: const TextStyle(
-                                        fontFamily: 'CR',
-                                        color: Colors.white,
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                  ),
-                                ),
+                              final snackBar = buildCustomSnackBar(
+                                title: 'failure',
+                                message: failure.message,
+                                color: CustomColor.red,
+                                type: .failure,
                               );
+
+                              ScaffoldMessenger.of(context)
+                                ..hideCurrentSnackBar()
+                                ..showSnackBar(snackBar);
                             },
                             (success) {
                               context.goNamed(HomeScreen.namedRoute);
@@ -227,8 +217,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
                               backgroundColor: primaryColor,
-                              foregroundColor: Colors
-                                  .black,
+                              foregroundColor: Colors.black,
                               elevation: 0,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(16),
@@ -337,10 +326,7 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(
-          color: Color(0xFFFF3B30),
-          width: 1.2,
-        ), 
+        borderSide: const BorderSide(color: Color(0xFFFF3B30), width: 1.2),
       ),
       focusedErrorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),

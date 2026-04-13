@@ -1,10 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_chat_room_app/constants/color.dart';
 import 'package:flutter_chat_room_app/domain/entity/user_entity.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/user/user_bloc.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/user/user_event.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/user/user_state.dart';
+import 'package:flutter_chat_room_app/presentation/customWidget/custom_snack_bar.dart';
 import 'package:go_router/go_router.dart';
 
 class EditProfileScreen extends StatefulWidget {
@@ -93,39 +95,28 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           if (state is UpdateProfileInfoSuccessState) {
             state.update.fold(
               (failure) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    behavior: SnackBarBehavior.floating,
-                    backgroundColor: CupertinoColors.destructiveRed,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    content: Text(
-                      failure.message,
-                      textDirection: TextDirection.rtl,
-                      style: const TextStyle(
-                        fontFamily: 'CR',
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
+                final snackBar = buildCustomSnackBar(
+                  title: 'failure',
+                  message: failure.message,
+                  color: CustomColor.red,
+                  type: .warning,
                 );
+
+                ScaffoldMessenger.of(context)
+                  ..hideCurrentSnackBar()
+                  ..showSnackBar(snackBar);
               },
               (updatedUser) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    behavior: SnackBarBehavior.floating,
-                    backgroundColor: CupertinoColors.activeGreen,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    content: const Text(
-                      'پروفایل با موفقیت به‌روزرسانی شد',
-                      textDirection: TextDirection.rtl,
-                      style: TextStyle(fontFamily: 'CR', color: Colors.white),
-                    ),
-                  ),
+                final snackBar = buildCustomSnackBar(
+                  title: 'success',
+                  message: 'پروفایل با موفقیت به روز رسانی شد',
+                  color: CustomColor.green,
+                  type: .success,
                 );
+
+                ScaffoldMessenger.of(context)
+                  ..hideCurrentSnackBar()
+                  ..showSnackBar(snackBar);
                 context.pop();
               },
             );

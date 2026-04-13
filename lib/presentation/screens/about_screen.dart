@@ -1,6 +1,10 @@
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_chat_room_app/constants/color.dart';
 import 'package:flutter_chat_room_app/core/utility/url_luncher.dart';
+import 'package:flutter_chat_room_app/presentation/customWidget/custom_snack_bar.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 
@@ -98,9 +102,8 @@ class AboutScreen extends StatelessWidget {
                       icon: FontAwesomeIcons.telegram,
                       iconColor: Colors.blue,
                       title: 'تلگرام',
-                      onTap: () => MyUrlLuncher.launchLink(
-                        'https://t.me/FIBOSAVEDMESSAGE',
-                      ),
+                      onTap: () =>
+                          MyUrlLuncher.launchLink('https://t.me/HamNavaApp'),
                     ),
                     Divider(
                       height: 1,
@@ -115,7 +118,7 @@ class AboutScreen extends StatelessWidget {
                       iconBgColor: isDark ? Colors.grey[800] : Colors.grey[200],
                       title: 'سورس کد',
                       onTap: () => MyUrlLuncher.launchLink(
-                        'https://github.com/T0WHIDM/HamNava',
+                        'https://github.com/Lilfibonacci/HamNava',
                       ),
                     ),
                     Divider(
@@ -133,6 +136,19 @@ class AboutScreen extends StatelessWidget {
                         'mailto:lilfibonacci1@gmail.com',
                       ),
                     ),
+                    Divider(
+                      height: 1,
+                      thickness: 0.5,
+                      color: Colors.grey.withValues(alpha: .2),
+                      indent: 56,
+                    ),
+                    _buildLinkItem(
+                      context: context,
+                      icon: CupertinoIcons.money_dollar_circle_fill,
+                      iconColor: CupertinoColors.activeGreen,
+                      title: 'حمایت از ما',
+                      onTap: () => _showSupportSheet(context),
+                    ),
                   ],
                 ),
               ),
@@ -145,16 +161,16 @@ class AboutScreen extends StatelessWidget {
               child: Column(
                 children: [
                   Text(
-                    '''Disigned with ♥️ by  Lil fibonacci''',
+                    'Designed with ♥️ by Lil fibonacci',
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontFamily: 'Cr'),
+                    style: TextStyle(fontFamily: 'CR'),
                   ),
                   SizedBox(height: 5),
                   Text(
-                    '''v 1.0.0''',
+                    'v 1.0.0',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontFamily: 'Cr',
+                      fontFamily: 'CR',
                       color: Colors.grey,
                       fontSize: 12,
                     ),
@@ -207,6 +223,101 @@ class AboutScreen extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  void _showSupportSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+
+        return Container(
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 8),
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.withValues(alpha: .3),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                const Text(
+                  '❤️ حمایت از ما ',
+                  style: TextStyle(
+                    fontFamily: 'CR',
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                _walletTile(
+                  context,
+                  title: 'USDT (TRC20)',
+                  address: 'TANUgkm65exhiaTReJnZ7xxAbukHXDEZ8R',
+                ),
+
+                _walletTile(
+                  context,
+                  title: 'TON',
+                  address: 'UQDdPFb3le5Tx8rkvSbiVigxqARKF3NDVrzDjCKPfexqTUFa',
+                ),
+
+                const SizedBox(height: 16),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _walletTile(
+    BuildContext context, {
+    required String title,
+    required String address,
+  }) {
+    return ListTile(
+      title: Text(title, style: const TextStyle(fontFamily: 'CR')),
+      subtitle: Text(
+        address,
+        style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+      ),
+      trailing: IconButton(
+        icon: const Icon(Icons.copy),
+        onPressed: () async {
+          await Clipboard.setData(ClipboardData(text: address));
+
+          if (!context.mounted) return;
+
+          context.pop();
+
+          final snackBar = buildCustomSnackBar(
+            color: CustomColor.green,
+            message: 'آدرس با موفقیت کپی شد',
+            title: title,
+            type: ContentType.success,
+          );
+
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(snackBar);
+        },
       ),
     );
   }
