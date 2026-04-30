@@ -9,9 +9,9 @@ class MessageDto {
   final String chatId;
   final String? attachment;
   final DateTime created;
-  final List<UserDto> readBy;
-  final String type;
-  final bool isDeleted;
+  // final List<UserDto> readBy;
+  // final String type;
+  // final bool isDeleted;
   final MessageDto? replyTo;
 
   MessageDto({
@@ -22,30 +22,26 @@ class MessageDto {
     required this.chatId,
     this.attachment,
     required this.created,
-    required this.readBy,
-    required this.type,
-    required this.isDeleted,
+    // required this.readBy,
+    // required this.type,
+    // required this.isDeleted,
     this.replyTo,
   });
 
   factory MessageDto.fromRecord(RecordModel record) {
     MessageDto? replyData;
     RecordModel? senderRecord;
-    List<RecordModel> readByList = [];
+    // List<RecordModel> readByList = [];
 
-    // دسترسی مستقیم به مپ اکسپند بدون ایجاد خطای پرهزینه
     final expand = record.expand;
 
-    // 1. بررسی و استخراج reply_to
     if (expand.containsKey('reply_to')) {
       final replyObj = expand['reply_to'];
       if (replyObj != null && replyObj.isNotEmpty) {
-        // پاکت‌بیس معمولا expand را به صورت لیست برمی‌گرداند حتی برای سینگل
         replyData = MessageDto.fromRecord(replyObj.first);
       }
     }
 
-    // 2. بررسی و استخراج sender_id
     if (expand.containsKey('sender_id')) {
       final senderObj = expand['sender_id'];
       if (senderObj != null && senderObj.isNotEmpty) {
@@ -53,14 +49,12 @@ class MessageDto {
       }
     }
 
-    // 3. بررسی و استخراج read_by
-    if (expand.containsKey('read_by')) {
-      final readByObj = expand['read_by'];
-      if (readByObj != null) {
-        // cast سریع لیست
-        readByList = List<RecordModel>.from(readByObj);
-      }
-    }
+    // if (expand.containsKey('read_by')) {
+    //   final readByObj = expand['read_by'];
+    //   if (readByObj != null) {
+    //     readByList = List<RecordModel>.from(readByObj);
+    //   }
+    // }
 
     return MessageDto(
       id: record.id,
@@ -70,9 +64,9 @@ class MessageDto {
       created: DateTime.parse(record.getStringValue('created')),
       sender: senderRecord != null ? UserDto.fromRecord(senderRecord) : null,
       senderId: record.getStringValue('sender_id'),
-      readBy: readByList.map((e) => UserDto.fromRecord(e)).toList(),
-      type: record.getStringValue('type'),
-      isDeleted: record.getBoolValue('is_deleted'),
+      // readBy: readByList.map((e) => UserDto.fromRecord(e)).toList(),
+      // type: record.getStringValue('type'),
+      // isDeleted: record.getBoolValue('is_deleted'),
       replyTo: replyData,
     );
   }

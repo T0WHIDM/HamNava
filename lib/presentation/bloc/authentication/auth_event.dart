@@ -2,8 +2,8 @@
 abstract class AuthEvent {}
 
 class AuthLoginEvent extends AuthEvent {
-  String userName;
-  String password;
+ final String userName;
+ final String password;
 
   AuthLoginEvent(this.userName, this.password);
 }

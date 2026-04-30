@@ -1,4 +1,3 @@
-
 import 'package:dartz/dartz.dart';
 import 'package:flutter_chat_room_app/core/exception/api_exeption.dart';
 import 'package:flutter_chat_room_app/data/dataSource/authdatasource/auth_data_source.dart';
@@ -8,6 +7,7 @@ class AuthRepositoryImpl implements IAuthenticationRepository {
   final IAuthDataSource dataSource;
   AuthRepositoryImpl(this.dataSource);
 
+  //logout
   @override
   Future<Either<ApiException, void>> logOut() async {
     try {
@@ -18,6 +18,7 @@ class AuthRepositoryImpl implements IAuthenticationRepository {
     }
   }
 
+  //login
   @override
   Future<Either<ApiException, void>> login(
     String userName,
@@ -33,6 +34,7 @@ class AuthRepositoryImpl implements IAuthenticationRepository {
     }
   }
 
+  //register
   @override
   Future<Either<ApiException, void>> register(
     String name,
@@ -51,7 +53,7 @@ class AuthRepositoryImpl implements IAuthenticationRepository {
         passwordConfirm,
         // avatarFile,
       );
-      return const Right(null); 
+      return const Right(null);
     } on ApiException catch (e) {
       return Left(e);
     }

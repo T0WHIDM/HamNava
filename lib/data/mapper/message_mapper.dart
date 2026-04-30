@@ -20,12 +20,12 @@ class MessageMapper {
               name: 'شما',
               friends: [],
             ),
-      isDeleted: messageDto.isDeleted,
-      type: messageDto.type,
-      replyTo: messageDto.replyTo != null
-          ? MessageMapper.toDomain(messageDto.replyTo!)
-          : null,
-      readBy: UserMapper.toDomainList(messageDto.readBy),
+      // isDeleted: messageDto.isDeleted,
+      // type: messageDto.type,
+      // replyTo: messageDto.replyTo != null
+      //     ? MessageMapper.toDomain(messageDto.replyTo!)
+      //     : null,
+      // readBy: UserMapper.toDomainList(messageDto.readBy),
     );
   }
 

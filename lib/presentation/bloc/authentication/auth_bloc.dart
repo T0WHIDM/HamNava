@@ -12,6 +12,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   AuthBloc(this._loginUseCase, this._registerUseCase, this._logOutUseCase)
     : super(AuthInitial()) {
+      
+    //login
     on<AuthLoginEvent>((event, emit) async {
       emit(AuthLoading());
 
@@ -19,6 +21,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(AuthSuccess(result));
     });
 
+    //register
     on<AuthRegisterEvent>((event, emit) async {
       emit(AuthLoading());
 
@@ -28,12 +31,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         event.email,
         event.password,
         event.passwordConfirm,
-        // event.avatarFile, 
+        // event.avatarFile,
       );
 
       emit(AuthSuccess(result));
     });
 
+    //log out
     on<AuthLogOutEvent>((event, emit) async {
       emit(AuthLoading());
 

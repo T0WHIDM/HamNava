@@ -1,10 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_chat_room_app/core/constants/color.dart';
 import 'package:flutter_chat_room_app/domain/entity/user_entity.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/user/user_bloc.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/user/user_event.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/user/user_state.dart';
+import 'package:flutter_chat_room_app/presentation/customWidget/custom_snack_bar.dart';
 import 'package:flutter_chat_room_app/presentation/screens/chat_screen.dart';
 import 'package:flutter_chat_room_app/presentation/screens/user_profile_screen.dart';
 import 'package:go_router/go_router.dart';
@@ -77,46 +79,35 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
           if (state is AddFriendComplatedState) {
             state.result.fold(
               (failure) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    backgroundColor: CupertinoColors.destructiveRed,
-                    behavior: SnackBarBehavior.floating,
-                    margin: const EdgeInsets.all(16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    content: Text(
-                      failure.message,
-                      style: const TextStyle(
-                        fontFamily: 'CR',
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
+                final snackbar = buildCustomSnackBar(
+                  color: CustomColor.red,
+                  message: failure.message,
+                  title: 'failure',
+                  type: .failure,
                 );
+
+                ScaffoldMessenger.of(context)
+                  ..hideCurrentSnackBar()
+                  ..showSnackBar(snackbar);
               },
               (success) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    duration: const Duration(seconds: 2),
-                    backgroundColor: CupertinoColors.activeGreen,
-                    behavior: SnackBarBehavior.floating,
-                    margin: const EdgeInsets.all(16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    content: const Text(
-                      'درخواست دوستی ارسال شد',
-                      style: TextStyle(fontFamily: 'CR', color: Colors.white),
-                    ),
-                  ),
+                final snackbar = buildCustomSnackBar(
+                  color: CustomColor.green,
+                  message: 'درخواست دوستی ارسال شد',
+                  title: 'success',
+                  type: .success,
                 );
+
+                ScaffoldMessenger.of(context)
+                  ..hideCurrentSnackBar()
+                  ..showSnackBar(snackbar);
               },
             );
           }
         },
         child: Column(
           children: [
+            //text field
             Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: 16.0,

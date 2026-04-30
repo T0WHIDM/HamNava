@@ -51,7 +51,7 @@ class UserDataSourceRemote extends IUserDataSource {
   Future<void> addFriend(String userId) async {
     try {
       final myUserId = locator<PocketBase>().authStore.record?.id ?? '';
-      if (myUserId.isEmpty) throw ApiException('کاربر لاگین نیست');
+      // if (myUserId.isEmpty) throw ApiException('کاربر لاگین نیست');
 
       final currentUserRecord = await pb.collection('users').getOne(myUserId);
 

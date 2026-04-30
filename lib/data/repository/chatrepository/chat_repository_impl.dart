@@ -53,7 +53,7 @@ class ChatRepositoryImpl extends IChatRepository {
       await dataSource.deleteChat(chatId);
       return const Right(null);
     } catch (e) {
-      return Left(ApiException('خطا در حذف چت: ${e.toString()}'));
+      return Left(ApiException('خطا در حذف چت: '));
     }
   }
 
@@ -66,7 +66,7 @@ class ChatRepositoryImpl extends IChatRepository {
       await dataSource.deleteMessage(messageId, chatId);
       return const Right(null);
     } catch (e) {
-      return Left(ApiException('خطا در حذف پیام: ${e.toString()}'));
+      return Left(ApiException('خطا در حذف پیام:'));
     }
   }
 
@@ -82,7 +82,7 @@ class ChatRepositoryImpl extends IChatRepository {
       );
       return Right(MessageMapper.toDomain(dto));
     } catch (e) {
-      return Left(ApiException('خطا در ویرایش پیام: ${e.toString()}'));
+      return Left(ApiException('خطا در ویرایش پیام: '));
     }
   }
 

@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/services.dart';
-import 'package:flutter_chat_room_app/constants/color.dart';
+import 'package:flutter_chat_room_app/core/constants/color.dart';
 import 'package:flutter_chat_room_app/presentation/customWidget/custom_snack_bar.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/cupertino.dart';

@@ -12,6 +12,8 @@ class ChatRemoteDataSourceImpl implements IChatDatasource {
   final PocketBase pb;
   ChatRemoteDataSourceImpl(this.pb);
 
+  //----------------- chat -----------------
+
   @override
   Future<ConversationDto> createOrGetGroupChat({
     required String chatName,
@@ -50,6 +52,7 @@ class ChatRemoteDataSourceImpl implements IChatDatasource {
       final filter =
           'is_group = false && participants ~ "$currentUserId" && participants ~ "$targetUserId"';
 
+      //create chat
       final existingChats = await pb
           .collection('chat')
           .getList(filter: filter, expand: 'participants');
@@ -58,6 +61,7 @@ class ChatRemoteDataSourceImpl implements IChatDatasource {
         return ConversationDto.fromRecord(existingChats.items.first);
       }
 
+      //new chat
       final body = <String, dynamic>{
         "name": "",
         "is_group": false,
@@ -107,7 +111,7 @@ class ChatRemoteDataSourceImpl implements IChatDatasource {
             .update(chatId, body: {'last_message': null});
       }
     } catch (e) {
-      throw Exception('خطا در حذف پیام و بروزرسانی چت: $e');
+      throw Exception('خطا در حذف پیام و بروزرسانی چت');
     }
   }
 
@@ -149,6 +153,7 @@ class ChatRemoteDataSourceImpl implements IChatDatasource {
     }
   }
 
+  //----------------- messages -----------------
   @override
   Future<List<MessageDto>> getMessages(String chatId, {int page = 1}) async {
     try {

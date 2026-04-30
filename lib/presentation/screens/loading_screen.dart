@@ -70,12 +70,14 @@ class _LoadingScreenState extends State<LoadingScreen>
         child: AnimatedBuilder(
           animation: _pulseAnimation,
           builder: (context, child) {
-            return Transform.scale(scale: _pulseAnimation.value, child: child);
+            return Transform.scale(
+              scale: _pulseAnimation.value,
+              child: SizedBox(
+                height: 300,
+                child: Image.asset('assets/images/hamnava.png'),
+              ),
+            );
           },
-          child: SizedBox(
-            height: 300,
-            child: Image.asset('assets/images/hamnava.png'),
-          ),
         ),
       ),
     );

@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_chat_room_app/constants/color.dart';
+import 'package:flutter_chat_room_app/core/constants/color.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/authentication/auth_bloc.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/authentication/auth_event.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/authentication/auth_state.dart';
@@ -21,7 +21,7 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
-  final _formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _userNameController = TextEditingController();
@@ -32,7 +32,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   File? _selectedAvatar;
 
-  // متغیرهای مدیریت نمایش رمز عبور
   bool _isPasswordObscured = true;
   bool _isConfirmPasswordObscured = true;
 
@@ -72,7 +71,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // تیتر صفحه
                     Text(
                       'ایجاد حساب کاربری',
                       style: TextStyle(
@@ -186,8 +184,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           if (value == null || value.trim().isEmpty) {
                             return 'لطفاً نام کاربری را وارد کنید';
                           }
-                          final englishRegex = RegExp(r'^[a-z0-9_]+$');
-                          if (!englishRegex.hasMatch(value)) {
+                          final englishRegex = RegExp(
+                            r'^[a-z0-9_]+$',
+                          ).hasMatch(value);
+                          if (!englishRegex) {
                             return 'فقط حروف انگلیسی کوچک، عدد و _ مجاز است';
                           }
                           if (value.length <= 3) {
@@ -388,7 +388,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               ),
                             ),
                             onPressed: () {
-                              if (_formKey.currentState?.validate() ?? false) {
+                              if (_formKey.currentState!.validate()) {
                                 context.read<AuthBloc>().add(
                                   AuthRegisterEvent(
                                     _nameController.text.trim(),

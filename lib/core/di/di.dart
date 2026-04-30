@@ -15,13 +15,13 @@ import 'package:flutter_chat_room_app/data/dataSource/authdatasource/auth_data_s
 import 'package:flutter_chat_room_app/data/dataSource/authdatasource/auth_data_source_remote.dart';
 import 'package:flutter_chat_room_app/data/dataSource/chatdatasource/chat_data_source.dart';
 import 'package:flutter_chat_room_app/data/dataSource/chatdatasource/chat_remote_data_source.dart';
-import 'package:flutter_chat_room_app/data/dataSource/userdatasource/user_data_source.dart'; // جدید
+import 'package:flutter_chat_room_app/data/dataSource/userdatasource/user_data_source.dart'; 
 import 'package:flutter_chat_room_app/data/repository/authrepository/auth_repository.dart';
 import 'package:flutter_chat_room_app/data/repository/chatrepository/chat_repository_impl.dart';
-import 'package:flutter_chat_room_app/data/repository/userrepository/user_repository_impl.dart'; // جدید
+import 'package:flutter_chat_room_app/data/repository/userrepository/user_repository_impl.dart'; 
 import 'package:flutter_chat_room_app/domain/repository/authentication_repository.dart';
 import 'package:flutter_chat_room_app/domain/repository/chat_repository.dart';
-import 'package:flutter_chat_room_app/domain/repository/user_repository.dart'; // جدید
+import 'package:flutter_chat_room_app/domain/repository/user_repository.dart'; 
 import 'package:flutter_chat_room_app/domain/usecase/authentication/log_out_use_case.dart';
 import 'package:flutter_chat_room_app/domain/usecase/authentication/login_use_case.dart';
 import 'package:flutter_chat_room_app/domain/usecase/authentication/register_use_case.dart';
@@ -29,16 +29,15 @@ import 'package:flutter_chat_room_app/domain/usecase/chat/get_all_chat_use_case.
 import 'package:flutter_chat_room_app/domain/usecase/chat/get_message_use_case.dart';
 import 'package:flutter_chat_room_app/domain/usecase/chat/listen_to_message_use_case.dart';
 import 'package:flutter_chat_room_app/domain/usecase/chat/send_message_use_case.dart';
-import 'package:flutter_chat_room_app/domain/usecase/chat/private_chat_use_case.dart'; // جدید
+import 'package:flutter_chat_room_app/domain/usecase/chat/private_chat_use_case.dart';
 import 'package:flutter_chat_room_app/domain/usecase/user/search_user_use_case.dart';
-import 'package:shared_preferences/shared_preferences.dart'; // جدید
+import 'package:shared_preferences/shared_preferences.dart'; 
 
 final locator = GetIt.instance;
 
 Future<void> getItInit() async {
   // sharedprefrences
   final prefs = await SharedPreferences.getInstance();
-
   locator.registerSingleton<SharedPreferences>(prefs);
 
   //pocketBase
@@ -73,6 +72,7 @@ Future<void> getItInit() async {
   );
 
   // --- UseCases ---
+  
   // --- Auth ---
   locator.registerLazySingleton(
     () => LoginUseCase(locator<IAuthenticationRepository>()),

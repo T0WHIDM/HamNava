@@ -19,18 +19,17 @@ class UserProfileScreen extends StatelessWidget {
         if (context.canPop()) {
           context.pop();
         } else {
-          context.goNamed(HomeScreen.namedRoute); 
+          context.goNamed(HomeScreen.namedRoute);
         }
       });
-      return const Scaffold(
-        body: Center(child: CupertinoActivityIndicator()),
-      );
+      return const Scaffold(body: Center(child: CupertinoActivityIndicator()));
     }
 
     final nonNullUser = user!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
-    final scaffoldBg = isDark ? const Color(0xFF000000) : const Color(0xFFF2F2F7);
+    final scaffoldBg = isDark
+        ? const Color(0xFF000000)
+        : const Color(0xFFF2F2F7);
     final cardBg = isDark ? const Color(0xFF1C1C1E) : Colors.white;
     final primaryColor = const Color(0xFF0ED0D3);
 
@@ -39,7 +38,9 @@ class UserProfileScreen extends StatelessWidget {
       body: Directionality(
         textDirection: TextDirection.ltr,
         child: CustomScrollView(
-          physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+          physics: const BouncingScrollPhysics(
+            parent: AlwaysScrollableScrollPhysics(),
+          ),
           slivers: [
             SliverAppBar(
               expandedHeight: 340,
@@ -86,7 +87,7 @@ class UserProfileScreen extends StatelessWidget {
                         color: Colors.white.withValues(alpha: .3),
                       ),
                     ),
-                    
+
                     Positioned(
                       bottom: 0,
                       left: 0,
@@ -107,7 +108,7 @@ class UserProfileScreen extends StatelessWidget {
                         ),
                       ),
                     ),
-                    
+
                     Positioned(
                       bottom: 24,
                       right: 24,
@@ -118,7 +119,7 @@ class UserProfileScreen extends StatelessWidget {
                           Text(
                             nonNullUser.name,
                             style: const TextStyle(
-                              fontFamily: 'CR', 
+                              fontFamily: 'CR',
                               fontSize: 28,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
@@ -147,11 +148,14 @@ class UserProfileScreen extends StatelessWidget {
 
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 24.0,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                   Padding(
+                    Padding(
                       padding: const EdgeInsets.only(right: 8.0, bottom: 8.0),
                       child: Text(
                         'اطلاعات کاربر',
@@ -171,11 +175,16 @@ class UserProfileScreen extends StatelessWidget {
                       child: Column(
                         children: [
                           ListTile(
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
                             leading: Container(
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                color: CupertinoColors.activeBlue.withValues(alpha: .15),
+                                color: CupertinoColors.activeBlue.withValues(
+                                  alpha: .15,
+                                ),
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: const Icon(
@@ -189,7 +198,9 @@ class UserProfileScreen extends StatelessWidget {
                               style: TextStyle(
                                 fontFamily: 'CR',
                                 fontSize: 13,
-                                color: isDark ? Colors.grey[400] : Colors.grey[600],
+                                color: isDark
+                                    ? Colors.grey[400]
+                                    : Colors.grey[600],
                               ),
                             ),
                             subtitle: Text(
@@ -241,7 +252,7 @@ class UserProfileScreen extends StatelessWidget {
                         ),
                       ),
                     ),
-                    
+
                     const SizedBox(height: 40),
                   ],
                 ),

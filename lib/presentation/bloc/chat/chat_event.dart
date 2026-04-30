@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter_chat_room_app/domain/entity/message_entity.dart';
 import 'package:flutter_chat_room_app/domain/entity/user_entity.dart';
 

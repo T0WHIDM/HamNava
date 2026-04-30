@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_chat_room_app/constants/color.dart';
+import 'package:flutter_chat_room_app/core/constants/color.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/authentication/auth_bloc.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/authentication/auth_event.dart';
 import 'package:flutter_chat_room_app/presentation/bloc/authentication/auth_state.dart';
@@ -46,6 +46,8 @@ class _SettingScreenState extends State<SettingScreen> {
         : Colors.grey.shade500;
 
     return BlocListener<AuthBloc, AuthState>(
+      
+      //log out
       listener: (context, state) {
         if (state is AuthSuccess) {
           state.result.fold(
@@ -76,6 +78,8 @@ class _SettingScreenState extends State<SettingScreen> {
               parent: AlwaysScrollableScrollPhysics(),
             ),
             slivers: [
+              
+              //appBar
               SliverAppBar(
                 expandedHeight: 60.0,
                 pinned: true,
@@ -94,7 +98,7 @@ class _SettingScreenState extends State<SettingScreen> {
                   ),
                 ),
               ),
-
+      
               SliverToBoxAdapter(
                 child: BlocBuilder<UserBloc, UserState>(
                   builder: (context, state) {
@@ -130,6 +134,8 @@ class _SettingScreenState extends State<SettingScreen> {
                           return Column(
                             children: [
                               const SizedBox(height: 20),
+
+                              //user avatar
                               Hero(
                                 tag: 'user_avatar',
                                 child: Container(
@@ -152,7 +158,6 @@ class _SettingScreenState extends State<SettingScreen> {
                                         ? Colors.grey.shade800
                                         : Colors.white,
                                     radius: 55,
-                                    // backgroundImage: user.avatar != null ? NetworkImage(...) : null,
                                     child: Icon(
                                       CupertinoIcons.person_fill,
                                       size: 55,
@@ -164,6 +169,8 @@ class _SettingScreenState extends State<SettingScreen> {
                                 ),
                               ),
                               const SizedBox(height: 16),
+
+                              // name
                               Text(
                                 user.name,
                                 style: const TextStyle(
@@ -173,6 +180,8 @@ class _SettingScreenState extends State<SettingScreen> {
                                 ),
                               ),
                               const SizedBox(height: 4),
+
+                              //user name
                               Text(
                                 '@${user.userName}',
                                 style: TextStyle(
@@ -184,13 +193,13 @@ class _SettingScreenState extends State<SettingScreen> {
                               ),
                               const SizedBox(height: 24),
 
-                              // 3. دکمه‌های پروفایل (مدرن و کپسولی)
                               Padding(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 24,
                                 ),
                                 child: Row(
                                   children: [
+                                    //edit info
                                     Expanded(
                                       child: _buildProfileButton(
                                         context: context,
@@ -211,7 +220,10 @@ class _SettingScreenState extends State<SettingScreen> {
                                         },
                                       ),
                                     ),
+
                                     const SizedBox(width: 16),
+
+                                    //change picture
                                     Expanded(
                                       child: _buildProfileButton(
                                         context: context,
@@ -305,7 +317,6 @@ class _SettingScreenState extends State<SettingScreen> {
 
               const SliverToBoxAdapter(child: SizedBox(height: 24)),
 
-              // 5. کارت خروج از حساب (کارت مجزا و قرمز رنگ)
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -396,7 +407,6 @@ class _SettingScreenState extends State<SettingScreen> {
     );
   }
 
-  // ویجت کمکی برای ساخت دکمه‌های زیر پروفایل
   Widget _buildProfileButton({
     required BuildContext context,
     required String title,
@@ -441,7 +451,6 @@ class _SettingScreenState extends State<SettingScreen> {
     );
   }
 
-  // ویجت کمکی برای ساخت ردیف‌های تنظیمات
   Widget _buildSettingTile({
     required IconData icon,
     required Color iconBgColor,
@@ -459,7 +468,6 @@ class _SettingScreenState extends State<SettingScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Row(
             children: [
-              // باکس رنگی پشت آیکون (سبک iOS)
               Container(
                 width: 32,
                 height: 32,
@@ -483,8 +491,7 @@ class _SettingScreenState extends State<SettingScreen> {
               ),
               trailing ??
                   Icon(
-                    CupertinoIcons
-                        .chevron_back, // فلش به سمت چپ برای زبان فارسی
+                    CupertinoIcons.chevron_back,
                     color: isDark ? Colors.grey.shade600 : Colors.grey.shade400,
                     size: 18,
                   ),

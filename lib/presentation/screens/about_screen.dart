@@ -2,7 +2,7 @@ import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_chat_room_app/constants/color.dart';
+import 'package:flutter_chat_room_app/core/constants/color.dart';
 import 'package:flutter_chat_room_app/core/utility/url_luncher.dart';
 import 'package:flutter_chat_room_app/presentation/customWidget/custom_snack_bar.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';

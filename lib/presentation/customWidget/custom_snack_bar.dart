@@ -9,8 +9,7 @@ SnackBar buildCustomSnackBar({
 }) {
   return SnackBar(
     duration: const Duration(seconds: 1),
-    
-    elevation: 0,
+        elevation: 0,
     behavior: SnackBarBehavior.floating,
     backgroundColor: Colors.transparent,
     content: Directionality(

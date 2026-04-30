@@ -7,9 +7,9 @@ class MessageEntity {
   final String chatId;
   final String? attachment;
   final DateTime created;
-  final List<UserEntity> readBy;
-  final String type;
-  final bool isDeleted;
+  // final List<UserEntity> readBy;
+  // final String type;
+  // final bool isDeleted;
   final MessageEntity? replyTo; 
 
   MessageEntity({
@@ -19,9 +19,9 @@ class MessageEntity {
     required this.chatId,
     this.attachment,
     required this.created,
-    required this.readBy,
-    required this.type,
-    required this.isDeleted,
+    // required this.readBy,
+    // required this.type,
+    // required this.isDeleted,
     this.replyTo,
   });
 }
